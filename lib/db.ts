@@ -5,7 +5,8 @@ export type DbMode = 'memory' | 'postgres' | 'supabase'
 
 function detectMode(): DbMode {
   if (process.env.DATABASE_URL) return 'postgres'
-  if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY) return 'supabase'
+  const supaKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL && supaKey) return 'supabase'
   return 'memory'
 }
 
@@ -32,9 +33,10 @@ async function getSupabase(): Promise<import('@supabase/supabase-js').SupabaseCl
   if (_supabase) return _supabase
   try {
     const { createClient } = await import('@supabase/supabase-js')
+    const supaKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
     _supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_KEY!
+      supaKey
     )
     return _supabase
   } catch {
