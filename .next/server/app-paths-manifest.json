@@ -1,0 +1,8 @@
+{
+  "/news/page": "app/news/page.js",
+  "/leaderboard/page": "app/leaderboard/page.js",
+  "/timeline/page": "app/timeline/page.js",
+  "/compare/page": "app/compare/page.js",
+  "/benchmarks/page": "app/benchmarks/page.js",
+  "/cost-calculator/page": "app/cost-calculator/page.js"
+}
