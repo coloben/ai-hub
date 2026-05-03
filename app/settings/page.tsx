@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { mockModels } from '@/lib/mock-data'
 
@@ -37,10 +38,17 @@ interface Profile {
 export default function SettingsPage() {
   const router = useRouter()
   const supabase = createClient()
+  const fileRef = useRef<HTMLInputElement>(null)
 
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const [loggedIn, setLoggedIn] = useState<boolean | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
+
+  // Avatar
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+  const [avatarFile, setAvatarFile] = useState<File | null>(null)
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
 
   // Form fields
   const [username, setUsername] = useState('')
@@ -51,6 +59,9 @@ export default function SettingsPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) setUserId(user.id)
+    })
     fetch('/api/me')
       .then(r => {
         if (r.status === 401) { setLoggedIn(false); setLoading(false); return null }
@@ -69,21 +80,47 @@ export default function SettingsPage() {
       .catch(() => setLoading(false))
   }, [])
 
+  function onAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) { setError('Avatar max 5 MB'); return }
+    setAvatarFile(file)
+    setAvatarPreview(URL.createObjectURL(file))
+  }
+
+  async function uploadAvatarToStorage(): Promise<string | null> {
+    if (!userId || !avatarFile) return null
+    setUploadingAvatar(true)
+    const ext = avatarFile.name.split('.').pop()
+    const path = `avatars/${userId}.${ext}`
+    const { error } = await supabase.storage.from('avatars').upload(path, avatarFile, { upsert: true })
+    if (error) { setUploadingAvatar(false); return null }
+    const { data } = supabase.storage.from('avatars').getPublicUrl(path)
+    setUploadingAvatar(false)
+    return data.publicUrl
+  }
+
   async function save(e: React.FormEvent) {
     e.preventDefault()
     setError('')
     setSaving(true)
     setSaved(false)
 
+    let avatarUrl = profile?.avatar_url ?? null
+    if (avatarFile) {
+      avatarUrl = await uploadAvatarToStorage()
+    }
+
     const res = await fetch('/api/me', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, interests, followed_models: followedModels }),
+      body: JSON.stringify({ username, interests, followed_models: followedModels, avatar_url: avatarUrl }),
     })
     const data = await res.json()
     if (!res.ok) { setError(data.error); setSaving(false); return }
 
-    setProfile(prev => prev ? { ...prev, ...data.profile } : data.profile)
+    setProfile(prev => prev ? { ...prev, ...data.profile, avatar_url: avatarUrl } : data.profile)
+    setAvatarFile(null)
     setSaving(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 2500)
@@ -141,8 +178,34 @@ export default function SettingsPage() {
         <div className="rounded-2xl border border-border bg-surface p-5">
           <h2 className="mb-4 text-sm font-semibold text-text">Profil & Karma</h2>
           <div className="flex items-center gap-4 mb-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/20 text-xl font-bold text-primary">
-              {username.slice(0, 2).toUpperCase() || '??'}
+            {/* Avatar avec bouton upload */}
+            <div className="relative shrink-0">
+              <div className="relative h-16 w-16 overflow-hidden rounded-full bg-primary/20">
+                {(avatarPreview || profile?.avatar_url) ? (
+                  <Image
+                    src={avatarPreview ?? profile!.avatar_url!}
+                    alt="avatar"
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <span className="absolute inset-0 flex items-center justify-center text-xl font-bold text-primary">
+                    {username.slice(0, 2).toUpperCase() || '??'}
+                  </span>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                className="absolute -bottom-0.5 -right-0.5 flex h-6 w-6 items-center justify-center rounded-full border-2 border-surface bg-primary text-white hover:bg-primary/90 transition-colors"
+                title="Changer la photo"
+              >
+                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.776 48.776 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" />
+                </svg>
+              </button>
+              <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={onAvatarChange} />
             </div>
             <div className="flex-1">
               <p className={`text-sm font-bold ${LEVEL_CONFIG[profile?.level ?? 'observateur']?.color}`}>

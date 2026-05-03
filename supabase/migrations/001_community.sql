@@ -231,3 +231,63 @@ CREATE INDEX IF NOT EXISTS idx_comments_post     ON public.comments(post_id, cre
 CREATE INDEX IF NOT EXISTS idx_votes_target      ON public.votes(target_id, target_type);
 CREATE INDEX IF NOT EXISTS idx_notifs_user       ON public.notifications(user_id, is_read, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_bookmarks_user    ON public.bookmarks(user_id, target_type);
+
+-- ============================================================
+-- Storage — bucket avatars (photos de profil)
+-- ============================================================
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+  'avatars',
+  'avatars',
+  true,
+  5242880,  -- 5 MB
+  ARRAY['image/jpeg','image/png','image/webp','image/gif']
+) ON CONFLICT (id) DO NOTHING;
+
+-- Lecture publique
+CREATE POLICY "avatars_public_read"
+  ON storage.objects FOR SELECT
+  USING (bucket_id = 'avatars');
+
+-- Upload uniquement vers son propre dossier  avatars/{user_id}.*
+CREATE POLICY "avatars_owner_upload"
+  ON storage.objects FOR INSERT
+  WITH CHECK (
+    bucket_id = 'avatars'
+    AND auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+-- Mise à jour / remplacement
+CREATE POLICY "avatars_owner_update"
+  ON storage.objects FOR UPDATE
+  USING (
+    bucket_id = 'avatars'
+    AND auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+-- Suppression
+CREATE POLICY "avatars_owner_delete"
+  ON storage.objects FOR DELETE
+  USING (
+    bucket_id = 'avatars'
+    AND auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+-- ============================================================
+-- Table user_alerts (alertes personnalisées)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.user_alerts (
+  id                uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id           uuid REFERENCES public.profiles ON DELETE CASCADE NOT NULL,
+  model_id          text NOT NULL,
+  condition         text NOT NULL CHECK (condition IN ('elo_above','elo_below','new_release','price_drop')),
+  threshold         numeric,
+  is_active         bool DEFAULT true,
+  last_triggered_at timestamptz,
+  created_at        timestamptz DEFAULT now(),
+  UNIQUE (user_id, model_id, condition)
+);
+
+ALTER TABLE public.user_alerts ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "user_alerts_owner" ON public.user_alerts FOR ALL USING (auth.uid() = user_id);
+CREATE INDEX IF NOT EXISTS idx_user_alerts_user ON public.user_alerts(user_id, is_active);
