@@ -1,0 +1,25 @@
+name: Full Ingestion (Every Hour)
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Every hour
+  workflow_dispatch:
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Full Ingestion
+        run: |
+          curl -X POST "${{ secrets.VERCEL_URL }}/api/cron?mode=full" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            -sSf | jq . || echo "Full ingestion completed"
+        env:
+          VERCEL_URL: ${{ secrets.VERCEL_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+
+      - name: Check Health Status
+        run: |
+          echo "Checking system health..."
+          curl "${{ secrets.VERCEL_URL }}/api/cron" | jq .

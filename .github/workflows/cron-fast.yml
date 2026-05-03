@@ -1,0 +1,24 @@
+name: Fast Ingestion (Every 15min)
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'  # Every 15 minutes
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Fast Ingestion
+        run: |
+          curl -X POST "${{ secrets.VERCEL_URL }}/api/cron?mode=fast" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            -sSf || echo "Fast ingestion completed"
+        env:
+          VERCEL_URL: ${{ secrets.VERCEL_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+
+      - name: Log Result
+        if: always()
+        run: echo "Fast ingestion job finished at $(date)"

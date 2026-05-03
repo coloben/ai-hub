@@ -1,0 +1,10 @@
+node_modules
+.next
+.git
+*.log
+.DS_Store
+coverage
+.vscode
+.idea
+*.md
+!.env.local.example

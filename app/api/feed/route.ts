@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { mockNews } from '@/lib/mock-data'
+import { getLiveNews } from '@/lib/feed'
 import { FeedResponse } from '@/lib/types'
 
-export const revalidate = 300
+export const revalidate = 900
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
   const offset = parseInt(searchParams.get('offset') || '0')
   const q = searchParams.get('q')?.toLowerCase()
   
-  let items = [...mockNews]
+  let items = await getLiveNews()
   
   if (source !== 'all') {
     const sourceMap: Record<string, string[]> = {

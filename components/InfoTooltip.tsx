@@ -42,11 +42,11 @@ export function InfoTooltip({ term, size = 'sm' }: InfoTooltipProps) {
   const sizeClass = size === 'sm' ? 'w-4 h-4 text-2xs' : 'w-5 h-5 text-xs'
 
   return (
-    <div className="inline-flex items-center" ref={ref}>
+    <div className="relative inline-flex items-center" ref={ref}>
       <button
         onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen) }}
         onMouseEnter={() => setIsOpen(true)}
-        className={`${sizeClass} inline-flex items-center justify-center rounded-full bg-surface-2 text-text-muted hover:text-primary hover:bg-primary-dim transition-colors border border-border font-mono`}
+        className={`${sizeClass} inline-flex items-center justify-center rounded-full bg-surface-2 text-text-muted hover:text-primary hover:bg-primary-dim transition-colors border border-border font-mono cursor-help`}
         aria-label={`Qu'est-ce que ${term} ?`}
       >
         ?
@@ -54,7 +54,7 @@ export function InfoTooltip({ term, size = 'sm' }: InfoTooltipProps) {
       
       {isOpen && (
         <div 
-          className={`absolute z-[200] w-[320px] bg-surface-2 border border-border rounded-lg shadow-xl p-4 ${
+          className={`absolute z-[200] w-[280px] bg-surface-2 border border-border rounded-lg shadow-xl p-4 left-1/2 -translate-x-1/2 ${
             position === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'
           }`}
         >

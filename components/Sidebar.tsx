@@ -8,6 +8,7 @@ const navSections = [
     title: 'Signal',
     items: [
       { href: '/', label: 'Command Center', icon: '✦' },
+      { href: '/live', label: 'Live Feed', icon: '●' },
       { href: '/briefing', label: 'Briefing quotidien', icon: '◈' },
       { href: '/news', label: 'Radar Actu', icon: '◉' },
       { href: '/alerts', label: 'Alertes', icon: '⚑' },
@@ -87,25 +88,31 @@ export function Sidebar() {
       </nav>
       
       <div className="p-4 border-t border-white/10">
-        <div className="intel-card rounded-2xl p-3">
+        <div className="intel-card rounded-2xl p-3 border-l-2 border-l-primary">
           <div className="flex items-center gap-2 text-2xs text-text-muted">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+            </span>
+            <span className="font-mono text-primary">Live Intelligence</span>
+          </div>
+          <div className="mt-2 text-[10px] leading-relaxed text-text-faint">
+            15+ sources • Polling 15min/1h/24h • Circuit breaker
+          </div>
+        </div>
+        <Link 
+          href="/live"
+          className="mt-3 flex items-center justify-between text-2xs text-text-muted hover:text-primary transition-colors"
+        >
+          <span className="flex items-center gap-2">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
             </span>
-            <span className="font-mono">Live intelligence</span>
-          </div>
-          <div className="mt-2 text-[10px] leading-relaxed text-text-faint">
-            Veille modèles, coûts, benchmarks et signaux faibles.
-          </div>
-        </div>
-        <div className="mt-3 flex items-center gap-2 text-2xs text-text-muted">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
+            <span className="font-mono">Sync: &lt; 15min</span>
           </span>
-          <span className="font-mono">Mis à jour il y a 3min</span>
-        </div>
+          <span>Voir Live →</span>
+        </Link>
       </div>
     </aside>
   )

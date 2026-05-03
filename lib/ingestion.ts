@@ -1,5 +1,5 @@
 import { mockModels, mockNews } from './mock-data'
-import { Model, NewsItem } from './types'
+import { Model, NewsItem, NewsCategory } from './types'
 import { dbUpsertNewsItems, dbInsertModelSnapshot, dbGetRecentNews } from './db'
 
 export type SourceConnectorType = 'rss' | 'api' | 'manual'
@@ -11,7 +11,7 @@ export interface SourceConnector {
   url: string
   type: SourceConnectorType
   reliability: SourceReliability
-  category: NewsItem['category']
+  category: NewsCategory
   enabled: boolean
   requiresKey?: boolean
 }

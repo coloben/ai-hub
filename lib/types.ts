@@ -1,15 +1,21 @@
+export type NewsCategory = 'research' | 'release' | 'benchmark' | 'industry' | 'pricing' | 'security' | 'community'
+
 export interface NewsItem {
   id: string
   title: string
   summary: string
   source: string
   source_logo?: string
-  category: 'research' | 'release' | 'benchmark' | 'industry'
+  category: NewsCategory
   published_at: string
   url: string
   tags: string[]
   is_breaking: boolean
   hype_score: number
+  // Enrichment fields
+  sentiment?: 'positive' | 'negative' | 'neutral'
+  entities?: string[] // Models, companies, benchmarks mentioned
+  confidence_score?: number // 0-100
 }
 
 export interface ModelScores {

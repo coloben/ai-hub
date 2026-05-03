@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0d0d12;
+            --bg-secondary: #14141a;
+            --bg-elevated: #1a1a22;
+            --text-primary: #e8e8ed;
+            --text-secondary: #8a8a95;
+            --text-muted: #5a5a65;
+            --accent: #3b82f6;
+            --accent-dim: rgba(59, 130, 246, 0.15);
+            --border: #2a2a35;
+            --border-hover: #3a3a45;
+            --warning: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        h1, h2, h3 {
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 4vw, 3.5rem);
+        }
+
+        h2 {
+            font-size: clamp(1.5rem, 3vw, 2rem);
+        }
+
+        h3 {
+            font-size: 1.25rem;
+        }
+
+        p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.75;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 32px;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(13, 13, 18, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            height: 64px;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        /* Dashboard Layout */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 24px;
+            padding-top: 96px;
+            min-height: 100vh;
+        }
+
+        .dashboard-main {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .dashboard-sidebar {
+            position: sticky;
+            top: 80px;
+            height: fit-content;
+        }
+
+        /* Welcome Section */
+        .welcome-section {
+            padding-bottom: 8px;
+        }
+
+        .welcome-section h1 {
+            margin-bottom: 12px;
+        }
+
+        .welcome-section p {
+            margin: 0;
+        }
+
+        /* Card */
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        /* News Section */
+        .news-section .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .link {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .link:hover {
+            text-decoration: underline;
+        }
+
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .news-card {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            text-decoration: none;
+            transition: border-color 0.2s;
+            display: flex;
+            flex-direction: column;
+            aspect-ratio: 1;
+        }
+
+        .news-card:hover {
+            border-color: var(--border-hover);
+        }
+
+        .news-meta {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .news-date {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .news-tag {
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            background: var(--accent-dim);
+            color: var(--accent);
+            border-radius: 4px;
+        }
+
+        .news-card h3 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+
+        .news-card p {
+            font-size: 0.75rem;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        /* Ranking Sidebar */
+        .ranking-sidebar .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .ranking-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: var(--bg-elevated);
+            border-radius: 6px;
+        }
+
+        .rank-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: var(--bg-primary);
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .rank-badge.top-1 {
+            background: var(--warning);
+            color: #0d0d12;
+        }
+
+        .rank-badge.top-2 {
+            background: #94a3b8;
+            color: #0d0d12;
+        }
+
+        .rank-badge.top-3 {
+            background: #cd7f32;
+            color: #0d0d12;
+        }
+
+        .ranking-info {
+            flex: 1;
+        }
+
+        .ranking-info .model-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .ranking-info .model-company {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .power-score {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-sidebar {
+                position: static;
+            }
+
+            .news-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .news-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-inner">
+            <a href="#" class="logo">AI Hub</a>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="dashboard">
+                <div class="dashboard-main">
+                    <div class="welcome-section">
+                        <h1>Intelligence Artificielle</h1>
+                        <p>Suivez l'évolution des modèles d'IA, comparez leurs performances et comprenez leurs capacités réelles.</p>
+                    </div>
+
+                    <div class="news-section card">
+                        <div class="section-header">
+                            <h2>Dernières infos</h2>
+                            <a href="#feed" class="link">Voir tout →</a>
+                        </div>
+                        <div class="news-grid">
+                            <a href="#feed" class="news-card">
+                                <div class="news-meta">
+                                    <span class="news-date">Il y a 2h</span>
+                                    <span class="news-tag">Release</span>
+                                </div>
+                                <h3>Claude 3.5 Sonnet : Nouveaux benchmarks</h3>
+                                <p>Anthropic publie les résultats complets sur les benchmarks de code et raisonnement.</p>
+                            </a>
+                            <a href="#feed" class="news-card">
+                                <div class="news-meta">
+                                    <span class="news-date">Il y a 5h</span>
+                                    <span class="news-tag">Benchmark</span>
+                                </div>
+                                <h3>GPT-4o améliore ses performances multimodales</h3>
+                                <p>OpenAI annonce une amélioration de 15% sur les tâches vision.</p>
+                            </a>
+                            <a href="#feed" class="news-card">
+                                <div class="news-meta">
+                                    <span class="news-date">Hier</span>
+                                    <span class="news-tag">Open Source</span>
+                                </div>
+                                <h3>Llama 3.1 405B disponible en quantization</h3>
+                                <p>Meta publie des versions quantized pour réduire les besoins en VRAM.</p>
+                            </a>
+                            <a href="#feed" class="news-card">
+                                <div class="news-meta">
+                                    <span class="news-date">Hier</span>
+                                    <span class="news-tag">Industry</span>
+                                </div>
+                                <h3>Google DeepMind fusionne avec Google Brain</h3>
+                                <p>Restructuration majeure des équipes de recherche IA chez Google.</p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <aside class="dashboard-sidebar">
+                    <div class="ranking-sidebar card">
+                        <div class="section-header">
+                            <h2>Top IA</h2>
+                            <a href="#ranking" class="link">Voir tout →</a>
+                        </div>
+                        <div class="ranking-list">
+                            <div class="ranking-item">
+                                <span class="rank-badge top-1">1</span>
+                                <div class="ranking-info">
+                                    <div class="model-name">Claude 3.5 Sonnet</div>
+                                    <div class="model-company">Anthropic</div>
+                                </div>
+                                <span class="power-score">98</span>
+                            </div>
+                            <div class="ranking-item">
+                                <span class="rank-badge top-2">2</span>
+                                <div class="ranking-info">
+                                    <div class="model-name">GPT-4o</div>
+                                    <div class="model-company">OpenAI</div>
+                                </div>
+                                <span class="power-score">96</span>
+                            </div>
+                            <div class="ranking-item">
+                                <span class="rank-badge top-3">3</span>
+                                <div class="ranking-info">
+                                    <div class="model-name">Gemini 2.0 Pro</div>
+                                    <div class="model-company">Google</div>
+                                </div>
+                                <span class="power-score">94</span>
+                            </div>
+                            <div class="ranking-item">
+                                <span class="rank-badge">4</span>
+                                <div class="ranking-info">
+                                    <div class="model-name">Claude 3 Opus</div>
+                                    <div class="model-company">Anthropic</div>
+                                </div>
+                                <span class="power-score">92</span>
+                            </div>
+                            <div class="ranking-item">
+                                <span class="rank-badge">5</span>
+                                <div class="ranking-info">
+                                    <div class="model-name">GPT-4 Turbo</div>
+                                    <div class="model-company">OpenAI</div>
+                                </div>
+                                <span class="power-score">90</span>
+                            </div>
+                            <div class="ranking-item">
+                                <span class="rank-badge">6</span>
+                                <div class="ranking-info">
+                                    <div class="model-name">Llama 3.1 405B</div>
+                                    <div class="model-company">Meta</div>
+                                </div>
+                                <span class="power-score">88</span>
+                            </div>
+                            <div class="ranking-item">
+                                <span class="rank-badge">7</span>
+                                <div class="ranking-info">
+                                    <div class="model-name">Mistral Large 2</div>
+                                    <div class="model-company">Mistral AI</div>
+                                </div>
+                                <span class="power-score">85</span>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

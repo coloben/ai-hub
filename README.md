@@ -1,15 +1,36 @@
-# AI Intelligence Hub
+# AI Intelligence Hub 🌐
 
-Dense intelligence feed for AI researchers and developers. A Bloomberg Terminal-style dashboard for tracking AI models, benchmarks, and research.
+**World-Class AI Intelligence Platform** — Centre de contrôle mondial pour les actualités IA, benchmarks, modèles et signaux faibles en temps réel.
 
-## Features
+## ✨ Features World-Class
 
-- **Ticker Tape**: Breaking news ticker with auto-scroll and pause on hover
-- **News Feed**: Filterable intelligence feed from major AI sources
-- **Model Leaderboard**: Sortable table with all major benchmarks
-- **Benchmarks Visualization**: Radar charts, bar charts, and timeline views
-- **Release Timeline**: Chronological view of model releases
-- **Global Search**: ⌘K command palette for quick navigation
+### 🔄 Live Intelligence System
+- **Multi-Frequency Ingestion**: Polling intelligent toutes les 15min/1h/24h
+- **15+ Verified Sources**: OpenAI, Anthropic, Google, Meta, Mistral, LMSYS, ArXiv, HuggingFace...
+- **Circuit Breaker**: Auto-recovery après 3 erreurs consécutives
+- **Deduplication**: Hash sémantique, fenêtre 48h
+- **Live Status Bar**: Sync temps réel visible partout
+
+### 🧠 Intelligence Engine
+- **Scoring**: Confidence, Impact, Severity automatiques
+- **Vérification**: Badges Confirmé/À surveiller/À vérifier/Contradiction
+- **Enrichment**: Extraction d'entités, sentiment analysis
+- **Cross-Reference**: Validation multi-sources
+
+### 🎨 UI/UX Premium
+- **SignalCard**: Cartes intelligentes avec badges contextuels
+- **Live Feed Page**: Fil temps réel avec filtres dynamiques
+- **Dark Mode Pro**: Design Bloomberg-terminal optimisé
+- **Animations**: Transitions fluides, micro-interactions
+- **Command Palette**: ⌘K navigation rapide
+
+### 📊 Dashboards
+- **Command Center**: Vue d'ensemble stratégique
+- **Live Feed**: Signaux temps réel
+- **Briefing**: Rapport quotidien auto-généré
+- **Leaderboard**: Classements ELO et benchmarks
+- **Compare**: Decision Engine (6 cas d'usage)
+- **Alerts**: Alertes configurables
 
 ## Tech Stack
 
@@ -62,17 +83,70 @@ lib/
 └── mock-data.ts            # Development data
 ```
 
-## Data Sources
+## 📡 Data Sources (15+)
 
+### Tier 1 - Critical (15min polling)
+- OpenAI Blog/API
+- Anthropic News
+- Google AI Blog
+- Meta AI
+- LMSYS Chatbot Arena
+- Mistral AI
+
+### Tier 2 - High (30min polling)
+- Artificial Analysis
+- OpenRouter
 - HuggingFace Papers
+
+### Tier 3 - Research (1-2h polling)
 - ArXiv cs.AI / cs.LG
-- Open LLM Leaderboard
-- The Verge AI
-- VentureBeat AI
-- MIT Tech Review
-- Anthropic Blog
-- OpenAI Blog
+- Papers With Code
+- DeepSeek AI
 
-## License
+### Tier 4 - Community (4h polling)
+- Cohere
+- AI21 Labs
+- HuggingFace Security
 
-MIT
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Next.js 14 + TypeScript + Tailwind CSS                     │
+├─────────────────────────────────────────────────────────────┤
+│  API Routes: /api/cron?mode={fast|full|daily}              │
+│  Scheduler: Circuit breaker, deduplication, health checks    │
+├─────────────────────────────────────────────────────────────┤
+│  Storage: Memory (dev) / PostgreSQL / Supabase (prod)       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## 🚀 Deployment
+
+```bash
+# Install
+npm install
+
+# Environment
+cp .env.local.example .env.local
+# Edit: CRON_SECRET, DATABASE_URL (optional)
+
+# Dev
+npm run dev
+
+# Build & Deploy (Vercel)
+npm run build
+```
+
+### Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `CRON_SECRET` | Yes | Auth token for /api/cron |
+| `DATABASE_URL` | No | PostgreSQL/Neon (default: memory) |
+| `NEXT_PUBLIC_SUPABASE_URL` | No | Supabase project URL |
+| `SUPABASE_SERVICE_KEY` | No | Supabase service role key |
+
+## 📝 License
+
+MIT © AI Intelligence Hub

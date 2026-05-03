@@ -1,199 +1,176 @@
-'use client'
-
-import { useState, useMemo } from 'react'
-import { NewsCard } from '@/components/NewsCard'
+import Link from 'next/link'
 import { mockNews } from '@/lib/mock-data'
-import { NewsItem } from '@/lib/types'
+import { getLiveNews } from '@/lib/feed'
+import { NewsCategory } from '@/lib/types'
 
-const categories = [
-  { id: 'all', label: 'Tout' },
-  { id: 'research', label: 'Recherche' },
-  { id: 'release', label: 'Sortie' },
-  { id: 'benchmark', label: 'Benchmark' },
-  { id: 'industry', label: 'Industrie' },
-]
-
-function formatTimeAgo(date: string): string {
-  const now = new Date()
-  const then = new Date(date)
-  const minutes = Math.floor((now.getTime() - then.getTime()) / (1000 * 60))
-  
-  if (minutes < 5) return 'maintenant'
-  if (minutes < 60) return `il y a ${minutes}m`
+function timeAgo(date: string): string {
+  const minutes = Math.floor((Date.now() - new Date(date).getTime()) / 60000)
+  if (minutes < 5)  return 'à l\'instant'
+  if (minutes < 60) return `${minutes}m`
   const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `il y a ${hours}h`
-  return `il y a ${Math.floor(hours / 24)}j`
+  if (hours < 24)   return `${hours}h`
+  return `${Math.floor(hours / 24)}j`
 }
 
-function isNew(date: string): boolean {
-  const now = new Date()
-  const then = new Date(date)
-  return (now.getTime() - then.getTime()) < 30 * 60 * 1000
+const categoryLabel: Record<NewsCategory, string> = {
+  release:   'Release',
+  benchmark: 'Benchmark',
+  research:  'Recherche',
+  industry:  'Industrie',
+  pricing:   'Tarifs',
+  security:  'Sécurité',
+  community: 'Communauté',
 }
 
-export default function NewsPage() {
-  const [activeCategory, setActiveCategory] = useState('all')
-  const [displayCount, setDisplayCount] = useState(12)
+const avatarMap: Record<string, string> = {
+  Anthropic: 'AN', OpenAI: 'OA', Google: 'GG', Meta: 'MA',
+  Mistral: 'MI', LMSYS: 'LM', ArXiv: 'AX', Microsoft: 'MS',
+  xAI: 'XA', DeepSeek: 'DS',
+}
 
-  const filteredNews = useMemo(() => {
-    if (activeCategory === 'all') return mockNews
-    return mockNews.filter(n => n.category === activeCategory)
-  }, [activeCategory])
+function initials(source: string): string {
+  return avatarMap[source] ?? source.slice(0, 2).toUpperCase()
+}
 
-  const featuredNews = filteredNews[0]
-  const regularNews = filteredNews.slice(1, displayCount)
-
-  const loadMore = () => {
-    setDisplayCount(prev => prev + 12)
-  }
+export default async function NewsPage() {
+  const allNews = await getLiveNews()
+  const sorted  = allNews  // getLiveNews() trie déjà par date décroissante
+  const sources = Array.from(new Set(allNews.map(n => n.source)))
 
   return (
-    <div className="relative p-6">
-      <span className="mesh-orb right-[12%] top-[4%] h-56 w-56 bg-primary/20"></span>
-      <div className="max-w-7xl mx-auto">
-        <div className="intel-card relative overflow-hidden rounded-[28px] p-6 mb-5">
-          <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-primary/20 blur-3xl"></div>
-          <div className="relative flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
-              <div className="mb-3 flex items-center gap-2">
-                <span className="signal-ring rounded-full bg-white/[0.04] px-3 py-1 text-2xs font-mono uppercase tracking-[0.24em] text-primary">AI Newsroom</span>
-                <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-2xs font-mono text-text-muted">Flux éditorial</span>
-              </div>
-              <h1 className="text-[38px] font-semibold leading-none tracking-[-0.055em] md:text-[54px]">
-                Radar mondial de l&apos;IA.
-              </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-text-muted">
-                Les annonces, benchmarks et signaux faibles filtrés pour comprendre ce qui change vraiment.
-              </p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-black/20 p-4 text-right">
-              <div className="text-2xs uppercase tracking-[0.2em] text-text-faint">Articles indexés</div>
-              <div className="mt-1 text-3xl font-semibold text-primary">{filteredNews.length}</div>
-            </div>
+    <div
+      className="mx-auto grid max-w-[1440px] px-6"
+      style={{ height: 'calc(100vh - 48px - 28px)', gridTemplateColumns: '1fr 280px' }}
+    >
+
+      {/* ── FEED ─────────────────────────────────────────────────────── */}
+      <div className="flex flex-col overflow-hidden border-r border-border">
+
+        {/* Header */}
+        <div className="flex shrink-0 items-center justify-between border-b border-border px-6 py-3">
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-semibold text-text">Feed IA</span>
+            <span className="h-1.5 w-1.5 rounded-full bg-success live-pulse" />
+            <span className="text-xs text-text-3">temps réel</span>
           </div>
+          <span className="text-xs text-text-3">{sorted.length} publications</span>
         </div>
 
-        <div className="sticky top-[32px] z-40 mb-6 flex gap-2 rounded-2xl border border-white/10 bg-[#070711]/78 p-2 backdrop-blur-xl">
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => {
-                setActiveCategory(cat.id)
-                setDisplayCount(12)
-              }}
-              className={`rounded-xl px-3 py-2 text-sm transition-colors ${
-                activeCategory === cat.id
-                  ? 'bg-white/[0.09] text-primary shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]'
-                  : 'text-text-muted hover:text-text hover:bg-white/[0.045]'
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
+        {/* Posts */}
+        <div className="flex-1 overflow-y-auto">
+          {sorted.map(item => (
+            <div key={item.id} className="border-b border-border">
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-4">
-            {featuredNews && (
-              <a href={featuredNews.url} target="_blank" rel="noopener noreferrer" className="intel-card intel-card-hover relative block overflow-hidden rounded-[28px] p-6 cursor-pointer group">
-                <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-amber/10 blur-3xl"></div>
-                <div className="relative">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="rounded-full bg-white/[0.045] px-2.5 py-1 text-2xs font-mono text-text-faint uppercase tracking-[0.16em]">
-                    {featuredNews.source}
+              {/* Post principal — cliquable vers source */}
+              <a
+                href={item.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block px-6 py-4 transition-colors hover:bg-surface"
+              >
+                {/* En-tête post */}
+                <div className="mb-2.5 flex items-center gap-3">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-surface-2 text-xs font-bold text-text-2">
+                    {initials(item.source)}
                   </span>
-                  <span className="text-2xs font-mono text-primary">
-                    {formatTimeAgo(featuredNews.published_at)}
+                  <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span className="text-sm font-semibold leading-none text-text">{item.source}</span>
+                    <span className="text-xs text-text-3">@{item.source.toLowerCase().replace(/\s+/g, '')}</span>
+                  </div>
+                  <span className="shrink-0 text-xs text-text-3">{timeAgo(item.published_at)}</span>
+                  <span className="shrink-0 rounded border border-border px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-wider text-text-3">
+                    {categoryLabel[item.category]}
                   </span>
-                  {featuredNews.is_breaking && (
-                    <span className="px-2 py-0.5 bg-amber/10 text-amber text-2xs font-medium rounded-full border border-amber/20">
-                      FLASH
-                    </span>
-                  )}
-                  {isNew(featuredNews.published_at) && (
-                    <span className="px-2 py-0.5 bg-primary/15 text-primary text-2xs font-medium rounded-full animate-pulse">
-                      NOUV.
-                    </span>
+                  {item.is_breaking && (
+                    <span className="shrink-0 text-2xs font-bold text-error">● Breaking</span>
                   )}
                 </div>
-                <h2 className="text-3xl font-semibold mb-3 group-hover:text-primary transition-colors tracking-[-0.045em] leading-tight">
-                  {featuredNews.title}
-                </h2>
-                <p className="text-sm text-text-muted leading-relaxed">
-                  {featuredNews.summary}
-                </p>
-                <div className="flex items-center gap-4 mt-5">
-                  <div className="flex flex-wrap gap-2">
-                    {featuredNews.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="px-2.5 py-1 bg-white/[0.05] text-2xs text-text-muted rounded-full"
-                      >
-                        #{tag}
-                      </span>
+
+                {/* Corps */}
+                <p className="mb-1.5 text-sm font-semibold leading-snug text-text">{item.title}</p>
+                <p className="text-sm leading-relaxed text-text-2">{item.summary}</p>
+
+                {/* Tags */}
+                {item.tags.length > 0 && (
+                  <div className="mt-2.5 flex flex-wrap gap-2">
+                    {item.tags.map(tag => (
+                      <span key={tag} className="text-xs text-text-3">#{tag}</span>
                     ))}
                   </div>
-                  {featuredNews.hype_score > 70 && (
-                    <span className="ml-auto rounded-full bg-amber/10 px-2.5 py-1 text-2xs text-amber">🔥 {featuredNews.hype_score}</span>
-                  )}
-                </div>
-                </div>
+                )}
               </a>
-            )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {regularNews.map((item) => (
-                <NewsCard key={item.id} news={item} />
-              ))}
-            </div>
-
-            {displayCount < filteredNews.length && (
-              <div className="flex justify-center pt-4">
-                <button
-                  onClick={loadMore}
-                  className="rounded-full border border-white/10 bg-white/[0.045] px-6 py-2.5 text-sm text-text-muted hover:text-text hover:bg-white/[0.075] transition-colors"
+              {/* Barre d'actions */}
+              <div className="flex items-center gap-0 border-t border-border/50 px-6">
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 py-2 pr-5 text-xs text-text-3 transition-colors hover:text-text-2"
                 >
-                  Charger plus ({filteredNews.length - displayCount} restants)
-                </button>
+                  <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 1 1.242 7.244" />
+                  </svg>
+                  Lire la source
+                </a>
+                <span className="mx-3 text-border-2">·</span>
+                <span className="flex items-center gap-2 py-2 text-xs text-text-3">
+                  <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.047 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48z" />
+                  </svg>
+                  Signal {item.hype_score}/100
+                </span>
               </div>
-            )}
-          </div>
 
-          <aside className="space-y-4">
-            <div className="intel-card rounded-[24px] p-5">
-              <h3 className="text-sm font-medium text-text-muted mb-3 uppercase tracking-[0.2em]">
-                Tendances
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {['GPT-5', 'Claude', 'open-source', 'multimodal', 'reasoning', 'coding', 'benchmark', 'enterprise'].map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-2.5 py-1 rounded-full bg-white/[0.045] text-xs text-text-muted hover:bg-white/[0.075] hover:text-text cursor-pointer transition-colors"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
             </div>
-
-            <div className="intel-card rounded-[24px] p-5">
-              <h3 className="text-sm font-medium text-text-muted mb-3 uppercase tracking-[0.2em]">
-                Sources
-              </h3>
-              <div className="space-y-2">
-                {['OpenAI', 'Anthropic', 'Google', 'Meta', 'HuggingFace', 'ArXiv'].map((source) => (
-                  <div key={source} className="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.025] px-3 py-2 text-sm">
-                    <span className="text-text-muted">{source}</span>
-                    <span className="text-2xs font-mono text-text-faint">
-                      {mockNews.filter(n => n.source === source).length}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </aside>
+          ))}
         </div>
       </div>
+
+      {/* ── RIGHT — FILTRES + SOURCES ──────────────────────────── */}
+      <aside className="flex flex-col overflow-y-auto py-6 pl-6">
+
+        <p className="mb-3 text-2xs font-semibold uppercase tracking-widest text-text-3">Catégories</p>
+        <div className="mb-7 flex flex-col gap-0.5">
+          {(Object.entries(categoryLabel) as [NewsCategory, string][]).map(([cat, label]) => {
+            const count = allNews.filter(n => n.category === cat).length
+            if (count === 0) return null
+            return (
+              <div
+                key={cat}
+                className="flex items-center justify-between rounded-sm px-2 py-1.5 text-sm text-text-2 hover:bg-surface cursor-pointer transition-colors"
+              >
+                <span>{label}</span>
+                <span className="text-xs tabular-nums text-text-3">{count}</span>
+              </div>
+            )
+          })}
+        </div>
+
+        <p className="mb-3 text-2xs font-semibold uppercase tracking-widest text-text-3">Sources</p>
+        <div className="flex flex-col gap-2">
+          {sources.map(source => {
+            const count = allNews.filter(n => n.source === source).length
+            return (
+              <div key={source} className="flex items-center gap-2.5">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border bg-surface-2 text-2xs font-bold text-text-3">
+                  {initials(source)}
+                </span>
+                <span className="flex-1 text-sm text-text-2">{source}</span>
+                <span className="text-xs tabular-nums text-text-3">{count}</span>
+              </div>
+            )
+          })}
+        </div>
+
+        <div className="mt-auto pt-8">
+          <Link href="/" className="text-xs text-text-3 transition-colors hover:text-text-2">
+            ← Dashboard
+          </Link>
+        </div>
+
+      </aside>
+
     </div>
   )
 }
