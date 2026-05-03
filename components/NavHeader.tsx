@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState, useRef, useEffect } from 'react'
 import { mockModels, mockNews } from '@/lib/mock-data'
+import { AuthButton } from '@/components/AuthButton'
 
 const navItems = [
   { href: '/',            label: 'Dashboard' },
@@ -161,6 +162,11 @@ export function NavHeader() {
           <div className="hidden sm:flex items-center gap-2 shrink-0">
             <span className="h-1.5 w-1.5 rounded-full bg-success live-pulse" />
             <span className="text-xs text-text-2">Live</span>
+          </div>
+
+          {/* Auth */}
+          <div className="hidden sm:block shrink-0">
+            <AuthButton />
           </div>
 
           {/* Hamburger mobile */}
