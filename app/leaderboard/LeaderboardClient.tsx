@@ -258,7 +258,13 @@ export default function LeaderboardClient() {
                     </td>
                     <td className="py-3 px-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">{model.name}</span>
+                        <a
+                          href={`/models/${model.id}`}
+                          className="text-sm font-medium text-text hover:text-primary hover:underline transition-colors"
+                          onClick={e => e.stopPropagation()}
+                        >
+                          {model.name}
+                        </a>
                         {model.is_new && (
                           <span className="px-1 py-0.5 bg-primary-dim text-new-badge text-2xs rounded">NOUV.</span>
                         )}

@@ -208,7 +208,7 @@ export default async function Home() {
               const delta = model.rank_delta_7d
               const pColor = providerColor[model.provider] ?? 'text-text-3'
               return (
-                <div key={model.id} className="group flex items-center gap-2 border-b border-border py-2.5 last:border-0 hover:bg-surface-2 -mx-2 px-2 rounded transition-colors">
+                <a key={model.id} href={`/models/${model.id}`} className="group flex items-center gap-2 border-b border-border py-2.5 last:border-0 hover:bg-surface-2 -mx-2 px-2 rounded transition-colors">
                   <span className={`w-5 shrink-0 text-center text-xs tabular-nums font-bold
                     ${i === 0 ? 'text-[#fbbf24]' : i === 1 ? 'text-text-2' : i === 2 ? 'text-[#cd7f32]' : 'text-text-3'}`}>
                     {i + 1}
@@ -234,7 +234,7 @@ export default async function Home() {
                       {delta > 0 ? `↑${delta}` : delta < 0 ? `↓${Math.abs(delta)}` : '—'}
                     </p>
                   </div>
-                </div>
+                </a>
               )
             })}
           </div>
