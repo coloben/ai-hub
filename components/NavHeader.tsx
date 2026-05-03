@@ -8,6 +8,7 @@ import { AuthButton } from '@/components/AuthButton'
 
 const navItems = [
   { href: '/',            label: 'Dashboard' },
+  { href: '/feed',        label: 'Mon Feed' },
   { href: '/news',        label: 'Feed IA' },
   { href: '/leaderboard', label: 'Classement' },
   { href: '/benchmarks',  label: 'Benchmarks' },
