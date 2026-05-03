@@ -1,10 +1,10 @@
-'use client'
-
 import { generateBriefing } from '@/lib/intelligence'
 import { generateAlertEvents } from '@/lib/alerts'
 import { getAllRecommendations } from '@/lib/decision'
 import { verifyCorpus } from '@/lib/verification'
-import { mockNews } from '@/lib/mock-data'
+import { getLiveNews } from '@/lib/feed'
+
+export const revalidate = 900
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
@@ -28,11 +28,12 @@ function HeatBar({ value, label, color = 'bg-primary' }: { value: number; label:
   )
 }
 
-export default function BriefingPage() {
+export default async function BriefingPage() {
+  const liveNews      = await getLiveNews()
   const briefing      = generateBriefing()
   const alerts        = generateAlertEvents()
   const recs          = getAllRecommendations()
-  const verified      = verifyCorpus(mockNews)
+  const verified      = verifyCorpus(liveNews)
   const confirmed     = verified.filter(v => v.status === 'confirmed').length
   const contradicted  = verified.filter(v => v.status === 'contradicted').length
   const criticalAlerts = alerts.filter(a => a.priority === 'critical')
