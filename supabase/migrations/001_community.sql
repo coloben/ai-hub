@@ -7,7 +7,7 @@
 CREATE TABLE IF NOT EXISTS public.profiles (
   id            uuid PRIMARY KEY REFERENCES auth.users ON DELETE CASCADE,
   username      text UNIQUE NOT NULL,
-  avatar_url    text,
+  avatar_url    text, 
   karma         int NOT NULL DEFAULT 0,
   level         text NOT NULL DEFAULT 'observateur',
   interests     text[] DEFAULT '{}',
