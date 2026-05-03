@@ -128,7 +128,7 @@ export function CommentDrawer({ postId, postTitle, open, onClose }: Props) {
       {/* Drawer */}
       <div
         ref={drawerRef}
-        className="fixed bottom-7 right-0 top-12 z-50 flex w-full max-w-md flex-col border-l border-border bg-bg shadow-2xl animate-slide-up"
+        className="fixed bottom-7 right-0 top-12 z-50 flex w-full max-w-md flex-col border-l border-border bg-bg shadow-2xl animate-slide-in-right"
       >
         {/* Header */}
         <div className="flex shrink-0 items-center gap-3 border-b border-border px-5 py-4">
