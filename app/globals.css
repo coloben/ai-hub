@@ -56,32 +56,30 @@ body {
    CARDS
 ───────────────────────────────────────────── */
 .card {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: #111120;
+  border: 1px solid #1e1e32;
   border-radius: 12px;
   transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
-  backdrop-filter: blur(8px);
 }
 .card:hover {
-  border-color: rgba(255,255,255,0.14);
-  background: rgba(255,255,255,0.06);
-  box-shadow: 0 0 0 1px rgba(37,99,235,0.08), 0 6px 24px rgba(0,0,0,0.45);
+  border-color: #2a2a45;
+  background: #16162a;
+  box-shadow: 0 0 0 1px rgba(37,99,235,0.1), 0 6px 24px rgba(0,0,0,0.5);
 }
 .card-elevated {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.10);
+  background: #16162a;
+  border: 1px solid #2a2a45;
   border-radius: 12px;
 }
 .intel-card {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.07);
+  background: #0f0f1a;
+  border: 1px solid #1e1e32;
   border-radius: 12px;
   transition: border-color 0.18s ease, box-shadow 0.18s ease;
-  backdrop-filter: blur(6px);
 }
 .intel-card:hover {
-  border-color: rgba(37,99,235,0.22);
-  box-shadow: 0 0 0 1px rgba(37,99,235,0.08);
+  border-color: #2563eb;
+  box-shadow: 0 0 0 1px rgba(37,99,235,0.15);
 }
 
 /* ─────────────────────────────────────────────
@@ -118,11 +116,7 @@ body {
    SKELETON LOADER
 ───────────────────────────────────────────── */
 .skeleton {
-  background: linear-gradient(90deg,
-    rgba(255,255,255,0.04) 0%,
-    rgba(255,255,255,0.08) 50%,
-    rgba(255,255,255,0.04) 100%
-  );
+  background: linear-gradient(90deg, #111120 0%, #1c1c32 50%, #111120 100%);
   background-size: 200% 100%;
   animation: shimmer 1.6s ease infinite;
   border-radius: 6px;
@@ -214,9 +208,9 @@ th, td { text-align: left; }
 
 /* Glass surface utilitaire */
 .glass {
-  background: rgba(255,255,255,0.04);
+  background: #111120;
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid #1e1e32;
 }
 
 /* Nav active indicator */
