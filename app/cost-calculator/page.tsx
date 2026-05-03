@@ -5,7 +5,7 @@ import { mockModels } from '@/lib/mock-data'
 import { InfoTooltip } from '@/components/InfoTooltip'
 
 export default function CostCalculatorPage() {
-  const [selectedModelId, setSelectedModelId] = useState<string>('gpt5')
+  const [selectedModelId, setSelectedModelId] = useState<string>('gpt-4o')
   const [inputTokens, setInputTokens] = useState(1000000)
   const [outputTokens, setOutputTokens] = useState(500000)
   const [requestsPerDay, setRequestsPerDay] = useState(100)

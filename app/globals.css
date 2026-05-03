@@ -60,3 +60,25 @@ body {
 /* Table */
 table { border-collapse: collapse; }
 th, td { text-align: left; }
+
+/* ── Compat ancien thème (alertes, briefing, compare, live) ──────────── */
+.intel-card {
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.mesh-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+}
+.signal-ring {
+  box-shadow: 0 0 0 1px rgba(99,102,241,0.3);
+}
+.text-gradient-intel {
+  background: linear-gradient(135deg, #6366f1, #a5b4fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}

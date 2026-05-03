@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { getLiveStatus, runScheduledIngestion, ScheduleMode } from '@/lib/scheduler'
 import { enhancedSourceConnectors, EnhancedSourceConnector } from '@/lib/sources-v2'
 
-const ACCESS_KEY = 'Kloups94!'
+const ACCESS_KEY = process.env.NEXT_PUBLIC_SYS_KEY ?? ''
 
 export default function SysPage() {
   const router = useRouter()

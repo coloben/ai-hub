@@ -24,8 +24,23 @@ const benchmarks = ['MMLU', 'HumanEval', 'MATH', 'GPQA', 'Arena ELO', 'Speed TPS
 
 const COLORS = ['#6366f1', '#f59e0b', '#22c55e', '#ec4899', '#8b5cf6']
 
+// Bornes réalistes pour normaliser chaque métrique sur 0-100
+const BENCHMARK_BOUNDS: Record<string, { min: number; max: number; key: string }> = {
+  'MMLU':      { min: 50,   max: 100,  key: 'mmlu'       },
+  'HumanEval': { min: 40,   max: 100,  key: 'humaneval'  },
+  'MATH':      { min: 20,   max: 100,  key: 'math'       },
+  'GPQA':      { min: 25,   max: 90,   key: 'gpqa'       },
+  'Arena ELO': { min: 1050, max: 1450, key: 'arena_elo'  },
+  'Speed TPS': { min: 0,    max: 250,  key: 'speed_tps'  },
+}
+
+function normalize(value: number, min: number, max: number): number {
+  if (max === min) return 0
+  return Math.round(Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100)))
+}
+
 export default function BenchmarksPage() {
-  const [selectedModels, setSelectedModels] = useState<string[]>(['gpt-5', 'claude-opus-5', 'gemini-3-pro'])
+  const [selectedModels, setSelectedModels] = useState<string[]>(['gpt-4o', 'claude-3-5-sonnet', 'gemini-1-5-pro'])
   const [activeChart, setActiveChart] = useState<'radar' | 'bar' | 'timeline'>('radar')
   const [selectedBenchmark, setSelectedBenchmark] = useState('arena_elo')
 
@@ -35,10 +50,11 @@ export default function BenchmarksPage() {
 
   const radarData = useMemo(() => {
     return benchmarks.map(b => {
+      const bounds = BENCHMARK_BOUNDS[b]
       const row: Record<string, number | string> = { benchmark: b }
       models.forEach(m => {
-        const key = b.toLowerCase().replace(' ', '_')
-        row[m.name] = m.scores[key as keyof typeof m.scores] ?? 0
+        const raw = m.scores[bounds.key as keyof typeof m.scores] ?? 0
+        row[m.name] = normalize(raw as number, bounds.min, bounds.max)
       })
       return row
     })
@@ -123,7 +139,22 @@ export default function BenchmarksPage() {
                 <RadarChart data={radarData}>
                   <PolarGrid stroke="#3f3f46" />
                   <PolarAngleAxis dataKey="benchmark" tick={{ fill: '#a1a1aa', fontSize: 12 }} />
-                  <PolarRadiusAxis tick={{ fill: '#52525b', fontSize: 10 }} />
+                  <PolarRadiusAxis
+                    domain={[0, 100]}
+                    tickCount={5}
+                    tick={{ fill: '#52525b', fontSize: 10 }}
+                    tickFormatter={(v) => `${v}`}
+                  />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#111', border: '1px solid #1e1e1e', borderRadius: '4px', fontSize: 12 }}
+                    formatter={(value: number, name: string, props) => {
+                      const b = props.payload?.benchmark as string
+                      const bounds = BENCHMARK_BOUNDS[b]
+                      if (!bounds) return [`${value}`, name]
+                      const real = Math.round(bounds.min + (value / 100) * (bounds.max - bounds.min))
+                      return [`${real} (score normalisé : ${value}/100)`, name]
+                    }}
+                  />
                   {models.map((model, index) => (
                     <Radar
                       key={model.id}
@@ -131,7 +162,7 @@ export default function BenchmarksPage() {
                       dataKey={model.name}
                       stroke={COLORS[index % COLORS.length]}
                       fill={COLORS[index % COLORS.length]}
-                      fillOpacity={0.1}
+                      fillOpacity={0.15}
                       strokeWidth={2}
                     />
                   ))}
@@ -189,13 +220,17 @@ export default function BenchmarksPage() {
             <h3 className="text-sm font-medium mb-4">Évolution ELO (90 jours simulés)</h3>
             <div className="h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={[
-                  { day: 'T-90', 'GPT-5': 1280, 'Claude Opus 5': 1300, 'Gemini 3 Pro': 1250 },
-                  { day: 'T-60', 'GPT-5': 1300, 'Claude Opus 5': 1305, 'Gemini 3 Pro': 1265 },
-                  { day: 'T-30', 'GPT-5': 1320, 'Claude Opus 5': 1310, 'Gemini 3 Pro': 1280 },
-                  { day: 'T-14', 'GPT-5': 1330, 'Claude Opus 5': 1315, 'Gemini 3 Pro': 1290 },
-                  { day: 'Now', 'GPT-5': 1342, 'Claude Opus 5': 1319, 'Gemini 3 Pro': 1298 },
-                ]}>
+                <LineChart data={(() => {
+                  const top3 = models.slice(0, 3)
+                  const base = top3.map(m => m.scores.arena_elo ?? 1200)
+                  return [
+                    { day: 'T-90', ...Object.fromEntries(top3.map((m,i) => [m.name, Math.round(base[i] * 0.96)])) },
+                    { day: 'T-60', ...Object.fromEntries(top3.map((m,i) => [m.name, Math.round(base[i] * 0.97)])) },
+                    { day: 'T-30', ...Object.fromEntries(top3.map((m,i) => [m.name, Math.round(base[i] * 0.985)])) },
+                    { day: 'T-14', ...Object.fromEntries(top3.map((m,i) => [m.name, Math.round(base[i] * 0.993)])) },
+                    { day: 'Now',  ...Object.fromEntries(top3.map((m,i) => [m.name, base[i]])) },
+                  ]
+                })()}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" />
                   <XAxis dataKey="day" tick={{ fill: '#a1a1aa', fontSize: 12 }} />
                   <YAxis tick={{ fill: '#a1a1aa', fontSize: 12 }} domain={['dataMin - 50', 'dataMax + 20']} />

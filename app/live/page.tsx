@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { mockNews } from '@/lib/mock-data'
+import { NewsItem } from '@/lib/types'
 import { SignalCard } from '@/components/SignalCard'
 import { InfoTooltip } from '@/components/InfoTooltip'
 
@@ -29,9 +30,17 @@ export default function LivePage() {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('24h')
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all')
   const [sortBy, setSortBy] = useState<'time' | 'impact' | 'confidence'>('time')
+  const [allNews, setAllNews] = useState<NewsItem[]>(mockNews)
+
+  useEffect(() => {
+    fetch('/api/feed?limit=80')
+      .then(r => r.json())
+      .then(d => { if (d.items?.length) setAllNews(d.items) })
+      .catch(() => {})
+  }, [])
 
   const filteredNews = useMemo(() => {
-    let filtered = [...mockNews]
+    let filtered = [...allNews]
 
     // Time filter
     const now = new Date()
