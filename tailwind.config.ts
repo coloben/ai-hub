@@ -11,15 +11,15 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // ── Base OLED ────────────────────────────────────────────────
-        bg:               '#07070f',
-        surface:          '#111120',
-        'surface-2':      '#16162a',
-        'surface-3':      '#1c1c32',
-        'surface-offset': '#0f0f1a',
-        border:           '#1e1e32',
-        'border-2':       '#2a2a45',
-        divider:          '#181828',
+        // ── Fonds (à la X / Reddit dark)────────────────────────────────
+        bg:               '#000000',
+        surface:          '#0f0f0f',
+        'surface-2':      '#161616',
+        'surface-3':      '#1c1c1c',
+        'surface-offset': '#0a0a0a',
+        border:           '#2f2f2f',
+        'border-2':       '#3d3d3d',
+        divider:          '#1a1a1a',
         // ── Texte ────────────────────────────────────────────────────
         text:             '#f0f0f7',
         'text-2':         '#9090a8',
