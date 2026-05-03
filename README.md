@@ -1,4 +1,4 @@
-# AI Intelligence Hub 🌐
+  # AI Intelligence Hub 🌐
 
 **World-Class AI Intelligence Platform** — Centre de contrôle mondial pour les actualités IA, benchmarks, modèles et signaux faibles en temps réel.
 
