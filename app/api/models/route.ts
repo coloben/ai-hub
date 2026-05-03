@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { mockModels } from '@/lib/mock-data'
+import { getLiveModels, searchModels } from '@/lib/models-live'
 import { ModelsResponse } from '@/lib/types'
 
-export const revalidate = 300
+export const revalidate = 3600
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -18,16 +18,17 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   
   const sort = searchParams.get('sort') || 'arena'
-  const limit = parseInt(searchParams.get('limit') || '20')
+  const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 100)
   const provider = searchParams.get('provider') || 'all'
-  
-  let models = [...mockModels]
+  const q = searchParams.get('q') || ''
+
+  let models = q ? searchModels(q) : await getLiveModels()
   
   if (provider !== 'all') {
     models = models.filter(m => m.provider.toLowerCase() === provider.toLowerCase())
   }
   
-  const sortFieldMap: Record<string, keyof typeof mockModels[0]['scores']> = {
+  const sortFieldMap: Record<string, string> = {
     arena: 'arena_elo',
     mmlu: 'mmlu',
     coding: 'humaneval',
@@ -39,8 +40,8 @@ export async function GET(request: NextRequest) {
   const sortField = sortFieldMap[sort] || 'arena_elo'
   
   models.sort((a, b) => {
-    const aVal = a.scores[sortField] ?? 0
-    const bVal = b.scores[sortField] ?? 0
+    const aVal = (a.scores as unknown as Record<string, number | null>)[sortField] ?? 0
+    const bVal = (b.scores as unknown as Record<string, number | null>)[sortField] ?? 0
     return bVal - aVal
   })
   
