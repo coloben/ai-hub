@@ -1,6 +1,18 @@
 {
   "crons": [
     {
+      "path": "/api/scores",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron?mode=fast",
+      "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron?mode=full",
+      "schedule": "0 * * * *"
+    },
+    {
       "path": "/api/cron?mode=daily",
       "schedule": "0 6 * * *"
     }
