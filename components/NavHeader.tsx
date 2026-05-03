@@ -95,20 +95,20 @@ export function NavHeader() {
         <div className="mx-auto flex h-full max-w-[1440px] items-center px-4 md:px-6 gap-3">
 
           {/* Logo */}
-          <Link href="/" className="mr-3 shrink-0 text-sm font-bold tracking-tight">
+          <Link href="/" className="shrink-0 text-sm font-bold tracking-tight">
             <span className="text-gradient">AI</span>
             <span className="text-text"> Hub</span>
           </Link>
 
           {/* Nav desktop */}
-          <nav className="hidden md:flex items-center">
+          <nav className="hidden md:flex items-center flex-1 min-w-0">
             {navItems.map(item => {
               const isActive = pathname === item.href
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`relative flex h-12 items-center px-3 text-xs font-medium transition-colors duration-150
+                  className={`relative flex h-12 items-center px-3 text-xs font-medium transition-colors duration-150 whitespace-nowrap
                     ${isActive ? 'text-text' : 'text-text-2 hover:text-text'}`}
                 >
                   {item.label}
@@ -120,67 +120,70 @@ export function NavHeader() {
             })}
           </nav>
 
-          {/* Search desktop */}
-          <div ref={containerRef} className="relative ml-auto hidden sm:block">
-            <div className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 w-44 focus-within:border-primary/30 focus-within:bg-white/[0.06] transition-all duration-150">
-              <svg className="h-3 w-3 text-text-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
-              </svg>
-              <input
-                ref={inputRef}
-                value={query}
-                onChange={e => { setQuery(e.target.value); setOpen(true) }}
-                onFocus={() => setOpen(true)}
-                placeholder="Rechercher…"
-                className="flex-1 bg-transparent text-xs text-text placeholder:text-text-3 outline-none min-w-0"
-              />
-              <kbd className="hidden lg:inline-flex text-2xs text-text-3 font-mono bg-surface px-1 rounded">⌘K</kbd>
-            </div>
-            {open && results.length > 0 && (
-              <div className="absolute right-0 top-full mt-1.5 w-72 rounded-xl border border-white/[0.08] bg-[#0d0d1a]/95 backdrop-blur-xl shadow-2xl overflow-hidden z-50 animate-slide-up">
-                {results.map((r, i) => (
-                  <button
-                    key={i}
-                    onClick={() => handleSelect(r)}
-                    className="flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-white/[0.05] transition-colors duration-100"
-                  >
-                    <span className={`text-2xs px-1.5 py-0.5 rounded font-medium shrink-0 ${
-                      r.type === 'model' ? 'bg-primary/10 text-primary' :
-                      r.type === 'news'  ? 'bg-amber/10 text-amber' :
-                      'bg-surface-3 text-text-2'
-                    }`}>
-                      {r.type === 'model' ? 'modèle' : r.type === 'news' ? 'actu' : 'page'}
-                    </span>
-                    <div className="min-w-0">
-                      <div className="text-xs text-text truncate">{r.label}</div>
-                      <div className="text-2xs text-text-2 truncate">{r.sub}</div>
-                    </div>
-                  </button>
-                ))}
+          {/* Droite : search + live + notif + auth */}
+          <div className="ml-auto flex items-center gap-2 shrink-0">
+
+            {/* Search desktop */}
+            <div ref={containerRef} className="relative hidden sm:block">
+              <div className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 w-40 lg:w-44 focus-within:border-primary/30 focus-within:bg-white/[0.06] transition-all duration-150">
+                <svg className="h-3 w-3 text-text-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+                </svg>
+                <input
+                  ref={inputRef}
+                  value={query}
+                  onChange={e => { setQuery(e.target.value); setOpen(true) }}
+                  onFocus={() => setOpen(true)}
+                  placeholder="Rechercher…"
+                  className="flex-1 bg-transparent text-xs text-text placeholder:text-text-3 outline-none min-w-0"
+                />
+                <kbd className="hidden lg:inline-flex text-2xs text-text-3 font-mono bg-surface px-1 rounded">⌘K</kbd>
               </div>
-            )}
-          </div>
+              {open && results.length > 0 && (
+                <div className="absolute right-0 top-full mt-1.5 w-72 rounded-xl border border-white/[0.08] bg-[#0d0d1a]/95 backdrop-blur-xl shadow-2xl overflow-hidden z-50 animate-slide-up">
+                  {results.map((r, i) => (
+                    <button
+                      key={i}
+                      onClick={() => handleSelect(r)}
+                      className="flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-white/[0.05] transition-colors duration-100"
+                    >
+                      <span className={`text-2xs px-1.5 py-0.5 rounded font-medium shrink-0 ${
+                        r.type === 'model' ? 'bg-primary/10 text-primary' :
+                        r.type === 'news'  ? 'bg-amber/10 text-amber' :
+                        'bg-surface-3 text-text-2'
+                      }`}>
+                        {r.type === 'model' ? 'modèle' : r.type === 'news' ? 'actu' : 'page'}
+                      </span>
+                      <div className="min-w-0">
+                        <div className="text-xs text-text truncate">{r.label}</div>
+                        <div className="text-2xs text-text-2 truncate">{r.sub}</div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
-          {/* Live indicator */}
-          <div className="hidden sm:flex items-center gap-2 shrink-0">
-            <span className="h-1.5 w-1.5 rounded-full bg-success live-pulse" />
-            <span className="text-xs text-text-2">Live</span>
-          </div>
+            {/* Live indicator */}
+            <div className="hidden sm:flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-success live-pulse" />
+              <span className="text-xs text-text-2">Live</span>
+            </div>
 
-          {/* Notifications */}
-          <div className="hidden sm:block shrink-0">
-            <NotificationBell />
-          </div>
+            {/* Notifications */}
+            <div className="hidden sm:block">
+              <NotificationBell />
+            </div>
 
-          {/* Auth */}
-          <div className="hidden sm:block shrink-0">
+            {/* Auth — toujours visible */}
             <AuthButton />
+
           </div>
 
           {/* Hamburger mobile */}
           <button
             onClick={() => setMobileOpen(v => !v)}
-            className="ml-auto md:hidden flex flex-col justify-center gap-1.5 p-2 text-text-2 hover:text-text transition-colors"
+            className="md:hidden flex flex-col justify-center gap-1.5 p-2 text-text-2 hover:text-text transition-colors"
             aria-label="Menu"
           >
             <span className={`block h-0.5 w-5 bg-current transition-transform duration-200 ${mobileOpen ? 'translate-y-2 rotate-45' : ''}`} />
