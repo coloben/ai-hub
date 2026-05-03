@@ -12,17 +12,17 @@ const config: Config = {
     extend: {
       colors: {
         // ── Nouveau thème (noir/blanc/gold) ─────────────────────────
-        bg:          '#000000',
-        surface:     '#0a0a0a',
-        'surface-2': '#111111',
-        'surface-3': '#161616',
-        'surface-offset': '#141417',
-        border:      '#1e1e1e',
-        'border-2':  '#2a2a2a',
-        divider:     '#1e1e1e',
-        text:        '#f0f0f0',
-        'text-2':    '#666666',
-        'text-3':    '#333333',
+        bg:          '#0d0d12',
+        surface:     '#14141a',
+        'surface-2': '#1a1a22',
+        'surface-3': '#1e1e28',
+        'surface-offset': '#16161e',
+        border:      '#2a2a35',
+        'border-2':  '#3a3a45',
+        divider:     '#2a2a35',
+        text:        '#e8e8ed',
+        'text-2':    '#8a8a95',
+        'text-3':    '#5a5a65',
         gold:        '#c9a84c',
         success:     '#22c55e',
         error:       '#ef4444',
@@ -57,8 +57,11 @@ const config: Config = {
         widest: '0.14em',
       },
       animation: {
-        ticker:     'ticker 50s linear infinite',
-        'live-dot': 'live-pulse 2s ease infinite',
+        ticker:       'ticker 50s linear infinite',
+        'live-dot':   'live-pulse 2s ease infinite',
+        'fade-in':    'fadeIn 0.2s ease',
+        'slide-up':   'slideUp 0.25s ease',
+        'shimmer':    'shimmer 1.5s infinite',
       },
       keyframes: {
         ticker: {
@@ -68,6 +71,18 @@ const config: Config = {
         'live-pulse': {
           '0%, 100%': { opacity: '1' },
           '50%':      { opacity: '0.35' },
+        },
+        fadeIn: {
+          '0%':   { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        slideUp: {
+          '0%':   { opacity: '0', transform: 'translateY(6px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        shimmer: {
+          '0%':   { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
         },
       },
     },

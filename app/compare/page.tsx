@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { mockModels, subcategoryConfig } from '@/lib/mock-data'
 import { InfoTooltip } from '@/components/InfoTooltip'
 import { getAllRecommendations, UseCaseRecommendation, UseCase } from '@/lib/decision'
@@ -103,10 +104,22 @@ function DecisionCard({ rec }: { rec: UseCaseRecommendation }) {
 }
 
 export default function ComparePage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [tab, setTab] = useState<Tab>('decision')
-  const [selectedIds, setSelectedIds] = useState<string[]>([])
   const maxCompare = 4
   const recommendations = getAllRecommendations()
+
+  const initialIds = searchParams.get('m')?.split(',').filter(id => mockModels.some(m => m.id === id)) ?? []
+  const [selectedIds, setSelectedIds] = useState<string[]>(initialIds)
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (selectedIds.length > 0) params.set('m', selectedIds.join(','))
+    else params.delete('m')
+    const newUrl = `${window.location.pathname}${selectedIds.length > 0 ? '?' + params.toString() : ''}`
+    router.replace(newUrl, { scroll: false })
+  }, [selectedIds])
 
   const toggleModel = (id: string) => {
     setSelectedIds(prev => {
@@ -135,9 +148,27 @@ export default function ComparePage() {
       <span className="mesh-orb left-[38%] top-[35%] h-48 w-48 bg-cyan-500/10"></span>
       <div className="flex-1 px-6 py-6 2xl:px-8">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-6">
-            <h1 className="text-3xl font-semibold tracking-[-0.05em]">Comparer &amp; Décider</h1>
-            <p className="mt-1 text-sm text-text-muted">Choisissez le meilleur modèle selon votre cas d&apos;usage, avec score transparent.</p>
+          <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
+            <div>
+              <h1 className="text-3xl font-semibold tracking-[-0.05em]">Comparer &amp; Décider</h1>
+              <p className="mt-1 text-sm text-text-muted">Choisissez le meilleur modèle selon votre cas d&apos;usage, avec score transparent.</p>
+            </div>
+            {selectedIds.length >= 2 && (
+              <button
+                onClick={() => {
+                  const url = `${window.location.origin}/compare?m=${selectedIds.join(',')}`
+                  navigator.clipboard?.writeText(url)
+                    .then(() => alert('Lien copié !'))
+                    .catch(() => alert(url))
+                }}
+                className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/20 transition-colors shrink-0"
+              >
+                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m9.632 4.684a3 3 0 10-2.684-5.368M8.684 13.342L15.316 9.658" />
+                </svg>
+                Partager la comparaison
+              </button>
+            )}
           </div>
 
           <div className="mb-6 flex gap-2">

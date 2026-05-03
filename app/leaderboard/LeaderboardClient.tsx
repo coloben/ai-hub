@@ -45,6 +45,30 @@ function formatPrice(price: number | null): string {
   return `$${price}`
 }
 
+function scoreBadgeClass(score: number | null, field: string): string {
+  if (score === null) return 'text-text-3'
+  if (field === 'arena_elo') {
+    if (score >= 1290) return 'badge-s'
+    if (score >= 1250) return 'badge-a'
+    if (score >= 1220) return 'badge-b'
+    return 'badge-c'
+  }
+  if (score >= 85) return 'badge-s'
+  if (score >= 70) return 'badge-a'
+  if (score >= 55) return 'badge-b'
+  return 'badge-c'
+}
+
+function RankDelta({ delta }: { delta: number }) {
+  if (delta === 0) return <span className="text-2xs text-text-3 tabular-nums">—</span>
+  const up = delta > 0
+  return (
+    <span className={`inline-flex items-center gap-0.5 text-2xs font-medium tabular-nums ${up ? 'text-success' : 'text-error'}`}>
+      {up ? '▲' : '▼'}{Math.abs(delta)}
+    </span>
+  )
+}
+
 export default function LeaderboardClient() {
   const [sortField, setSortField] = useState<SortField>('arena_elo')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
@@ -223,10 +247,13 @@ export default function LeaderboardClient() {
                     onClick={() => setExpandedModel(expandedModel === model.id ? null : model.id)}
                   >
                     <td className="py-3 px-2">
-                      <span className={`text-sm font-mono ${
-                        index < 3 ? 'text-primary font-medium' : 'text-text-muted'
+                      <span className={`text-sm font-mono tabular-nums ${
+                        index === 0 ? 'text-gold font-semibold' :
+                        index === 1 ? 'text-text-2 font-medium' :
+                        index === 2 ? 'text-warn font-medium' :
+                        'text-text-3'
                       }`}>
-                        {index + 1}
+                        {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : index + 1}
                       </span>
                     </td>
                     <td className="py-3 px-2">
@@ -240,40 +267,38 @@ export default function LeaderboardClient() {
                     <td className={`py-3 px-2 text-sm ${getProviderColor(model.provider)}`}>
                       {model.provider}
                     </td>
-                    <td className="py-3 px-2 font-mono text-sm tabular-nums">
-                      <span className={model.scores.arena_elo === maxScores.arena_elo ? 'border-b border-dotted border-primary' : ''}>
-                        {formatScore(model.scores.arena_elo)}
-                      </span>
-                      {model.rank_delta_7d !== 0 && (
-                        <span className={`ml-2 text-2xs ${model.rank_delta_7d > 0 ? 'text-success' : 'text-error'}`}>
-                          {model.rank_delta_7d > 0 ? '▲' : '▼'} {Math.abs(model.rank_delta_7d)}
+                    <td className="py-3 px-2">
+                      <div className="flex items-center gap-1.5">
+                        <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-2xs font-mono font-medium tabular-nums ${scoreBadgeClass(model.scores.arena_elo, 'arena_elo')}`}>
+                          {formatScore(model.scores.arena_elo)}
                         </span>
-                      )}
+                        <RankDelta delta={model.rank_delta_7d} />
+                      </div>
                     </td>
-                    <td className="py-3 px-2 font-mono text-sm tabular-nums text-text-muted">
-                      <span className={model.scores.mmlu === maxScores.mmlu ? 'text-text border-b border-dotted border-primary' : ''}>
+                    <td className="py-3 px-2">
+                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-2xs font-mono font-medium tabular-nums ${scoreBadgeClass(model.scores.mmlu, 'mmlu')}`}>
                         {formatScore(model.scores.mmlu)}
                       </span>
                     </td>
-                    <td className="py-3 px-2 font-mono text-sm tabular-nums text-text-muted">
-                      <span className={model.scores.humaneval === maxScores.humaneval ? 'text-text border-b border-dotted border-primary' : ''}>
+                    <td className="py-3 px-2">
+                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-2xs font-mono font-medium tabular-nums ${scoreBadgeClass(model.scores.humaneval, 'humaneval')}`}>
                         {formatScore(model.scores.humaneval)}
                       </span>
                     </td>
-                    <td className="py-3 px-2 font-mono text-sm tabular-nums text-text-muted">
-                      <span className={model.scores.math === maxScores.math ? 'text-text border-b border-dotted border-primary' : ''}>
+                    <td className="py-3 px-2">
+                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-2xs font-mono font-medium tabular-nums ${scoreBadgeClass(model.scores.math, 'math')}`}>
                         {formatScore(model.scores.math)}
                       </span>
                     </td>
-                    <td className="py-3 px-2 font-mono text-sm tabular-nums text-text-muted">
-                      <span className={model.scores.gpqa === maxScores.gpqa ? 'text-text border-b border-dotted border-primary' : ''}>
+                    <td className="py-3 px-2">
+                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-2xs font-mono font-medium tabular-nums ${scoreBadgeClass(model.scores.gpqa, 'gpqa')}`}>
                         {formatScore(model.scores.gpqa)}
                       </span>
                     </td>
-                    <td className="py-3 px-2 font-mono text-sm tabular-nums text-text-muted">
+                    <td className="py-3 px-2 font-mono text-sm tabular-nums text-text-2">
                       {formatScore(model.scores.speed_tps)}
                     </td>
-                    <td className="py-3 px-2 font-mono text-sm tabular-nums text-text-muted">
+                    <td className="py-3 px-2 font-mono text-sm tabular-nums text-text-2">
                       {formatPrice(model.scores.price_input)}
                     </td>
                     <td className="py-3 px-2 text-sm text-text-muted font-mono">

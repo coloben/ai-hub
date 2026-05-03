@@ -34,8 +34,13 @@ export function NavHeader() {
   const router = useRouter()
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    setMobileOpen(false)
+  }, [pathname])
 
   const results: Result[] = query.trim().length < 2 ? [] : [
     ...mockModels
@@ -82,78 +87,150 @@ export function NavHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-40 h-12 border-b border-border bg-black/95 backdrop-blur-xl">
-      <div className="mx-auto flex h-full max-w-[1440px] items-center px-6 gap-4">
-        <Link href="/" className="mr-4 text-sm font-bold tracking-tight text-text shrink-0">
-          AI Hub
-        </Link>
+    <>
+      <header className="sticky top-0 z-40 h-12 border-b border-border bg-bg/95 backdrop-blur-xl">
+        <div className="mx-auto flex h-full max-w-[1440px] items-center px-4 md:px-6 gap-3">
 
-        <nav className="flex items-center">
-          {navItems.map(item => {
-            const isActive = pathname === item.href
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex h-12 items-center border-b-2 px-3 text-xs font-medium transition-colors
-                  ${isActive
-                    ? 'border-text text-text'
-                    : 'border-transparent text-text-2 hover:text-text'
-                  }`}
-              >
-                {item.label}
-              </Link>
-            )
-          })}
-        </nav>
+          {/* Logo */}
+          <Link href="/" className="mr-3 text-sm font-bold tracking-tight text-text shrink-0">
+            AI Hub
+          </Link>
 
-        {/* Search */}
-        <div ref={containerRef} className="relative ml-auto">
-          <div className="flex items-center gap-2 rounded-md border border-border bg-surface-2 px-3 py-1.5 w-48 focus-within:border-text-3 transition-colors">
-            <svg className="h-3 w-3 text-text-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
-            </svg>
-            <input
-              ref={inputRef}
-              value={query}
-              onChange={e => { setQuery(e.target.value); setOpen(true) }}
-              onFocus={() => setOpen(true)}
-              placeholder="Rechercher…"
-              className="flex-1 bg-transparent text-xs text-text placeholder:text-text-3 outline-none min-w-0"
-            />
-            <kbd className="hidden sm:inline-flex text-2xs text-text-3 font-mono bg-surface px-1 rounded">⌘K</kbd>
+          {/* Nav desktop */}
+          <nav className="hidden md:flex items-center">
+            {navItems.map(item => {
+              const isActive = pathname === item.href
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex h-12 items-center border-b-2 px-3 text-xs font-medium transition-colors
+                    ${isActive
+                      ? 'border-primary text-text'
+                      : 'border-transparent text-text-2 hover:text-text'
+                    }`}
+                >
+                  {item.label}
+                </Link>
+              )
+            })}
+          </nav>
+
+          {/* Search desktop */}
+          <div ref={containerRef} className="relative ml-auto hidden sm:block">
+            <div className="flex items-center gap-2 rounded-md border border-border bg-surface-2 px-3 py-1.5 w-44 focus-within:border-primary/40 transition-colors">
+              <svg className="h-3 w-3 text-text-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+              </svg>
+              <input
+                ref={inputRef}
+                value={query}
+                onChange={e => { setQuery(e.target.value); setOpen(true) }}
+                onFocus={() => setOpen(true)}
+                placeholder="Rechercher…"
+                className="flex-1 bg-transparent text-xs text-text placeholder:text-text-3 outline-none min-w-0"
+              />
+              <kbd className="hidden lg:inline-flex text-2xs text-text-3 font-mono bg-surface px-1 rounded">⌘K</kbd>
+            </div>
+            {open && results.length > 0 && (
+              <div className="absolute right-0 top-full mt-1 w-72 rounded-lg border border-border bg-surface shadow-2xl overflow-hidden z-50 animate-slide-up">
+                {results.map((r, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleSelect(r)}
+                    className="flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-surface-2 transition-colors"
+                  >
+                    <span className={`text-2xs px-1.5 py-0.5 rounded font-medium shrink-0 ${
+                      r.type === 'model' ? 'bg-primary/10 text-primary' :
+                      r.type === 'news'  ? 'bg-amber/10 text-amber' :
+                      'bg-surface-3 text-text-2'
+                    }`}>
+                      {r.type === 'model' ? 'modèle' : r.type === 'news' ? 'actu' : 'page'}
+                    </span>
+                    <div className="min-w-0">
+                      <div className="text-xs text-text truncate">{r.label}</div>
+                      <div className="text-2xs text-text-2 truncate">{r.sub}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
-          {open && results.length > 0 && (
-            <div className="absolute right-0 top-full mt-1 w-72 rounded-lg border border-border bg-surface shadow-xl overflow-hidden z-50">
-              {results.map((r, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleSelect(r)}
-                  className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-surface-2 transition-colors"
-                >
-                  <span className={`text-2xs px-1.5 py-0.5 rounded shrink-0 ${
-                    r.type === 'model' ? 'bg-primary/10 text-primary' :
-                    r.type === 'news'  ? 'bg-amber/10 text-amber' :
-                    'bg-surface-3 text-text-2'
-                  }`}>
-                    {r.type === 'model' ? 'modèle' : r.type === 'news' ? 'actu' : 'page'}
-                  </span>
-                  <div className="min-w-0">
-                    <div className="text-xs text-text truncate">{r.label}</div>
-                    <div className="text-2xs text-text-2 truncate">{r.sub}</div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+          {/* Live indicator */}
+          <div className="hidden sm:flex items-center gap-2 shrink-0">
+            <span className="h-1.5 w-1.5 rounded-full bg-success live-pulse" />
+            <span className="text-xs text-text-2">Live</span>
+          </div>
 
-        <div className="flex items-center gap-2 shrink-0">
-          <span className="h-1.5 w-1.5 rounded-full bg-success live-pulse" />
-          <span className="text-xs text-text-2 tracking-wide">Live</span>
+          {/* Hamburger mobile */}
+          <button
+            onClick={() => setMobileOpen(v => !v)}
+            className="ml-auto md:hidden flex flex-col justify-center gap-1.5 p-2 text-text-2 hover:text-text transition-colors"
+            aria-label="Menu"
+          >
+            <span className={`block h-0.5 w-5 bg-current transition-transform duration-200 ${mobileOpen ? 'translate-y-2 rotate-45' : ''}`} />
+            <span className={`block h-0.5 w-5 bg-current transition-opacity duration-200 ${mobileOpen ? 'opacity-0' : ''}`} />
+            <span className={`block h-0.5 w-5 bg-current transition-transform duration-200 ${mobileOpen ? '-translate-y-2 -rotate-45' : ''}`} />
+          </button>
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* Mobile menu */}
+      {mobileOpen && (
+        <div className="fixed inset-0 top-12 z-30 bg-bg/98 backdrop-blur-xl md:hidden animate-fade-in">
+          <nav className="flex flex-col px-4 pt-4 pb-8 gap-1">
+            {navItems.map(item => {
+              const isActive = pathname === item.href
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                    isActive ? 'bg-primary/10 text-text' : 'text-text-2 hover:bg-surface-2 hover:text-text'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              )
+            })}
+            <div className="mt-4 px-4">
+              <div className="flex items-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-2.5">
+                <svg className="h-3.5 w-3.5 text-text-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+                </svg>
+                <input
+                  value={query}
+                  onChange={e => setQuery(e.target.value)}
+                  placeholder="Rechercher modèles, actus…"
+                  className="flex-1 bg-transparent text-sm text-text placeholder:text-text-3 outline-none"
+                />
+              </div>
+              {query.trim().length >= 2 && results.length > 0 && (
+                <div className="mt-2 rounded-lg border border-border bg-surface overflow-hidden">
+                  {results.map((r, i) => (
+                    <button key={i} onClick={() => handleSelect(r)} className="flex w-full items-center gap-3 px-3 py-3 text-left hover:bg-surface-2 transition-colors">
+                      <span className={`text-2xs px-1.5 py-0.5 rounded font-medium shrink-0 ${
+                        r.type === 'model' ? 'bg-primary/10 text-primary' :
+                        r.type === 'news'  ? 'bg-amber/10 text-amber' :
+                        'bg-surface-3 text-text-2'
+                      }`}>{r.type === 'model' ? 'modèle' : r.type === 'news' ? 'actu' : 'page'}</span>
+                      <div className="min-w-0">
+                        <div className="text-sm text-text truncate">{r.label}</div>
+                        <div className="text-xs text-text-2 truncate">{r.sub}</div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="mt-6 px-4 flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-success live-pulse" />
+              <span className="text-xs text-text-2">Live — données en temps réel</span>
+            </div>
+          </nav>
+        </div>
+      )}
+    </>
   )
 }

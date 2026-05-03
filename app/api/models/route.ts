@@ -4,6 +4,16 @@ import { ModelsResponse } from '@/lib/types'
 
 export const revalidate = 300
 
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: CORS })
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   
@@ -41,5 +51,5 @@ export async function GET(request: NextRequest) {
     last_updated: new Date().toISOString(),
   }
   
-  return NextResponse.json(response)
+  return NextResponse.json(response, { headers: CORS })
 }
