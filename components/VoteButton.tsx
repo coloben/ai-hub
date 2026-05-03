@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
@@ -18,6 +18,10 @@ export function VoteButton({ targetId, targetType, initialScore, initialVote = 0
   const [score, setScore] = useState(initialScore)
   const [vote, setVote] = useState<1 | -1 | 0>(initialVote)
   const [loading, setLoading] = useState(false)
+  const [popUp, setPopUp] = useState(false)
+  const [floatKey, setFloatKey] = useState(0)
+  const [showFloat, setShowFloat] = useState(false)
+  const floatTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   async function handleVote(value: 1 | -1) {
     const { data: { user } } = await supabase.auth.getUser()
@@ -29,6 +33,16 @@ export function VoteButton({ targetId, targetType, initialScore, initialVote = 0
     const delta = newVote - prev
     setVote(newVote as 1 | -1 | 0)
     setScore(s => s + delta)
+
+    if (value === 1 && delta > 0) {
+      setPopUp(false)
+      requestAnimationFrame(() => setPopUp(true))
+      setTimeout(() => setPopUp(false), 400)
+      setFloatKey(k => k + 1)
+      setShowFloat(true)
+      if (floatTimer.current) clearTimeout(floatTimer.current)
+      floatTimer.current = setTimeout(() => setShowFloat(false), 900)
+    }
 
     const res = await fetch('/api/votes', {
       method: 'POST',
@@ -47,14 +61,30 @@ export function VoteButton({ targetId, targetType, initialScore, initialVote = 0
     : 'flex items-center justify-center rounded-md p-1 transition-colors disabled:opacity-50'
 
   return (
-    <div className="flex flex-col items-center gap-0.5">
+    <div className="relative flex flex-col items-center gap-0.5">
+      {/* Karma float +1 */}
+      {showFloat && (
+        <span
+          key={floatKey}
+          className="karma-float pointer-events-none absolute -top-3 left-1/2 -translate-x-1/2 text-2xs font-bold text-primary select-none"
+        >
+          +1
+        </span>
+      )}
+
       <button
         onClick={() => handleVote(1)}
         disabled={loading}
         className={`${btnBase} ${vote === 1 ? 'text-primary' : 'text-text-3 hover:text-primary'}`}
         aria-label="Upvote"
       >
-        <svg className={size === 'sm' ? 'h-3 w-3' : 'h-4 w-4'} viewBox="0 0 24 24" fill={vote === 1 ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={2.5}>
+        <svg
+          className={`${size === 'sm' ? 'h-3 w-3' : 'h-4 w-4'} ${popUp ? 'vote-pop' : ''}`}
+          viewBox="0 0 24 24"
+          fill={vote === 1 ? 'currentColor' : 'none'}
+          stroke="currentColor"
+          strokeWidth={2.5}
+        >
           <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
         </svg>
       </button>

@@ -91,12 +91,13 @@ export function NavHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 h-12 border-b border-border bg-bg/95 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 h-12 border-b border-white/[0.07] bg-[#07070f]/90 backdrop-blur-xl">
         <div className="mx-auto flex h-full max-w-[1440px] items-center px-4 md:px-6 gap-3">
 
           {/* Logo */}
-          <Link href="/" className="mr-3 text-sm font-bold tracking-tight text-text shrink-0">
-            AI Hub
+          <Link href="/" className="mr-3 shrink-0 text-sm font-bold tracking-tight">
+            <span className="text-gradient">AI</span>
+            <span className="text-text"> Hub</span>
           </Link>
 
           {/* Nav desktop */}
@@ -107,13 +108,13 @@ export function NavHeader() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex h-12 items-center border-b-2 px-3 text-xs font-medium transition-colors
-                    ${isActive
-                      ? 'border-primary text-text'
-                      : 'border-transparent text-text-2 hover:text-text'
-                    }`}
+                  className={`relative flex h-12 items-center px-3 text-xs font-medium transition-colors duration-150
+                    ${isActive ? 'text-text' : 'text-text-2 hover:text-text'}`}
                 >
                   {item.label}
+                  {isActive && (
+                    <span className="absolute bottom-0 left-2 right-2 h-[2px] rounded-full bg-gradient-to-r from-primary to-violet" />
+                  )}
                 </Link>
               )
             })}
@@ -121,7 +122,7 @@ export function NavHeader() {
 
           {/* Search desktop */}
           <div ref={containerRef} className="relative ml-auto hidden sm:block">
-            <div className="flex items-center gap-2 rounded-md border border-border bg-surface-2 px-3 py-1.5 w-44 focus-within:border-primary/40 transition-colors">
+            <div className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 w-44 focus-within:border-primary/30 focus-within:bg-white/[0.06] transition-all duration-150">
               <svg className="h-3 w-3 text-text-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
               </svg>
@@ -136,12 +137,12 @@ export function NavHeader() {
               <kbd className="hidden lg:inline-flex text-2xs text-text-3 font-mono bg-surface px-1 rounded">⌘K</kbd>
             </div>
             {open && results.length > 0 && (
-              <div className="absolute right-0 top-full mt-1 w-72 rounded-lg border border-border bg-surface shadow-2xl overflow-hidden z-50 animate-slide-up">
+              <div className="absolute right-0 top-full mt-1.5 w-72 rounded-xl border border-white/[0.08] bg-[#0d0d1a]/95 backdrop-blur-xl shadow-2xl overflow-hidden z-50 animate-slide-up">
                 {results.map((r, i) => (
                   <button
                     key={i}
                     onClick={() => handleSelect(r)}
-                    className="flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-surface-2 transition-colors"
+                    className="flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-white/[0.05] transition-colors duration-100"
                   >
                     <span className={`text-2xs px-1.5 py-0.5 rounded font-medium shrink-0 ${
                       r.type === 'model' ? 'bg-primary/10 text-primary' :
@@ -191,7 +192,7 @@ export function NavHeader() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="fixed inset-0 top-12 z-30 bg-bg/98 backdrop-blur-xl md:hidden animate-fade-in">
+        <div className="fixed inset-0 top-12 z-30 bg-[#07070f]/97 backdrop-blur-xl md:hidden animate-fade-in">
           <nav className="flex flex-col px-4 pt-4 pb-8 gap-1">
             {navItems.map(item => {
               const isActive = pathname === item.href
@@ -199,8 +200,10 @@ export function NavHeader() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                    isActive ? 'bg-primary/10 text-text' : 'text-text-2 hover:bg-surface-2 hover:text-text'
+                  className={`flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-colors duration-150 ${
+                    isActive
+                      ? 'bg-primary/10 text-text border-l-2 border-primary'
+                      : 'text-text-2 hover:bg-white/[0.05] hover:text-text border-l-2 border-transparent'
                   }`}
                 >
                   {item.label}
@@ -208,7 +211,7 @@ export function NavHeader() {
               )
             })}
             <div className="mt-4 px-4">
-              <div className="flex items-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-2.5">
+              <div className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2.5">
                 <svg className="h-3.5 w-3.5 text-text-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
                 </svg>
