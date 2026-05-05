@@ -62,7 +62,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="fr">
-      <body className="antialiased bg-bg text-text min-h-screen">
+      <body className="antialiased bg-bg text-text min-h-screen" data-version="2">
         <NavHeader />
 
         {children}
