@@ -2,14 +2,8 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { mockModels } from '@/lib/mock-data'
-
-const LEVEL_BADGE: Record<string, { label: string; color: string }> = {
-  observateur:  { label: 'Observateur',  color: 'text-text-3 bg-surface-3' },
-  contributeur: { label: 'Contributeur', color: 'text-primary bg-primary/10' },
-  analyste:     { label: 'Analyste',     color: 'text-success bg-success/10' },
-  expert:       { label: 'Expert',       color: 'text-warn bg-warn/10' },
-  architecte:   { label: 'Architecte',   color: 'text-[#fbbf24] bg-[#fbbf24]/10' },
-}
+import { LEVEL_CONFIG } from '@/lib/constants'
+import Image from 'next/image'
 
 export async function generateMetadata({ params }: { params: { username: string } }): Promise<Metadata> {
   return {
@@ -38,7 +32,7 @@ export default async function ProfilePage({ params }: { params: { username: stri
     .limit(10)
 
   const followedModels = mockModels.filter(m => (profile.followed_models ?? []).includes(m.id))
-  const badge = LEVEL_BADGE[profile.level] ?? LEVEL_BADGE['observateur']
+  const level = LEVEL_CONFIG[profile.level] ?? LEVEL_CONFIG['observateur']
   const joined = new Date(profile.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
 
   return (
@@ -46,14 +40,20 @@ export default async function ProfilePage({ params }: { params: { username: stri
 
       {/* Header profil */}
       <div className="mb-8 flex items-start gap-5">
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-primary/20 text-2xl font-bold text-primary">
-          {profile.username.slice(0, 2).toUpperCase()}
+        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl ring-2 ring-border">
+          {profile.avatar_url ? (
+            <Image src={profile.avatar_url} alt={profile.username} fill className="object-cover" />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-primary/20 text-2xl font-bold text-primary">
+              {profile.username.slice(0, 2).toUpperCase()}
+            </div>
+          )}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-xl font-bold text-text">@{profile.username}</h1>
-            <span className={`rounded-full px-2.5 py-0.5 text-2xs font-semibold ${badge.color}`}>
-              {badge.label}
+            <span className={`rounded-full px-2.5 py-0.5 text-2xs font-semibold ${level.color} ${level.bg}`}>
+              {level.label}
             </span>
           </div>
           <p className="mt-1 text-sm text-text-3">Membre depuis {joined}</p>

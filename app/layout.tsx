@@ -68,15 +68,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {children}
 
         {/* ── Ticker live ── */}
-        <footer className="ticker-bar fixed bottom-0 left-0 right-0 z-50 flex h-7 items-center overflow-hidden border-t border-border bg-bg">
-          <span className="flex h-full shrink-0 items-center border-r border-border px-3 text-2xs font-semibold uppercase tracking-widest text-text-3">
+        <footer className="ticker-bar fixed bottom-0 left-0 right-0 z-50 flex h-7 items-center overflow-hidden border-t border-divider bg-bg">
+          <span className="flex h-full shrink-0 items-center border-r border-divider px-3 text-2xs font-semibold uppercase tracking-widest text-text-3">
             Live
           </span>
           <div className="ticker-container flex-1">
             <div className="ticker-content gap-10 px-6 text-xs text-text-3">
               {doubled.map((item, i) => (
                 <span key={i} className="inline-flex items-center gap-2 whitespace-nowrap">
-                  <span className="text-border-2">·</span>
+                  <span className="text-text-3">·</span>
                   <strong className="font-medium text-text-2">{item.source}</strong>
                   <span>— {item.title}</span>
                 </span>

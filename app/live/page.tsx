@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { mockNews } from '@/lib/mock-data'
 import { NewsItem } from '@/lib/types'
-import { SignalCard } from '@/components/SignalCard'
+import { NewsCard } from '@/components/NewsCard'
 import { InfoTooltip } from '@/components/InfoTooltip'
 
 type TimeFilter = '1h' | '24h' | '7d' | 'all'
@@ -17,7 +17,7 @@ const timeFilters: { id: TimeFilter; label: string; icon: string }[] = [
 ]
 
 const categoryFilters: { id: CategoryFilter; label: string; color: string }[] = [
-  { id: 'all', label: 'Tous', color: 'bg-white/10' },
+  { id: 'all', label: 'Tous', color: 'bg-surface-3' },
   { id: 'release', label: 'Releases', color: 'bg-primary/20' },
   { id: 'research', label: 'Recherche', color: 'bg-cyan-500/20' },
   { id: 'benchmark', label: 'Benchmarks', color: 'bg-success/20' },
@@ -95,7 +95,7 @@ export default function LivePage() {
             <h1 className="text-3xl font-semibold tracking-tight text-text mb-2">
               Signaux IA en temps réel
             </h1>
-            <p className="text-text-muted max-w-2xl">
+            <p className="text-text-2 max-w-2xl">
               Surveillance continue des sources officielles, benchmarks et communautés. 
               Mis à jour toutes les 15 minutes pour les sources critiques.
             </p>
@@ -109,8 +109,8 @@ export default function LivePage() {
               { label: 'Signaux 24h', value: filteredNews.length.toString(), color: 'text-amber' },
               { label: 'Confiance moyenne', value: '94%', color: 'text-cyan-400' },
             ].map((stat, i) => (
-              <div key={i} className="rounded-2xl border border-white/5 bg-white/[0.02] p-4">
-                <div className="text-2xs uppercase tracking-wider text-text-faint mb-1">{stat.label}</div>
+              <div key={i} className="rounded-2xl border border-border bg-surface p-4">
+                <div className="text-2xs uppercase tracking-wider text-text-3 mb-1">{stat.label}</div>
                 <div className={`text-2xl font-semibold ${stat.color}`}>{stat.value}</div>
               </div>
             ))}
@@ -120,7 +120,7 @@ export default function LivePage() {
           <div className="mb-6 space-y-3">
             {/* Time filters */}
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs text-text-faint mr-2">Temps:</span>
+              <span className="text-xs text-text-3 mr-2">Temps:</span>
               {timeFilters.map(f => (
                 <button
                   key={f.id}
@@ -128,7 +128,7 @@ export default function LivePage() {
                   className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
                     timeFilter === f.id
                       ? 'bg-primary/15 text-primary border border-primary/20'
-                      : 'bg-white/5 text-text-muted hover:bg-white/10 hover:text-text border border-transparent'
+                      : 'bg-surface-2 text-text-2 hover:bg-surface-3 hover:text-text border border-transparent'
                   }`}
                 >
                   <span>{f.icon}</span>
@@ -139,15 +139,15 @@ export default function LivePage() {
 
             {/* Category filters */}
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs text-text-faint mr-2">Catégorie:</span>
+              <span className="text-xs text-text-3 mr-2">Catégorie:</span>
               {categoryFilters.map(f => (
                 <button
                   key={f.id}
                   onClick={() => setCategoryFilter(f.id)}
                   className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
                     categoryFilter === f.id
-                      ? `${f.color} text-text border border-white/20`
-                      : 'bg-white/5 text-text-muted hover:bg-white/10 hover:text-text border border-transparent'
+                      ? `${f.color} text-text border border-border-strong`
+                      : 'bg-surface-2 text-text-2 hover:bg-surface-3 hover:text-text border border-transparent'
                   }`}
                 >
                   {f.label}
@@ -157,7 +157,7 @@ export default function LivePage() {
 
             {/* Sort */}
             <div className="flex items-center gap-2">
-              <span className="text-xs text-text-faint">Trier par:</span>
+              <span className="text-xs text-text-3">Trier par:</span>
               {[
                 { id: 'time', label: 'Date' },
                 { id: 'impact', label: 'Impact' },
@@ -167,7 +167,7 @@ export default function LivePage() {
                   key={s.id}
                   onClick={() => setSortBy(s.id as any)}
                   className={`text-xs transition-colors ${
-                    sortBy === s.id ? 'text-primary font-medium' : 'text-text-muted hover:text-text'
+                    sortBy === s.id ? 'text-primary font-medium' : 'text-text-2 hover:text-text'
                   }`}
                 >
                   {s.label}
@@ -186,7 +186,7 @@ export default function LivePage() {
               </div>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {breakingNews.map(news => (
-                  <SignalCard key={news.id} news={news} featured />
+                  <NewsCard key={news.id} news={news} variant="featured" />
                 ))}
               </div>
             </div>
@@ -195,28 +195,28 @@ export default function LivePage() {
           {/* Main Feed */}
           <div>
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-sm font-medium uppercase tracking-wider text-text-muted">
+              <h2 className="text-sm font-medium uppercase tracking-wider text-text-2">
                 Tous les signaux ({regularNews.length})
               </h2>
-              <span className="text-2xs text-text-faint">
+              <span className="text-2xs text-text-3">
                 Mise à jour automatique
               </span>
             </div>
             
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {regularNews.map(news => (
-                <SignalCard key={news.id} news={news} />
+                <NewsCard key={news.id} news={news} />
               ))}
             </div>
 
             {regularNews.length === 0 && (
               <div className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="mb-4 rounded-full bg-white/5 p-4">
-                  <svg className="h-8 w-8 text-text-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="mb-4 rounded-full bg-surface-2 p-4">
+                  <svg className="h-8 w-8 text-text-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                   </svg>
                 </div>
-                <p className="text-text-muted">Aucun signal pour ces filtres</p>
+                <p className="text-text-2">Aucun signal pour ces filtres</p>
                 <button 
                   onClick={() => { setTimeFilter('all'); setCategoryFilter('all') }}
                   className="mt-2 text-xs text-primary hover:underline"

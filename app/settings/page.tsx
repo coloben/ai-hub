@@ -6,25 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { mockModels } from '@/lib/mock-data'
-
-const INTERESTS = [
-  { id: 'code',      label: 'Code',          icon: '⌨️' },
-  { id: 'research',  label: 'Recherche',     icon: '🔬' },
-  { id: 'reasoning', label: 'Raisonnement',  icon: '🧠' },
-  { id: 'vision',    label: 'Vision',        icon: '👁️' },
-  { id: 'industry',  label: 'Industrie',     icon: '🏢' },
-  { id: 'pricing',   label: 'Tarifs',        icon: '💰' },
-  { id: 'audio',     label: 'Audio',         icon: '🎤' },
-  { id: 'agent',     label: 'Agents',        icon: '🤖' },
-]
-
-const LEVEL_CONFIG: Record<string, { label: string; min: number; color: string }> = {
-  observateur:  { label: 'Observateur',  min: 0,    color: 'text-text-3' },
-  contributeur: { label: 'Contributeur', min: 50,   color: 'text-primary' },
-  analyste:     { label: 'Analyste',     min: 200,  color: 'text-success' },
-  expert:       { label: 'Expert',       min: 500,  color: 'text-warn' },
-  architecte:   { label: 'Architecte',  min: 1000, color: 'text-[#fbbf24]' },
-}
+import { INTERESTS, LEVEL_CONFIG } from '@/lib/constants'
 
 interface Profile {
   username: string
@@ -258,7 +240,7 @@ export default function SettingsPage() {
                 className={`flex flex-col items-center gap-1.5 rounded-xl border p-3 text-xs font-medium transition-all ${
                   interests.includes(interest.id)
                     ? 'border-primary/50 bg-primary/10 text-text'
-                    : 'border-border bg-surface-2 text-text-3 hover:border-border-2'
+                    : 'border-border bg-surface-2 text-text-3 hover:border-border-hover'
                 }`}
               >
                 <span className="text-xl">{interest.icon}</span>
@@ -286,7 +268,7 @@ export default function SettingsPage() {
                   className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-xs transition-all ${
                     followedModels.includes(model.id)
                       ? 'border-primary/40 bg-primary/10 text-text'
-                      : 'border-border bg-surface-2 text-text-3 hover:border-border-2'
+                      : 'border-border bg-surface-2 text-text-3 hover:border-border-hover'
                   }`}
                 >
                   <span className={`h-2 w-2 shrink-0 rounded-full ${followedModels.includes(model.id) ? 'bg-primary' : 'bg-border'}`} />

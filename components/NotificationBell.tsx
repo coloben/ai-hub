@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { timeAgo } from '@/lib/constants'
 
 interface Notification {
   id: string
@@ -12,15 +13,6 @@ interface Notification {
   url: string | null
   is_read: boolean
   created_at: string
-}
-
-function timeAgo(date: string): string {
-  const m = Math.floor((Date.now() - new Date(date).getTime()) / 60000)
-  if (m < 2) return 'à l\'instant'
-  if (m < 60) return `${m}m`
-  const h = Math.floor(m / 60)
-  if (h < 24) return `${h}h`
-  return `${Math.floor(h / 24)}j`
 }
 
 const TYPE_ICON: Record<string, string> = {
@@ -109,7 +101,7 @@ export function NotificationBell() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(o => !o)}
-        className="relative flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-surface text-text-2 transition-colors hover:border-border-2 hover:text-text"
+        className="relative flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-surface text-text-2 transition-colors hover:border-border-hover hover:text-text"
         aria-label="Notifications"
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>

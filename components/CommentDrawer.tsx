@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { VoteButton } from '@/components/VoteButton'
+import { LEVEL_CONFIG, timeAgo } from '@/lib/constants'
 
 interface Comment {
   id: string
@@ -19,23 +20,6 @@ interface Props {
   postTitle: string
   open: boolean
   onClose: () => void
-}
-
-function timeAgo(date: string): string {
-  const m = Math.floor((Date.now() - new Date(date).getTime()) / 60000)
-  if (m < 2) return 'à l\'instant'
-  if (m < 60) return `${m}m`
-  const h = Math.floor(m / 60)
-  if (h < 24) return `${h}h`
-  return `${Math.floor(h / 24)}j`
-}
-
-const LEVEL_COLOR: Record<string, string> = {
-  observateur:  'text-text-3',
-  contributeur: 'text-primary',
-  analyste:     'text-success',
-  expert:       'text-warn',
-  architecte:   'text-[#fbbf24]',
 }
 
 export function CommentDrawer({ postId, postTitle, open, onClose }: Props) {
@@ -121,14 +105,14 @@ export function CommentDrawer({ postId, postTitle, open, onClose }: Props) {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+        className="fixed inset-0 z-50 bg-bg/80"
         onClick={onClose}
       />
 
       {/* Drawer */}
       <div
         ref={drawerRef}
-        className="fixed bottom-7 right-0 top-12 z-50 flex w-full max-w-md flex-col border-l border-border bg-bg shadow-2xl animate-slide-in-right"
+        className="fixed bottom-7 right-0 top-12 z-50 flex w-full max-w-md flex-col border-l border-border bg-bg shadow-2xl animate-slide-right"
       >
         {/* Header */}
         <div className="flex shrink-0 items-center gap-3 border-b border-border px-5 py-4">
@@ -238,7 +222,7 @@ function CommentItem({
   onReply: (c: Comment) => void
 }) {
   const [expanded, setExpanded] = useState(true)
-  const levelColor = LEVEL_COLOR[comment.author?.level ?? 'observateur'] ?? 'text-text-3'
+  const levelColor = LEVEL_CONFIG[comment.author?.level ?? 'observateur']?.color ?? 'text-text-3'
 
   return (
     <div className="mb-4">
@@ -289,7 +273,7 @@ function CommentItem({
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <span className={`text-2xs font-semibold ${LEVEL_COLOR[r.author?.level ?? 'observateur']}`}>
+                  <span className={`text-2xs font-semibold ${LEVEL_CONFIG[r.author?.level ?? 'observateur']?.color ?? 'text-text-3'}`}>
                     @{r.author?.username ?? 'anonyme'}
                   </span>
                   <span className="text-2xs text-text-3">{timeAgo(r.created_at)}</span>

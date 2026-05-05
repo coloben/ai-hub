@@ -4,18 +4,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { mockModels } from '@/lib/mock-data'
+import { INTERESTS, AVATAR_COLORS } from '@/lib/constants'
 import Image from 'next/image'
-
-const INTERESTS = [
-  { id: 'code',      label: 'Code & Dev',    icon: '⌨️' },
-  { id: 'research',  label: 'Recherche',     icon: '🔬' },
-  { id: 'industry',  label: 'Industrie',     icon: '🏢' },
-  { id: 'pricing',   label: 'Tarifs',        icon: '💰' },
-  { id: 'reasoning', label: 'Raisonnement',  icon: '🧠' },
-  { id: 'vision',    label: 'Vision',        icon: '👁️' },
-  { id: 'agent',     label: 'Agents',        icon: '🤖' },
-  { id: 'audio',     label: 'Audio',         icon: '🎤' },
-]
 
 const TOP_MODELS = mockModels
   .filter(m => m.scores.arena_elo && m.scores.arena_elo > 1220)
@@ -23,12 +13,6 @@ const TOP_MODELS = mockModels
   .slice(0, 12)
 
 const STEPS = ['Avatar', 'Pseudo', 'Intérêts', 'Modèles']
-
-// Couleurs d'avatar générés auto
-const AVATAR_COLORS = [
-  ['#2563eb', '#1e40af'], ['#7c3aed', '#5b21b6'], ['#059669', '#047857'],
-  ['#dc2626', '#b91c1c'], ['#d97706', '#b45309'], ['#0891b2', '#0e7490'],
-]
 
 export default function OnboardingClient() {
   const router = useRouter()
@@ -204,7 +188,7 @@ export default function OnboardingClient() {
               {oauthAvatarUrl && (
                 <button
                   onClick={() => setAvatarMode('oauth')}
-                  className={`rounded-xl border p-3 text-center text-xs font-medium transition-all ${avatarMode === 'oauth' ? 'border-primary/50 bg-primary/10 text-text' : 'border-border bg-surface text-text-3 hover:border-border-2'}`}
+                  className={`rounded-xl border p-3 text-center text-xs font-medium transition-all ${avatarMode === 'oauth' ? 'border-primary/50 bg-primary/10 text-text' : 'border-border bg-surface text-text-3 hover:border-border-hover'}`}
                 >
                   <p className="text-xl mb-1">🔗</p>
                   Photo OAuth
@@ -212,14 +196,14 @@ export default function OnboardingClient() {
               )}
               <button
                 onClick={() => fileRef.current?.click()}
-                className={`rounded-xl border p-3 text-center text-xs font-medium transition-all ${avatarMode === 'upload' ? 'border-primary/50 bg-primary/10 text-text' : 'border-border bg-surface text-text-3 hover:border-border-2'}`}
+                className={`rounded-xl border p-3 text-center text-xs font-medium transition-all ${avatarMode === 'upload' ? 'border-primary/50 bg-primary/10 text-text' : 'border-border bg-surface text-text-3 hover:border-border-hover'}`}
               >
                 <p className="text-xl mb-1">📸</p>
                 Importer
               </button>
               <button
                 onClick={() => setAvatarMode('generated')}
-                className={`rounded-xl border p-3 text-center text-xs font-medium transition-all ${avatarMode === 'generated' ? 'border-primary/50 bg-primary/10 text-text' : 'border-border bg-surface text-text-3 hover:border-border-2'}`}
+                className={`rounded-xl border p-3 text-center text-xs font-medium transition-all ${avatarMode === 'generated' ? 'border-primary/50 bg-primary/10 text-text' : 'border-border bg-surface text-text-3 hover:border-border-hover'}`}
               >
                 <p className="text-xl mb-1">🎨</p>
                 Généré
@@ -333,8 +317,8 @@ export default function OnboardingClient() {
                     onClick={() => setInterests(p => p.includes(interest.id) ? p.filter(i => i !== interest.id) : [...p, interest.id])}
                     className={`flex flex-col items-center gap-2 rounded-2xl border px-3 py-4 text-center transition-all ${
                       active
-                        ? 'border-primary/60 bg-primary/10 text-text shadow-[0_0_0_1px_rgba(37,99,235,0.3)]'
-                        : 'border-border bg-surface text-text-2 hover:border-border-2 hover:bg-surface-2'
+                        ? 'border-primary/60 bg-primary/10 text-text'
+                        : 'border-border bg-surface text-text-2 hover:border-border-hover hover:bg-surface-2'
                     }`}
                   >
                     <span className="text-2xl">{interest.icon}</span>
@@ -372,8 +356,8 @@ export default function OnboardingClient() {
                     onClick={() => setFollowedModels(p => p.includes(model.id) ? p.filter(i => i !== model.id) : [...p, model.id])}
                     className={`flex items-center justify-between rounded-2xl border px-3.5 py-3 text-left transition-all ${
                       active
-                        ? 'border-primary/50 bg-primary/10 shadow-[0_0_0_1px_rgba(37,99,235,0.2)]'
-                        : 'border-border bg-surface hover:border-border-2'
+                        ? 'border-primary/50 bg-primary/10'
+                        : 'border-border bg-surface hover:border-border-hover'
                     }`}
                   >
                     <div className="min-w-0">

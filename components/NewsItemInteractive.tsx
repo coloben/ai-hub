@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { VoteButton } from '@/components/VoteButton'
 import { CommentDrawer } from '@/components/CommentDrawer'
+import { CATEGORY_CONFIG, timeAgo } from '@/lib/constants'
 
 interface NewsItemProps {
   id: string
@@ -19,20 +20,6 @@ interface NewsItemProps {
   communityScore?: number
   communityPostId?: string
   commentCount?: number
-}
-
-function timeAgo(date: string): string {
-  const m = Math.floor((Date.now() - new Date(date).getTime()) / 60000)
-  if (m < 2) return 'à l\'instant'
-  if (m < 60) return `${m}m`
-  const h = Math.floor(m / 60)
-  if (h < 24) return `${h}h`
-  return `${Math.floor(h / 24)}j`
-}
-
-const categoryLabel: Record<string, string> = {
-  release: 'Release', benchmark: 'Benchmark', research: 'Recherche',
-  industry: 'Industrie', pricing: 'Tarifs', security: 'Sécurité', community: 'Communauté',
 }
 
 const avatarMap: Record<string, string> = {
@@ -70,7 +57,7 @@ export function NewsItemInteractive(props: NewsItemProps) {
           </div>
           <span className="shrink-0 text-xs text-text-3">{timeAgo(props.published_at)}</span>
           <span className="shrink-0 rounded border border-border px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-wider text-text-3">
-            {categoryLabel[props.category] ?? props.category}
+            {(CATEGORY_CONFIG as Record<string, {icon:string}>)[props.category]?.icon ?? ''} {props.category}
           </span>
           {props.is_breaking && (
             <span className="shrink-0 text-2xs font-bold text-error">● Breaking</span>

@@ -150,7 +150,7 @@ export default function LeaderboardClient() {
           <h1 className="text-xl font-semibold">Classement des modèles</h1>
           <button
             onClick={exportCSV}
-            className="px-3 py-1.5 bg-surface-2 hover:bg-surface-offset rounded text-sm text-text-muted hover:text-text transition-colors"
+            className="px-3 py-1.5 bg-surface-2 hover:bg-surface-3 rounded text-sm text-text-2 hover:text-text transition-colors"
           >
             Exporter CSV
           </button>
@@ -165,7 +165,7 @@ export default function LeaderboardClient() {
                 className={`px-3 py-1 rounded text-sm transition-colors ${
                   filterType === type
                     ? 'bg-surface text-text'
-                    : 'text-text-muted hover:text-text'
+                    : 'text-text-2 hover:text-text'
                 }`}
               >
                 {type === 'all' ? 'Tous' : type === 'proprietary' ? 'Propriétaire' : 'Libre'}
@@ -188,52 +188,52 @@ export default function LeaderboardClient() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-divider">
-                <th className="text-left py-3 px-2 text-2xs font-medium text-text-muted uppercase tracking-wider w-12">Rang</th>
-                <th className="text-left py-3 px-2 text-2xs font-medium text-text-muted uppercase tracking-wider">Modèle</th>
-                <th className="text-left py-3 px-2 text-2xs font-medium text-text-muted uppercase tracking-wider">Fournisseur</th>
+                <th className="text-left py-3 px-2 text-2xs font-medium text-text-2 uppercase tracking-wider w-12">Rang</th>
+                <th className="text-left py-3 px-2 text-2xs font-medium text-text-2 uppercase tracking-wider">Modèle</th>
+                <th className="text-left py-3 px-2 text-2xs font-medium text-text-2 uppercase tracking-wider">Fournisseur</th>
                 <th 
-                  className="text-left py-3 px-2 text-2xs font-medium text-text-muted uppercase tracking-wider cursor-pointer hover:text-text"
+                  className="text-left py-3 px-2 text-2xs font-medium text-text-2 uppercase tracking-wider cursor-pointer hover:text-text"
                   onClick={() => handleSort('arena_elo')}
                 >
                   Arena ELO {sortField === 'arena_elo' && (sortDirection === 'desc' ? '↓' : '↑')}
                 </th>
                 <th 
-                  className="text-left py-3 px-2 text-2xs font-medium text-text-muted uppercase tracking-wider cursor-pointer hover:text-text"
+                  className="text-left py-3 px-2 text-2xs font-medium text-text-2 uppercase tracking-wider cursor-pointer hover:text-text"
                   onClick={() => handleSort('mmlu')}
                 >
                   MMLU {sortField === 'mmlu' && (sortDirection === 'desc' ? '↓' : '↑')}
                 </th>
                 <th 
-                  className="text-left py-3 px-2 text-2xs font-medium text-text-muted uppercase tracking-wider cursor-pointer hover:text-text"
+                  className="text-left py-3 px-2 text-2xs font-medium text-text-2 uppercase tracking-wider cursor-pointer hover:text-text"
                   onClick={() => handleSort('humaneval')}
                 >
                   HumanEval {sortField === 'humaneval' && (sortDirection === 'desc' ? '↓' : '↑')}
                 </th>
                 <th 
-                  className="text-left py-3 px-2 text-2xs font-medium text-text-muted uppercase tracking-wider cursor-pointer hover:text-text"
+                  className="text-left py-3 px-2 text-2xs font-medium text-text-2 uppercase tracking-wider cursor-pointer hover:text-text"
                   onClick={() => handleSort('math')}
                 >
                   MATH {sortField === 'math' && (sortDirection === 'desc' ? '↓' : '↑')}
                 </th>
                 <th 
-                  className="text-left py-3 px-2 text-2xs font-medium text-text-muted uppercase tracking-wider cursor-pointer hover:text-text"
+                  className="text-left py-3 px-2 text-2xs font-medium text-text-2 uppercase tracking-wider cursor-pointer hover:text-text"
                   onClick={() => handleSort('gpqa')}
                 >
                   GPQA {sortField === 'gpqa' && (sortDirection === 'desc' ? '↓' : '↑')}
                 </th>
                 <th 
-                  className="text-left py-3 px-2 text-2xs font-medium text-text-muted uppercase tracking-wider cursor-pointer hover:text-text"
+                  className="text-left py-3 px-2 text-2xs font-medium text-text-2 uppercase tracking-wider cursor-pointer hover:text-text"
                   onClick={() => handleSort('speed_tps')}
                 >
                   Vitesse {sortField === 'speed_tps' && (sortDirection === 'desc' ? '↓' : '↑')}
                 </th>
                 <th 
-                  className="text-left py-3 px-2 text-2xs font-medium text-text-muted uppercase tracking-wider cursor-pointer hover:text-text"
+                  className="text-left py-3 px-2 text-2xs font-medium text-text-2 uppercase tracking-wider cursor-pointer hover:text-text"
                   onClick={() => handleSort('price_input')}
                 >
                   $/1M entrée {sortField === 'price_input' && (sortDirection === 'desc' ? '↓' : '↑')}
                 </th>
-                <th className="text-left py-3 px-2 text-2xs font-medium text-text-muted uppercase tracking-wider">Sortie</th>
+                <th className="text-left py-3 px-2 text-2xs font-medium text-text-2 uppercase tracking-wider">Sortie</th>
               </tr>
             </thead>
             <tbody>
@@ -242,13 +242,13 @@ export default function LeaderboardClient() {
                   <tr 
                     key={model.id}
                     className={`border-b border-divider hover:bg-surface-2 transition-colors cursor-pointer ${
-                      index % 2 === 0 ? 'bg-surface' : 'bg-[#141417]'
+                      index % 2 === 0 ? 'bg-surface' : 'bg-surface'
                     }`}
                     onClick={() => setExpandedModel(expandedModel === model.id ? null : model.id)}
                   >
                     <td className="py-3 px-2">
                       <span className={`text-sm font-mono tabular-nums ${
-                        index === 0 ? 'text-gold font-semibold' :
+                        index === 0 ? 'text-warn font-semibold' :
                         index === 1 ? 'text-text-2 font-medium' :
                         index === 2 ? 'text-warn font-medium' :
                         'text-text-3'
@@ -266,7 +266,7 @@ export default function LeaderboardClient() {
                           {model.name}
                         </a>
                         {model.is_new && (
-                          <span className="px-1 py-0.5 bg-primary-dim text-new-badge text-2xs rounded">NOUV.</span>
+                          <span className="px-1 py-0.5 bg-primary-dim text-primary text-2xs rounded">NOUV.</span>
                         )}
                       </div>
                     </td>
@@ -307,14 +307,14 @@ export default function LeaderboardClient() {
                     <td className="py-3 px-2 font-mono text-sm tabular-nums text-text-2">
                       {formatPrice(model.scores.price_input)}
                     </td>
-                    <td className="py-3 px-2 text-sm text-text-muted font-mono">
+                    <td className="py-3 px-2 text-sm text-text-2 font-mono">
                       {model.release_date}
                     </td>
                   </tr>
                   {expandedModel === model.id && (
                     <tr className="bg-surface-2">
                       <td colSpan={11} className="py-4 px-6">
-                        <div className="text-sm text-text-muted">
+                        <div className="text-sm text-text-2">
                           <p className="mb-2">{model.description}</p>
                           <div className="flex items-center gap-4 text-2xs">
                             <span>Contexte : {model.context_window.toLocaleString()} tokens</span>
@@ -343,7 +343,7 @@ export default function LeaderboardClient() {
           <div className="flex justify-center mt-6">
             <button
               onClick={() => setPageSize(prev => prev + 20)}
-              className="px-6 py-2 bg-surface-2 hover:bg-surface-offset rounded text-sm text-text-muted hover:text-text transition-colors"
+              className="px-6 py-2 bg-surface-2 hover:bg-surface-3 rounded text-sm text-text-2 hover:text-text transition-colors"
             >
               Charger plus ({filteredModels.length - displayModels.length} restants)
             </button>
