@@ -1,117 +1,150 @@
 ﻿import Link from 'next/link'
 import { mockModels } from '@/lib/mock-data'
 import { getLiveNews } from '@/lib/feed'
-import { timeAgo } from '@/lib/constants'
-import { StatCard } from '@/components/StatCard'
-import { BreakingAlerts } from '@/components/BreakingAlerts'
-import { ArenaRanking } from '@/components/ArenaRanking'
+import { FeedCard } from '@/components/FeedCard'
 
 export default async function Home() {
-  // ── Data ──────────────────────────────────────────────────────────────
   const allNews = await getLiveNews()
+
+  // Stats
+  const totalModels = mockModels.length
+  const openModels = mockModels.filter(m => m.type === 'open').length
+  const newModels = mockModels.filter(m => m.is_new).length
+  const maxCtxModel = [...mockModels].sort((a, b) => (b.context_window || 0) - (a.context_window || 0))[0]
+  const maxCtx = maxCtxModel?.context_window || 0
+
   const ranked = [...mockModels]
     .filter(m => m.scores.arena_elo)
     .sort((a, b) => (b.scores.arena_elo ?? 0) - (a.scores.arena_elo ?? 0))
-    .slice(0, 10)
 
-  const totalModels = mockModels.length
-  const openCount   = mockModels.filter(m => m.type === 'open').length
-  const newCount    = mockModels.filter(m => m.is_new).length
-  const maxCtx      = Math.max(...mockModels.map(m => m.context_window))
-  const maxCtxModel = mockModels.find(m => m.context_window === maxCtx)
-  const topModel    = ranked[0]
-  const avgElo      = Math.round(ranked.reduce((a, m) => a + (m.scores.arena_elo ?? 0), 0) / ranked.length)
+  const topModel = ranked[0]
+  const avgElo = Math.round(ranked.reduce((acc, m) => acc + (m.scores.arena_elo || 0), 0) / ranked.length)
 
-  const breaking    = allNews.filter(n => n.is_breaking)
-  const latest      = allNews.slice(0, 4)
+  // News
+  const posts = allNews.slice(0, 12)
+  const breaking = allNews.filter(n => n.is_breaking).slice(0, 3)
 
-  // ── Render ────────────────────────────────────────────────────────────
   return (
-    <div className="mx-auto max-w-[1440px] px-4 md:px-6">
-      <div
-        className="grid gap-0"
-        style={{ gridTemplateColumns: 'minmax(0,1fr) 300px' }}
-      >
+    <div className="min-h-screen">
+      {/* Header Section */}
+      <header className="px-6 py-6 border-b border-border">
+        <div className="flex items-center gap-3 mb-2">
+          <span className="live-dot" />
+          <span className="text-2xs font-semibold uppercase tracking-widest text-accent">Live</span>
+          <span className="text-text-quaternary">·</span>
+          <span className="text-xs text-text-tertiary">{posts.length} signaux aujourd'hui</span>
+        </div>
+        <h1 className="text-3xl font-bold tracking-tight text-text-primary mb-1">
+          Veille Intelligence Artificielle
+        </h1>
+        <p className="text-sm text-text-secondary max-w-lg">
+          La course aux modèles IA en temps réel — benchmarks, actualités, analyses.
+        </p>
+      </header>
 
-        {/* ── MAIN ─────────────────────────────────────────────────────── */}
-        <div className="flex flex-col border-r border-border py-8 pr-6 md:pr-8 min-h-[calc(100vh-76px)]">
-
-          {/* Hero */}
-          <div className="mb-8">
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1">
-              <span className="h-1.5 w-1.5 rounded-full bg-success live-pulse" />
-              <span className="text-2xs font-semibold uppercase tracking-widest text-primary">Live</span>
-            </div>
-            <h1 className="mb-2 text-3xl font-bold tracking-tight text-text">
-              Veille Intelligence Artificielle
-            </h1>
-            <p className="text-sm text-text-2 max-w-xl">
-              Suivez en temps réel la course aux modèles IA — classements, benchmarks, actualités et alertes.
+      <div className="px-6 py-6 space-y-6">
+        {/* Stats Grid */}
+        <section className="grid grid-cols-4 gap-4">
+          <div className="card-stat">
+            <p className="data-label mb-2">Modèles suivis</p>
+            <p className="data-value text-data-lg text-text-primary">{totalModels}</p>
+            <p className="text-xs text-text-tertiary mt-1">
+              {openModels} open · {totalModels - openModels} proprio
             </p>
+            <p className="text-xs text-accent mt-1">+{newModels} ce mois</p>
           </div>
 
-          {/* Stats */}
-          <div className="mb-8 grid grid-cols-2 md:grid-cols-4 gap-3">
-            <StatCard value={totalModels} unit="modèles" label="Modèles suivis"
-              sub={`${openCount} open · ${totalModels - openCount} proprio`} delta={`+${newCount} nouveaux`}
-              accent="border-primary/20 bg-primary/5" dot="bg-primary" up={true} />
-            <StatCard value={(maxCtx / 1_000_000).toFixed(1)} unit="M tokens" label="Contexte max"
-              sub={maxCtxModel?.name ?? '—'} delta="record absolu"
-              accent="border-success/20 bg-success/5" dot="bg-success" up={true} />
-            <StatCard value={topModel?.scores.arena_elo ?? '—'} unit="ELO" label="Meilleur Arena"
-              sub={topModel?.name ?? '—'} delta={`moy. ${avgElo}`}
-              accent="border-warn/20 bg-warn/5" dot="bg-warn" up={null} />
-            <StatCard value={newCount} unit="nouveaux" label="Sorties récentes"
-              sub="ce mois-ci" delta="modèles mis à jour"
-              accent="border-border bg-surface" dot="bg-text-3" up={null} />
+          <div className="card-stat">
+            <p className="data-label mb-2">Meilleur ELO</p>
+            <p className="data-value text-data-lg text-accent">{topModel?.scores.arena_elo || '—'}</p>
+            <p className="text-xs text-text-tertiary mt-1 truncate">
+              {topModel?.name || '—'}
+            </p>
+            <p className="text-xs text-text-quaternary mt-1">moy. {avgElo}</p>
           </div>
 
-          {/* Breaking alerts */}
-          <BreakingAlerts items={breaking} />
+          <div className="card-stat">
+            <p className="data-label mb-2">Contexte Max</p>
+            <p className="data-value text-data-lg text-text-primary">{(maxCtx / 1_000_000).toFixed(1)}M</p>
+            <p className="text-xs text-text-tertiary mt-1 truncate">
+              {maxCtxModel?.name || '—'}
+            </p>
+            <p className="text-xs text-accent mt-1">record absolu</p>
+          </div>
 
-          {/* Latest news */}
-          <div>
-            <div className="mb-3 flex items-center justify-between">
-              <p className="text-2xs font-semibold uppercase tracking-widest text-text-3">Dernières infos</p>
-              <Link href="/news" className="text-xs text-primary hover:underline transition-colors">
-                Feed complet →
-              </Link>
+          <div className="card-stat">
+            <p className="data-label mb-2">Nouveautés</p>
+            <p className="data-value text-data-lg text-text-primary">{newModels}</p>
+            <p className="text-xs text-text-tertiary mt-1">ce mois-ci</p>
+            <p className="text-xs text-text-quaternary mt-1">modèles mis à jour</p>
+          </div>
+        </section>
+
+        {/* Breaking Alerts */}
+        {breaking.length > 0 && (
+          <section className="glass-highlight p-4 animate-fade-scale">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-1.5 h-1.5 rounded-full bg-error animate-pulse" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-error">Alertes actives</span>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              {latest.map(item => (
+            <div className="space-y-2">
+              {breaking.map((alert) => (
                 <a
-                  key={item.id}
-                  href={item.url}
+                  key={alert.id}
+                  href={alert.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex flex-col justify-between rounded-xl border border-border bg-surface p-4 min-h-[140px] transition-all hover:border-border-hover hover:bg-surface-2"
+                  className="flex items-start gap-3 p-3 rounded-lg hover:bg-void-700/50 transition-colors group"
                 >
-                  <div>
-                    <div className="mb-2 flex items-center gap-1.5">
-                      {item.is_breaking && (
-                        <span className="h-1.5 w-1.5 rounded-full bg-error live-pulse shrink-0" />
-                      )}
-                      <span className="text-xs font-medium text-text-2 truncate">{item.source}</span>
-                      <span className="text-text-3 shrink-0">·</span>
-                      <span className="text-xs text-text-3 shrink-0">{timeAgo(item.published_at)}</span>
-                    </div>
-                    <p className="text-sm font-semibold leading-snug text-text line-clamp-4 group-hover:text-text transition-colors">{item.title}</p>
-                  </div>
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {item.tags.slice(0, 2).map(tag => (
-                      <span key={tag} className="text-2xs text-text-3 bg-surface-3 px-1.5 py-0.5 rounded">#{tag}</span>
-                    ))}
-                  </div>
+                  <span className="text-signal font-bold text-xs uppercase tracking-wider shrink-0">
+                    {alert.hype_score >= 90 ? 'Urgent' : 'Alerte'}
+                  </span>
+                  <p className="text-sm text-text-secondary group-hover:text-text-primary transition-colors flex-1">
+                    {alert.title}
+                  </p>
                 </a>
               ))}
             </div>
+          </section>
+        )}
+
+        {/* Main Feed */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <h2 className="text-sm font-semibold text-text-primary">Feed IA</h2>
+              <span className="text-2xs text-text-quaternary">{posts.length} items</span>
+            </div>
+            <Link href="/news" className="text-xs text-accent hover:underline">
+              Voir tout →
+            </Link>
           </div>
 
-        </div>
+          <div className="space-y-3">
+            {posts.map((item, index) => (
+              <FeedCard key={item.id} item={item} index={index} />
+            ))}
+          </div>
+        </section>
 
-        {/* ── SIDEBAR ──────────────────────────────────────────────── */}
-        <ArenaRanking models={ranked} />
-
+        {/* Quick Actions */}
+        <section className="grid grid-cols-3 gap-4 pt-4 border-t border-border">
+          <Link href="/compare" className="glass p-4 text-center hover:border-accent/30 transition-colors group">
+            <p className="text-2xl mb-2">⚖</p>
+            <p className="text-sm font-medium text-text-primary group-hover:text-accent transition-colors">Comparer</p>
+            <p className="text-xs text-text-tertiary mt-1">2 modèles côte à côte</p>
+          </Link>
+          <Link href="/briefing" className="glass p-4 text-center hover:border-accent/30 transition-colors group">
+            <p className="text-2xl mb-2">◫</p>
+            <p className="text-sm font-medium text-text-primary group-hover:text-accent transition-colors">Briefing</p>
+            <p className="text-xs text-text-tertiary mt-1">Résumé quotidien IA</p>
+          </Link>
+          <Link href="/alerts" className="glass p-4 text-center hover:border-accent/30 transition-colors group">
+            <p className="text-2xl mb-2">◉</p>
+            <p className="text-sm font-medium text-text-primary group-hover:text-accent transition-colors">Alertes</p>
+            <p className="text-xs text-text-tertiary mt-1">Surveillance personnalisée</p>
+          </Link>
+        </section>
       </div>
     </div>
   )

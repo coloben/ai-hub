@@ -15,13 +15,13 @@ export const PROVIDER_COLORS: Record<string, string> = {
 
 // ── Category config ──────────────────────────────────────────────────
 export const CATEGORY_CONFIG: Record<NewsCategory, { icon: string; color: string; bg: string }> = {
-  release:   { icon: '🚀', color: 'text-primary',       bg: 'bg-primary/10 border-primary/20' },
-  research:  { icon: '🔬', color: 'text-info',          bg: 'bg-info-dim border-info/20' },
-  benchmark: { icon: '📊', color: 'text-success',        bg: 'bg-success-dim border-success/20' },
-  industry:  { icon: '🏢', color: 'text-warn',           bg: 'bg-warn-dim border-warn/20' },
-  pricing:   { icon: '💰', color: 'text-success',        bg: 'bg-success-dim border-success/20' },
-  security:  { icon: '🔒', color: 'text-error',          bg: 'bg-error-dim border-error/20' },
-  community: { icon: '👥', color: 'text-primary',        bg: 'bg-primary-dim border-primary/20' },
+  release:   { icon: '◉', color: 'text-accent',     bg: 'bg-accent-dim text-accent border-accent/20' },
+  research:  { icon: '◎', color: 'text-info',        bg: 'bg-info-dim text-info' },
+  benchmark: { icon: '▤', color: 'text-success',     bg: 'bg-success-dim text-success' },
+  industry:  { icon: '◈', color: 'text-warn',        bg: 'bg-warn-dim text-warn' },
+  pricing:   { icon: '◊', color: 'text-success',     bg: 'bg-success-dim text-success' },
+  security:  { icon: '◉', color: 'text-error',     bg: 'bg-error-dim text-error' },
+  community: { icon: '◬', color: 'text-accent',     bg: 'bg-accent-dim text-accent' },
 }
 
 // ── Verification config ──────────────────────────────────────────────
