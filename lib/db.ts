@@ -34,10 +34,9 @@ async function getSupabase(): Promise<import('@supabase/supabase-js').SupabaseCl
   try {
     const { createClient } = await import('@supabase/supabase-js')
     const supaKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-    _supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      supaKey
-    )
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    if (!url) return null
+    _supabase = createClient(url, supaKey)
     return _supabase
   } catch {
     return null
