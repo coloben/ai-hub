@@ -1,17 +1,16 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { Sidebar } from '@/components/Sidebar'
-import { RightSidebar } from '@/components/RightSidebar'
 
 const BASE_URL = 'https://ai-hub-cnb3.vercel.app'
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
-    default: 'AI Hub — Le réseau social de l\'IA',
+    default: 'AI Hub — Veille IA',
     template: '%s | AI Hub',
   },
-  description: 'Le réseau social dédié à l\'intelligence artificielle. News, classements, benchmarks, comparateur de modèles.',
+  description: 'Veille intelligence artificielle en temps réel. News, classements, benchmarks, comparateur de modèles.',
   keywords: ['IA','intelligence artificielle','LLM','GPT','Claude','Gemini','benchmark','classement IA'],
   authors: [{ name: 'AI Hub' }],
   creator: 'AI Hub',
@@ -20,7 +19,7 @@ export const metadata: Metadata = {
     locale: 'fr_FR',
     url: BASE_URL,
     siteName: 'AI Hub',
-    title: 'AI Hub — Le réseau social de l\'IA',
+    title: 'AI Hub — Veille IA',
     description: 'News, classements, benchmarks, comparateur de modèles IA.',
     images: [{ url: '/og.png', width: 1200, height: 630, alt: 'AI Hub' }],
   },
@@ -62,33 +61,27 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="fr">
-      <body className="antialiased bg-bg text-text min-h-screen">
-        {/* Left Sidebar Navigation */}
+      <body className="antialiased bg-black text-white min-h-screen">
         <Sidebar />
 
-        {/* Right Sidebar - Rankings */}
-        <RightSidebar />
-
-        {/* Main Content Area */}
-        <main className="ml-[200px] mr-[340px] min-h-screen pb-12">
+        {/* Main — full width minus rail. Mobile: full width minus bottom bar */}
+        <main className="md:ml-14 min-h-screen pb-14 md:pb-8">
           {children}
         </main>
 
-        {/* Live Ticker Footer */}
-        <footer className="fixed bottom-0 left-[200px] right-[340px] z-50 h-8 flex items-center overflow-hidden border-t border-border bg-void-950/95 backdrop-blur-sm">
-          <div className="flex h-full shrink-0 items-center border-r border-border px-4">
-            <div className="flex items-center gap-2">
-              <span className="live-dot" />
-              <span className="text-2xs font-semibold uppercase tracking-widest text-accent">Live</span>
-            </div>
+        {/* Ticker — desktop only, above content */}
+        <footer className="hidden md:flex fixed bottom-0 left-14 right-0 z-30 h-8 items-center overflow-hidden border-t border-white/10 bg-black">
+          <div className="flex h-full shrink-0 items-center border-r border-white/10 px-3 gap-2">
+            <span className="live-dot" />
+            <span className="text-[11px] font-semibold uppercase tracking-widest text-white/70">Live</span>
           </div>
           <div className="ticker-container flex-1">
-            <div className="ticker-content gap-12 px-6 text-xs text-text-secondary">
+            <div className="ticker-content gap-10 px-4 text-xs text-white/50">
               {doubled.map((item, i) => (
                 <span key={i} className="inline-flex items-center gap-2 whitespace-nowrap">
-                  <span className="text-accent">·</span>
-                  <strong className="font-medium text-text-primary">{item.source}</strong>
-                  <span className="text-text-tertiary">— {item.title}</span>
+                  <span className="text-white/30">·</span>
+                  <strong className="font-medium text-white/70">{item.source}</strong>
+                  <span className="text-white/40">— {item.title}</span>
                 </span>
               ))}
             </div>

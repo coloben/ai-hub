@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { NewsItem } from '@/lib/types'
 import { timeAgo, CATEGORY_CONFIG } from '@/lib/constants'
+import { ArrowUp, ArrowDown, MessageSquare, ExternalLink } from 'lucide-react'
 
 interface FeedCardProps {
   item: NewsItem
@@ -13,10 +14,7 @@ export function FeedCard({ item, index }: FeedCardProps) {
   const [score, setScore] = useState(item.hype_score)
   const [vote, setVote] = useState<'up' | 'down' | null>(null)
 
-  const handleVote = (direction: 'up' | 'down', e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-
+  const handleVote = (direction: 'up' | 'down') => {
     if (vote === direction) {
       setVote(null)
       setScore(item.hype_score)
@@ -26,92 +24,88 @@ export function FeedCard({ item, index }: FeedCardProps) {
     }
   }
 
-  const category = CATEGORY_CONFIG[item.category]
+  const cat = CATEGORY_CONFIG[item.category]
 
   return (
-    <a
-      href={item.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="card-feed block group animate-slide-up"
-      style={{ animationDelay: `${index * 50}ms` }}
-    >
-      <div className="flex gap-4">
-        {/* Vote Column */}
-        <div className="flex flex-col items-center gap-1 shrink-0 pt-1">
-          <button
-            onClick={(e) => handleVote('up', e)}
-            className={`vote-btn up ${vote === 'up' ? 'active up' : ''}`}
-            aria-label="Upvote"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="m5 15 7-7 7 7" />
-            </svg>
-          </button>
-          <span className="data-value text-sm text-text-secondary tabular-nums">{score}</span>
-          <button
-            onClick={(e) => handleVote('down', e)}
-            className={`vote-btn down ${vote === 'down' ? 'active down' : ''}`}
-            aria-label="Downvote"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="m19 9-7 7-7-7" />
-            </svg>
-          </button>
+    <div className="line-item animate-slide-up" style={{ animationDelay: `${index * 40}ms` }}>
+      {/* Vote column — separate from link */}
+      <div className="vote-col pt-0.5">
+        <button
+          onClick={() => handleVote('up')}
+          className={`vote-up ${vote === 'up' ? 'active' : ''}`}
+          aria-label="Upvote"
+        >
+          <ArrowUp size={16} />
+        </button>
+        <span className="score">{score}</span>
+        <button
+          onClick={() => handleVote('down')}
+          className={`vote-down ${vote === 'down' ? 'active' : ''}`}
+          aria-label="Downvote"
+        >
+          <ArrowDown size={16} />
+        </button>
+      </div>
+
+      {/* Content — link wraps title only, not buttons */}
+      <div className="flex-1 min-w-0">
+        {/* Meta line */}
+        <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+          {item.is_breaking && (
+            <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/10 text-white/80">BREAKING</span>
+          )}
+          <span className="text-[11px] font-medium uppercase tracking-wider text-white/30">
+            {cat?.icon} {item.category}
+          </span>
+          <span className="text-xs text-white/45">{item.source}</span>
+          <span className="text-white/15">·</span>
+          <span className="text-xs text-white/30">{timeAgo(item.published_at)}</span>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          {/* Meta */}
-          <div className="flex items-center gap-2 mb-2">
-            {item.is_breaking && (
-              <span className="badge-error">BREAKING</span>
-            )}
-            <span className={`badge ${category?.bg || 'bg-void-700'}`}>
-              {category?.icon} {item.category}
-            </span>
-            <span className="text-xs font-medium text-text-secondary">{item.source}</span>
-            <span className="text-text-quaternary">·</span>
-            <span className="text-xs text-text-tertiary">{timeAgo(item.published_at)}</span>
-          </div>
-
-          {/* Title */}
-          <h3 className="text-base font-semibold text-text-primary leading-snug group-hover:text-accent transition-colors mb-2">
+        {/* Title — the actual link */}
+        <a
+          href={item.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group inline-block"
+        >
+          <h3 className="text-sm font-semibold text-white/90 leading-snug group-hover:text-white transition-colors">
             {item.title}
           </h3>
+        </a>
 
-          {/* Summary */}
-          <p className="text-sm text-text-secondary line-clamp-2 mb-3">
-            {item.summary}
-          </p>
+        {/* Summary */}
+        <p className="text-sm text-white/45 mt-1 line-clamp-2 leading-relaxed">
+          {item.summary}
+        </p>
 
-          {/* Tags & Actions */}
-          <div className="flex items-center gap-4">
-            <div className="flex flex-wrap gap-1.5">
-              {item.tags.slice(0, 3).map((tag) => (
-                <span key={tag} className="tag">
-                  #{tag}
-                </span>
-              ))}
-            </div>
+        {/* Tags + hover actions */}
+        <div className="flex items-center gap-3 mt-2.5">
+          <div className="flex flex-wrap gap-1.5">
+            {item.tags.slice(0, 3).map(tag => (
+              <span key={tag} className="text-[11px] text-white/30 bg-white/[0.04] border border-white/[0.06] px-2 py-0.5 rounded hover:text-white/50 hover:border-white/10 transition-colors cursor-pointer">
+                #{tag}
+              </span>
+            ))}
+          </div>
 
-            <div className="ml-auto flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button className="text-xs text-text-tertiary hover:text-text-secondary flex items-center gap-1 transition-colors">
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 0 1-.923 1.785A5.969 5.969 0 0 0 6 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337Z" />
-                </svg>
-                {index % 5 + 2}
-              </button>
-              <button className="text-xs text-text-tertiary hover:text-text-secondary flex items-center gap-1 transition-colors">
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" />
-                </svg>
-                Partager
-              </button>
-            </div>
+          <div className="ml-auto flex items-center gap-3 opacity-0 hover:opacity-100 transition-opacity">
+            <span className="text-[11px] text-white/25 flex items-center gap-1">
+              <MessageSquare size={12} />
+              {index % 4 + 1}
+            </span>
+            <a
+              href={item.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[11px] text-white/25 hover:text-white/50 flex items-center gap-1 transition-colors"
+            >
+              <ExternalLink size={12} />
+              Source
+            </a>
           </div>
         </div>
       </div>
-    </a>
+    </div>
   )
 }

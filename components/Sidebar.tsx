@@ -2,99 +2,107 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import {
+  LayoutGrid, Newspaper, Trophy, BarChart3, GitCompare, Bell,
+  FileText, Calculator, Clock, BookOpen, Plus, Settings
+} from 'lucide-react'
 
-const navItems = [
-  { href: '/', label: 'Dashboard', icon: '⊡' },
-  { href: '/feed', label: 'Mon Feed', icon: '◬' },
-  { href: '/news', label: 'Feed IA', icon: '◈' },
-  { href: '/leaderboard', label: 'Classement', icon: '▲' },
-  { href: '/benchmarks', label: 'Benchmarks', icon: '▤' },
-  { href: '/compare', label: 'Comparer', icon: '⚖' },
-  { href: '/alerts', label: 'Alertes', icon: '◉' },
+const mainItems = [
+  { href: '/', icon: LayoutGrid, label: 'Dashboard' },
+  { href: '/news', icon: Newspaper, label: 'Feed IA' },
+  { href: '/leaderboard', icon: Trophy, label: 'Classement' },
+  { href: '/benchmarks', icon: BarChart3, label: 'Benchmarks' },
+  { href: '/compare', icon: GitCompare, label: 'Comparer' },
+  { href: '/alerts', icon: Bell, label: 'Alertes' },
 ]
 
 const toolItems = [
-  { href: '/briefing', label: 'Briefing', icon: '◫' },
-  { href: '/cost-calculator', label: 'Coûts API', icon: '◊' },
-  { href: '/timeline', label: 'Timeline', icon: '◐' },
-  { href: '/glossary', label: 'Glossaire', icon: '◎' },
+  { href: '/briefing', icon: FileText, label: 'Briefing' },
+  { href: '/cost-calculator', icon: Calculator, label: 'Coûts' },
+  { href: '/timeline', icon: Clock, label: 'Timeline' },
+  { href: '/glossary', icon: BookOpen, label: 'Glossaire' },
 ]
 
 export function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="fixed left-0 top-0 bottom-0 w-[200px] bg-void-950 border-r border-border z-40 flex flex-col">
-      {/* Logo */}
-      <div className="h-16 flex items-center px-4 border-b border-border">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="w-8 h-8 rounded-xl bg-text-primary text-bg flex items-center justify-center text-sm font-bold">
+    <>
+      {/* Desktop rail — left edge, 56px */}
+      <aside className="fixed left-0 top-0 bottom-0 w-14 border-r border-white/10 bg-black z-40 hidden md:flex flex-col">
+        {/* Logo mark */}
+        <div className="h-14 flex items-center justify-center border-b border-white/10">
+          <Link href="/" className="w-8 h-8 rounded-lg bg-white text-black flex items-center justify-center text-xs font-extrabold">
             AI
-          </span>
-          <span className="font-semibold text-text-primary">Hub</span>
-        </Link>
-      </div>
+          </Link>
+        </div>
 
-      {/* Main nav */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        {navItems.map((item) => {
+        {/* Main nav */}
+        <nav className="nav-rail flex-1 py-2">
+          {mainItems.map((item) => {
+            const Icon = item.icon
+            const isActive = pathname === item.href
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={isActive ? 'active' : ''}
+                title={item.label}
+                aria-label={item.label}
+              >
+                <Icon size={20} strokeWidth={isActive ? 2.5 : 1.5} />
+              </Link>
+            )
+          })}
+
+          <div className="w-5 h-px bg-white/10 my-2" />
+
+          {toolItems.map((item) => {
+            const Icon = item.icon
+            const isActive = pathname === item.href
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={isActive ? 'active' : ''}
+                title={item.label}
+                aria-label={item.label}
+              >
+                <Icon size={18} strokeWidth={isActive ? 2.5 : 1.5} />
+              </Link>
+            )
+          })}
+        </nav>
+
+        {/* Bottom */}
+        <div className="nav-rail pb-2">
+          <Link href="/submit" title="Poster" aria-label="Poster">
+            <Plus size={20} strokeWidth={1.5} />
+          </Link>
+          <Link href="/settings" title="Paramètres" aria-label="Paramètres">
+            <Settings size={18} strokeWidth={1.5} />
+          </Link>
+        </div>
+      </aside>
+
+      {/* Mobile bottom bar */}
+      <nav className="fixed bottom-0 left-0 right-0 h-14 bg-black border-t border-white/10 z-40 flex items-center justify-around md:hidden">
+        {mainItems.slice(0, 5).map((item) => {
+          const Icon = item.icon
           const isActive = pathname === item.href
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`nav-item ${isActive ? 'active' : ''}`}
+              className={`flex flex-col items-center gap-0.5 ${isActive ? 'text-white' : 'text-white/35'}`}
+              aria-label={item.label}
             >
-              <span className={`text-lg ${isActive ? 'text-accent' : 'text-text-tertiary'}`}>
-                {item.icon}
-              </span>
-              <span>{item.label}</span>
-            </Link>
-          )
-        })}
-
-        {/* Divider */}
-        <div className="my-4 border-t border-divider" />
-
-        {/* Tools section */}
-        <p className="px-3 py-2 text-2xs font-semibold uppercase tracking-wider text-text-quaternary">
-          Outils
-        </p>
-        {toolItems.map((item) => {
-          const isActive = pathname === item.href
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`nav-item ${isActive ? 'active' : ''}`}
-            >
-              <span className={`text-lg ${isActive ? 'text-accent' : 'text-text-tertiary'}`}>
-                {item.icon}
-              </span>
-              <span>{item.label}</span>
+              <Icon size={20} strokeWidth={isActive ? 2.5 : 1.5} />
+              <span className="text-[10px]">{item.label.slice(0, 6)}</span>
             </Link>
           )
         })}
       </nav>
-
-      {/* Bottom section */}
-      <div className="p-3 border-t border-border">
-        <Link
-          href="/submit"
-          className="btn-secondary w-full mb-3"
-        >
-          <span className="text-accent">+</span>
-          <span>Poster</span>
-        </Link>
-
-        <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-2 text-text-tertiary">
-            <span className="live-dot" />
-            <span className="text-xs">Live</span>
-          </div>
-          <span className="text-2xs text-text-quaternary">v1.0</span>
-        </div>
-      </div>
-    </aside>
+    </>
   )
 }

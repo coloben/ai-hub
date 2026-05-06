@@ -1,16 +1,16 @@
 import { NewsCategory } from '@/lib/types'
 
-// ── Provider colors ──────────────────────────────────────────────────
+// ── Provider colors — ARENA: neutralized, monochrome ───────────────────
 export const PROVIDER_COLORS: Record<string, string> = {
-  'OpenAI':    'text-[#10a37f]',
-  'Anthropic': 'text-[#c57f4e]',
-  'Google':    'text-[#4285f4]',
-  'Meta':      'text-[#0866ff]',
-  'DeepSeek':  'text-[#5b73ff]',
-  'Alibaba':   'text-[#ff6a00]',
-  'Mistral':   'text-[#f7461c]',
-  'xAI':       'text-[#a8a8a8]',
-  'Zhipu AI':  'text-[#7c3aed]',
+  'OpenAI':    'text-white/55',
+  'Anthropic': 'text-white/55',
+  'Google':    'text-white/55',
+  'Meta':      'text-white/55',
+  'DeepSeek':  'text-white/55',
+  'Alibaba':   'text-white/55',
+  'Mistral':   'text-white/55',
+  'xAI':       'text-white/55',
+  'Zhipu AI':  'text-white/55',
 }
 
 // ── Category config ──────────────────────────────────────────────────
