@@ -63,6 +63,7 @@ const config: Config = {
         'amber-dim': 'rgba(245,158,11,0.10)',
         'error-dim': 'rgba(239,68,68,0.10)',
         'info-dim': 'rgba(59,130,246,0.10)',
+        'new-badge': '#00d4aa',
       },
       fontFamily: {
         sans: ['Inter','-apple-system','BlinkMacSystemFont','Segoe UI','system-ui','sans-serif'],

@@ -243,11 +243,13 @@ export async function getLiveNews(limitTotal = 30): Promise<NewsItem[]> {
     return _cache.items.slice(0, limitTotal)
   }
 
-  const [hnAI, hnLLM, hnOpenAI, reddit] = await Promise.allSettled([
-    fetchHN('artificial intelligence', 15),
-    fetchHN('LLM large language model', 10),
-    fetchHN('OpenAI OR Anthropic OR Google Gemini OR Meta Llama', 10),
-    fetchReddit('LocalLLaMA', 8, 'day'),
+  const [hnAI, hnLLM, hnModels, hnBenchmarks, redditLLaMA, redditML] = await Promise.allSettled([
+    fetchHN('artificial intelligence', 12),
+    fetchHN('large language model', 8),
+    fetchHN('OpenAI GPT Claude Gemini Llama', 8),
+    fetchHN('benchmark AI evaluation', 6),
+    fetchReddit('LocalLLaMA', 6, 'day'),
+    fetchReddit('MachineLearning', 6, 'day'),
   ])
 
   const live: NewsItem[] = []
@@ -255,10 +257,14 @@ export async function getLiveNews(limitTotal = 30): Promise<NewsItem[]> {
   else console.warn('[feed] HN AI failed:', hnAI.reason)
   if (hnLLM.status === 'fulfilled') live.push(...hnLLM.value)
   else console.warn('[feed] HN LLM failed:', hnLLM.reason)
-  if (hnOpenAI.status === 'fulfilled') live.push(...hnOpenAI.value)
-  else console.warn('[feed] HN OpenAI failed:', hnOpenAI.reason)
-  if (reddit.status === 'fulfilled') live.push(...reddit.value)
-  else console.warn('[feed] Reddit failed:', reddit.reason)
+  if (hnModels.status === 'fulfilled') live.push(...hnModels.value)
+  else console.warn('[feed] HN Models failed:', hnModels.reason)
+  if (hnBenchmarks.status === 'fulfilled') live.push(...hnBenchmarks.value)
+  else console.warn('[feed] HN Benchmarks failed:', hnBenchmarks.reason)
+  if (redditLLaMA.status === 'fulfilled') live.push(...redditLLaMA.value)
+  else console.warn('[feed] Reddit LocalLLaMA failed:', redditLLaMA.reason)
+  if (redditML.status === 'fulfilled') live.push(...redditML.value)
+  else console.warn('[feed] Reddit ML failed:', redditML.reason)
 
   if (live.length === 0) {
     return [...mockNews].sort(
