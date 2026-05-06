@@ -1,116 +1,207 @@
 /**
- * feed.ts — Source de vérité pour les news du site.
+ * feed.ts — Pipeline de données IA temps réel.
  *
- * Stratégie (sans DB) :
- *   1. Fetch les 10 connecteurs RSS réels en parallèle (Next.js ISR, revalidate 900s)
- *   2. Déduplique par titre normalisé
- *   3. Trie par date décroissante
- *   4. Si tous les flux échouent (réseau mort, CORS serveur…) → fallback mockNews
+ * Stratégie v2 (robust + réel) :
+ *   1. Fetch Hacker News Search API (JSON natif, gratuit, fiable) — requêtes IA
+ *   2. Fetch Reddit r/LocalLLaMA top (discussions modèles open-source)
+ *   3. Classification dynamique par analyse du contenu (pas par source)
+ *   4. Hype score = engagement réel (points HN / upvotes Reddit)
+ *   5. Déduplication + tri date
+ *   6. Si TOUT échoue → fallback mockNews
  *
- * Appelé uniquement côté serveur (Server Components / Route Handlers).
+ * Sources :
+ *   - HN Algolia : https://hn.algolia.com/api/v1/search?query=AI&tags=story
+ *   - Reddit JSON : https://www.reddit.com/r/LocalLLaMA/top.json?limit=10&t=day
  */
 
 import { NewsItem, NewsCategory } from './types'
 import { mockNews } from './mock-data'
 
-interface RssConnector {
-  id: string
-  name: string
-  url: string
-  category: NewsCategory
-  reliability: 'official' | 'independent' | 'community'
+// ── Types sources ────────────────────────────────────────────────────────────
+
+interface HNHit {
+  objectID: string
+  title: string
+  url: string | null
+  story_text: string | null
+  points: number
+  num_comments: number
+  created_at: string
+  author: string
 }
 
-const RSS_CONNECTORS: RssConnector[] = [
-  { id: 'openai',      name: 'OpenAI',       url: 'https://openai.com/blog/rss.xml',                    category: 'release',   reliability: 'official'    },
-  { id: 'anthropic',   name: 'Anthropic',    url: 'https://www.anthropic.com/news/rss.xml',              category: 'release',   reliability: 'official'    },
-  { id: 'google-ai',   name: 'Google',       url: 'https://blog.google/technology/ai/rss/',              category: 'release',   reliability: 'official'    },
-  { id: 'meta-ai',     name: 'Meta',         url: 'https://ai.meta.com/blog/rss/',                       category: 'release',   reliability: 'official'    },
-  { id: 'mistral',     name: 'Mistral',      url: 'https://mistral.ai/news/rss.xml',                     category: 'release',   reliability: 'official'    },
-  { id: 'hf-papers',   name: 'HuggingFace',  url: 'https://huggingface.co/papers/rss',                   category: 'research',  reliability: 'community'   },
-  { id: 'arxiv',       name: 'ArXiv',        url: 'https://export.arxiv.org/rss/cs.AI',                  category: 'research',  reliability: 'independent' },
-  { id: 'pwc',         name: 'Papers w/ Code', url: 'https://paperswithcode.com/rss',                    category: 'benchmark', reliability: 'independent' },
-  { id: 'deepmind',    name: 'DeepMind',     url: 'https://deepmind.google/blog/rss.xml',                category: 'research',  reliability: 'official'    },
-  { id: 'msft-ai',     name: 'Microsoft',    url: 'https://blogs.microsoft.com/ai/feed/',                category: 'industry',  reliability: 'official'    },
+interface RedditPost {
+  data: {
+    title: string
+    url: string
+    selftext: string
+    ups: number
+    num_comments: number
+    created_utc: number
+    subreddit: string
+    author: string
+    permalink: string
+  }
+}
+
+// ── Classification par contenu (pas par source) ───────────────────────────────
+
+const CLASSIFIERS: { pattern: RegExp; category: NewsCategory }[] = [
+  { pattern: /\b(release|launch|announc|introduc|unveil|dévoil|lance|sortie|nouveau modèle|new model|shipped|available now|rollout)\b/i, category: 'release' },
+  { pattern: /\b(benchmark|eval|score|test|leaderboard|elo|arena|humaneval|mmlu|gpqa|math benchmark|performance test)\b/i, category: 'benchmark' },
+  { pattern: /\b(paper|arxiv|research|study|étude|survey|paper review|technical report|preprint)\b/i, category: 'research' },
+  { pattern: /\b(price|cost|pricing|api cost|tarif|token price|cheaper|free tier|subscription)\b|[\$€]/i, category: 'pricing' },
+  { pattern: /\b(hack|vulnerab|security|leak|exploit|jailbreak|prompt injection|privacy risk|data breach)\b/i, category: 'security' },
+  { pattern: /\b(open source|github|huggingface|hf.co|model card|weights|llama|mistral|deepseek|qwen|license|apache|mit license)\b/i, category: 'community' },
 ]
+
+function classify(title: string, text: string): NewsCategory {
+  const full = `${title} ${text}`.toLowerCase()
+  for (const c of CLASSIFIERS) {
+    if (c.pattern.test(full)) return c.category
+  }
+  return 'industry'
+}
+
+// ── Tags par extraction de contenu ───────────────────────────────────────────
+
+const TAG_PATTERNS: Record<string, RegExp> = {
+  'OpenAI': /\bopenai\b|\bgpt\b|\bchatgpt\b|\bo3\b|\bo4-mini\b|\bcodex\b/i,
+  'Anthropic': /\banthropic\b|\bclaude\b/i,
+  'Google': /\bgoogle\b|\bgemini\b|\bdeepmind\b|\bvertex\b/i,
+  'Meta': /\bmeta\b|\bllama\b|\bfacebook\b/i,
+  'Mistral': /\bmistral\b/i,
+  'DeepSeek': /\bdeepseek\b/i,
+  'xAI': /\bxai\b|\bgrok\b/i,
+  'Alibaba': /\bqwen\b|\balibaba\b/i,
+  'Microsoft': /\bmicrosoft\b|\bcopilot\b|\bazure\b/i,
+  'benchmark': /\bbenchmark\b|\bscore\b|\bleaderboard\b|\barena\b|\beval\b/i,
+  'open-source': /\bopen.source\b|\bopen weight\b|\bweights released\b|\bmit license\b|\bapache 2/i,
+  'agent': /\bagent\b|\bcodex\b|\bautonomous\b|\btool use\b/i,
+  'multimodal': /\bmultimodal\b|\bvision\b|\bimage\b|\bvideo\b|\baudio\b/i,
+  'reasoning': /\breasoning\b|\bchain of thought\b|\bmath\b|\blogic\b/i,
+}
+
+function extractTags(title: string, text: string): string[] {
+  const full = `${title} ${text}`.toLowerCase()
+  const found = Object.entries(TAG_PATTERNS)
+    .filter(([, re]) => re.test(full))
+    .map(([tag]) => tag)
+  return Array.from(new Set(['AI', ...found])).slice(0, 6)
+}
+
+// ── Breaking detection ───────────────────────────────────────────────────────
+
+function isBreaking(title: string, category: NewsCategory, engagement: number): boolean {
+  const urgent = /\b(breaking|launch|release|unveil|dévoil|nouveau|new model|available now|shipped|open weight|free tier)\b/i.test(title)
+  const hot = engagement > 100
+  return (urgent && hot) || (category === 'release' && hot && /\b(launch|release|unveil|new)\b/i.test(title))
+}
+
+// ── Hype score = engagement réel normalisé ──────────────────────────────────
+
+function computeHypeScore(points: number, comments: number): number {
+  // HN : points 0-500+ ; Reddit : upvotes 0-500+
+  // Formule : points * 0.15 + comments * 0.5, cap à 100
+  const raw = points * 0.15 + comments * 0.5
+  return Math.min(100, Math.round(raw))
+}
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function stripHtml(s: string): string {
-  return s
-    .replace(/<!\[CDATA\[/g, '')
-    .replace(/\]\]>/g, '')
-    .replace(/<[^>]+>/g, '')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
+function domainFromUrl(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '')
+  } catch {
+    return 'news'
+  }
+}
+
+function sanitizeText(text: string | null, maxLen = 280): string {
+  if (!text) return ''
+  return text
+    .replace(/\n/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
+    .slice(0, maxLen)
 }
 
-function getXmlTag(xml: string, tag: string): string | null {
-  const m = xml.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'i'))
-  return m ? stripHtml(m[1]) : null
-}
+// ── Fetch Hacker News ────────────────────────────────────────────────────────
 
-function inferTags(title: string, summary: string): string[] {
-  const text = `${title} ${summary}`.toLowerCase()
-  const candidates = [
-    'openai', 'anthropic', 'google', 'meta', 'mistral', 'deepseek',
-    'benchmark', 'agent', 'code', 'multimodal', 'open-source', 'reasoning',
-    'gpt', 'claude', 'gemini', 'llama', 'grok',
-  ]
-  const found = candidates.filter(t => text.includes(t))
-  return Array.from(new Set(['AI', ...found])).slice(0, 5)
-}
-
-function isBreaking(title: string, reliability: string, index: number): boolean {
-  const urgent = /(launch|announce|release|new|introduces|unveil|dévoil|lance|nouveau)/i.test(title)
-  return reliability === 'official' && index === 0 && urgent
-}
-
-function parseHupeScore(reliability: string, isBreak: boolean): number {
-  const base = reliability === 'official' ? 72 : reliability === 'independent' ? 60 : 52
-  return isBreak ? Math.min(100, base + 18) : base
-}
-
-// ── Fetch un connecteur RSS ───────────────────────────────────────────────────
-
-async function fetchConnector(c: RssConnector, limit = 5): Promise<NewsItem[]> {
+async function fetchHN(query: string, hits = 20): Promise<NewsItem[]> {
   try {
-    const res = await fetch(c.url, {
-      next: { revalidate: 900 },  // ISR 15 min
-      headers: { 'User-Agent': 'AI-Hub/1.0 RSS-Reader' },
-      signal: AbortSignal.timeout(6000),
-    })
+    const res = await fetch(
+      `https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(query)}&tags=story&hitsPerPage=${hits}`,
+      { next: { revalidate: 600 }, signal: AbortSignal.timeout(8000) }
+    )
     if (!res.ok) return []
+    const json = await res.json() as { hits?: HNHit[] }
+    if (!json.hits) return []
 
-    const xml = await res.text()
-    const items = Array.from(
-      xml.matchAll(/<item[\s\S]*?<\/item>|<entry[\s\S]*?<\/entry>/gi)
-    ).map(m => m[0]).slice(0, limit)
+    return json.hits
+      .filter(h => h.url || h.story_text) // au moins un lien ou du texte
+      .map(h => {
+        const title = h.title
+        const text = sanitizeText(h.story_text)
+        const url = h.url || `https://news.ycombinator.com/item?id=${h.objectID}`
+        const category = classify(title, text)
+        const engagement = h.points + h.num_comments
+        const breaking = isBreaking(title, category, engagement)
 
-    return items.map((chunk, i) => {
-      const title    = getXmlTag(chunk, 'title') ?? `${c.name} update`
-      const summary  = (getXmlTag(chunk, 'description') ?? getXmlTag(chunk, 'summary') ?? title).slice(0, 320)
-      const url      = getXmlTag(chunk, 'link') ?? c.url
-      const rawDate  = getXmlTag(chunk, 'pubDate') ?? getXmlTag(chunk, 'updated') ?? new Date().toISOString()
-      const date     = isNaN(new Date(rawDate).getTime()) ? new Date().toISOString() : new Date(rawDate).toISOString()
-      const breaking = isBreaking(title, c.reliability, i)
+        return {
+          id: `hn-${h.objectID}`,
+          title,
+          summary: text || title,
+          source: domainFromUrl(url),
+          category,
+          published_at: h.created_at,
+          url,
+          tags: extractTags(title, text),
+          is_breaking: breaking,
+          hype_score: computeHypeScore(h.points, h.num_comments),
+        } satisfies NewsItem
+      })
+  } catch {
+    return []
+  }
+}
+
+// ── Fetch Reddit ───────────────────────────────────────────────────────────────
+
+async function fetchReddit(subreddit: string, limit = 10, time = 'day'): Promise<NewsItem[]> {
+  try {
+    const res = await fetch(
+      `https://www.reddit.com/r/${subreddit}/top.json?limit=${limit}&t=${time}`,
+      {
+        next: { revalidate: 600 },
+        signal: AbortSignal.timeout(8000),
+        headers: { 'User-Agent': 'AI-Hub/1.0 (by /u/ai-hub-bot)' },
+      }
+    )
+    if (!res.ok) return []
+    const json = await res.json() as { data?: { children?: RedditPost[] } }
+    if (!json.data?.children) return []
+
+    return json.data.children.map((post, i) => {
+      const d = post.data
+      const title = d.title
+      const text = sanitizeText(d.selftext)
+      const url = d.url.startsWith('/r/') ? `https://www.reddit.com${d.permalink}` : d.url
+      const category = classify(title, text)
+      const engagement = d.ups + d.num_comments
+      const breaking = isBreaking(title, category, engagement)
 
       return {
-        id:           `${c.id}-${i}-${Buffer.from(title).toString('base64url').slice(0, 8)}`,
+        id: `rd-${subreddit}-${i}-${d.created_utc}`,
         title,
-        summary,
-        source:       c.name,
-        category:     c.category,
-        published_at: date,
+        summary: text || title,
+        source: `Reddit r/${d.subreddit}`,
+        category,
+        published_at: new Date(d.created_utc * 1000).toISOString(),
         url,
-        tags:         inferTags(title, summary),
-        is_breaking:  breaking,
-        hype_score:   parseHupeScore(c.reliability, breaking),
+        tags: extractTags(title, text),
+        is_breaking: breaking,
+        hype_score: computeHypeScore(d.ups, d.num_comments),
       } satisfies NewsItem
     })
   } catch {
@@ -118,50 +209,53 @@ async function fetchConnector(c: RssConnector, limit = 5): Promise<NewsItem[]> {
   }
 }
 
-// ── Déduplique par titre normalisé ────────────────────────────────────────────
+// ── Déduplication ────────────────────────────────────────────────────────────
 
 function dedup(items: NewsItem[]): NewsItem[] {
   const seen = new Set<string>()
   return items.filter(item => {
-    const key = item.title.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40)
+    const key = item.title.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 50)
     if (seen.has(key)) return false
     seen.add(key)
     return true
   })
 }
 
-// ── Export principal ──────────────────────────────────────────────────────────
+// ── Export principal ─────────────────────────────────────────────────────────
 
 /**
- * Retourne les news triées par date.
- * En production : données RSS réelles.
- * En dev sans réseau / si tous les flux échouent : mockNews.
+ * Retourne les news fraîches depuis HN + Reddit.
+ * Classification par contenu, hype score = engagement réel.
+ * Fallback mockNews uniquement si TOUT échoue.
  */
-export async function getLiveNews(limitPerSource = 5): Promise<NewsItem[]> {
-  const results = await Promise.allSettled(
-    RSS_CONNECTORS.map(c => fetchConnector(c, limitPerSource))
-  )
+export async function getLiveNews(limitTotal = 30): Promise<NewsItem[]> {
+  const [hnAI, hnLLM, hnOpenAI, reddit] = await Promise.allSettled([
+    fetchHN('artificial intelligence', 15),
+    fetchHN('LLM large language model', 10),
+    fetchHN('OpenAI OR Anthropic OR Google Gemini OR Meta Llama', 10),
+    fetchReddit('LocalLLaMA', 8, 'day'),
+  ])
 
-  const live = results
-    .filter((r): r is PromiseFulfilledResult<NewsItem[]> => r.status === 'fulfilled')
-    .flatMap(r => r.value)
+  const live: NewsItem[] = []
+  if (hnAI.status === 'fulfilled') live.push(...hnAI.value)
+  if (hnLLM.status === 'fulfilled') live.push(...hnLLM.value)
+  if (hnOpenAI.status === 'fulfilled') live.push(...hnOpenAI.value)
+  if (reddit.status === 'fulfilled') live.push(...reddit.value)
 
   if (live.length === 0) {
-    // Tous les flux ont échoué (pas de réseau serveur, CORS, etc.)
     return [...mockNews].sort(
       (a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
     )
   }
 
-  return dedup(live).sort(
-    (a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
-  )
+  return dedup(live)
+    .sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime())
+    .slice(0, limitTotal)
 }
 
 /**
- * Retourne les N news les plus récentes avec enrichissement intelligence.
+ * Alias pour compatibilité — retourne les N news les plus récentes.
  */
 export async function getEnrichedNews(limit = 20): Promise<NewsItem[]> {
-  const news = await getLiveNews()
-  return news.slice(0, limit)
+  return getLiveNews(limit)
 }

@@ -21,13 +21,16 @@ const categoryLabel: Record<NewsCategory, string> = {
   community: 'Communauté',
 }
 
-const avatarMap: Record<string, string> = {
-  Anthropic: 'AN', OpenAI: 'OA', Google: 'GG', Meta: 'MA',
-  Mistral: 'MI', LMSYS: 'LM', ArXiv: 'AX', Microsoft: 'MS',
-  xAI: 'XA', DeepSeek: 'DS',
-}
 function initials(source: string): string {
-  return avatarMap[source] ?? source.slice(0, 2).toUpperCase()
+  // Supporte les domaines HN (openai.com, arxiv.org) et Reddit (Reddit r/LocalLLaMA)
+  const clean = source.replace(/^www\./, '')
+  if (clean.startsWith('Reddit')) return 'RD'
+  if (clean.includes('ycombinator')) return 'HN'
+  const parts = clean.split(/[.\s]/)
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase()
+  }
+  return clean.slice(0, 2).toUpperCase()
 }
 
 export default async function NewsPageClient() {
@@ -36,24 +39,24 @@ export default async function NewsPageClient() {
 
   return (
     <div
-      className="mx-auto grid max-w-[1440px] px-4 md:px-6"
+      className="mx-auto grid max-w-[1440px] px-4 md:px-6 gap-6"
       style={{ gridTemplateColumns: 'minmax(0,1fr) 260px' }}
     >
       {/* ── FEED ─────────────────────────────────────────────────────── */}
-      <div className="flex flex-col border-r border-border min-h-[calc(100vh-76px)]">
+      <div className="flex flex-col border-r border-white/[0.06] min-h-[calc(100vh-76px)]">
 
         {/* Header */}
-        <div className="flex shrink-0 items-center justify-between border-b border-border px-6 py-3">
+        <div className="flex shrink-0 items-center justify-between border-b border-white/[0.06] px-6 py-3">
           <div className="flex items-center gap-3">
-            <span className="text-sm font-semibold text-text">Feed IA</span>
-            <span className="h-1.5 w-1.5 rounded-full bg-success live-pulse" />
-            <span className="text-xs text-text-3">temps réel</span>
+            <span className="text-sm font-semibold text-white/90">Feed IA</span>
+            <span className="h-1.5 w-1.5 rounded-full bg-[#22c55e] live-dot" />
+            <span className="text-xs text-white/30">temps réel</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs text-text-3">{allNews.length} publications</span>
+            <span className="text-xs text-white/30">{allNews.length} publications</span>
             <Link
               href="/submit"
-              className="rounded-lg border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/20 transition-colors"
+              className="rounded-lg border border-[#00d4aa]/40 bg-[#00d4aa]/10 px-3 py-1.5 text-xs font-semibold text-[#00d4aa] hover:bg-[#00d4aa]/20 transition-colors"
             >
               + Soumettre
             </Link>
@@ -83,38 +86,38 @@ export default async function NewsPageClient() {
       {/* ── SIDEBAR — FILTRES + SOURCES ────────────────────────── */}
       <aside className="hidden md:flex flex-col py-6 pl-6">
 
-        <p className="mb-3 text-2xs font-semibold uppercase tracking-widest text-text-3">Catégories</p>
+        <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-white/30">Catégories</p>
         <div className="mb-7 flex flex-col gap-0.5">
           {(Object.entries(categoryLabel) as [NewsCategory, string][]).map(([cat, label]) => {
             const count = allNews.filter(n => n.category === cat).length
             if (count === 0) return null
             return (
-              <div key={cat} className="flex items-center justify-between rounded-lg px-2 py-1.5 text-sm text-text-2 hover:bg-surface cursor-pointer transition-colors">
+              <div key={cat} className="flex items-center justify-between rounded-lg px-2 py-1.5 text-sm text-white/55 hover:bg-white/[0.04] cursor-pointer transition-colors">
                 <span>{label}</span>
-                <span className="text-xs tabular-nums text-text-3">{count}</span>
+                <span className="text-xs tabular-nums text-white/30">{count}</span>
               </div>
             )
           })}
         </div>
 
-        <p className="mb-3 text-2xs font-semibold uppercase tracking-widest text-text-3">Sources</p>
+        <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-white/30">Sources</p>
         <div className="flex flex-col gap-2">
           {sources.map(source => {
             const count = allNews.filter(n => n.source === source).length
             return (
               <div key={source} className="flex items-center gap-2.5">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border bg-surface-2 text-2xs font-bold text-text-3">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/[0.06] bg-white/[0.04] text-[11px] font-bold text-white/30">
                   {initials(source)}
                 </span>
-                <span className="flex-1 text-sm text-text-2 truncate">{source}</span>
-                <span className="text-xs tabular-nums text-text-3">{count}</span>
+                <span className="flex-1 text-sm text-white/55 truncate">{source}</span>
+                <span className="text-xs tabular-nums text-white/30">{count}</span>
               </div>
             )
           })}
         </div>
 
         <div className="mt-auto pt-8">
-          <Link href="/" className="text-xs text-text-3 transition-colors hover:text-text-2">← Dashboard</Link>
+          <Link href="/" className="text-xs text-white/30 transition-colors hover:text-white/55">← Dashboard</Link>
         </div>
       </aside>
     </div>

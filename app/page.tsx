@@ -41,7 +41,7 @@ export default async function Home() {
         </p>
       </header>
 
-      <div className="px-6 md:px-10 py-8 space-y-10 max-w-4xl">
+      <div className="px-6 md:px-10 py-8 space-y-10 max-w-4xl mx-auto">
         {/* ── DATA NUMBERS — massive focal points ── */}
         <section className="surface-section p-6 md:p-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
