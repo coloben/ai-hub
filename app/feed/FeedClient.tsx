@@ -49,7 +49,7 @@ export default function FeedClient() {
       .then(r => r.json())
       .then(d => {
         if (Array.isArray(d)) setNews(d)
-        else setNews(d.news ?? [])
+        else setNews(d.items ?? d.news ?? [])
       })
       .catch(() => setNews(mockNews))
   }, [])
@@ -107,6 +107,21 @@ export default function FeedClient() {
     return scored.sort((a, b) => b.score - a.score).map(x => x.item).slice(0, 30)
   })()
 
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-2xl px-4 py-6 pb-16 space-y-4 animate-pulse">
+        <div className="h-6 w-32 rounded bg-surface-2" />
+        <div className="h-20 rounded-xl bg-surface" />
+        <div className="h-10 rounded-xl bg-surface" />
+        <div className="space-y-3">
+          <div className="h-32 rounded-xl bg-surface" />
+          <div className="h-32 rounded-xl bg-surface" />
+          <div className="h-32 rounded-xl bg-surface" />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="mx-auto max-w-2xl px-4 py-6 pb-16">
 
@@ -114,7 +129,7 @@ export default function FeedClient() {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-text">
-            {loading ? 'Mon Feed' : profile ? `Bonjour, @${profile.username}` : 'Mon Feed'}
+            {profile ? `Bonjour, @${profile.username}` : 'Mon Feed'}
           </h1>
           <p className="text-xs text-text-3 mt-0.5">Personnalisé selon vos intérêts</p>
         </div>
