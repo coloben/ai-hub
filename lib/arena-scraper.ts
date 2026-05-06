@@ -49,6 +49,18 @@ const ARENA_NAME_MAP: Record<string, string> = {
   'grok-4-beta':                    'grok-4',
   'qwen-3':                         'qwen-3',
   'qwen3-72b':                      'qwen-3',
+  'kimi-k1.5':                      'kimi-k1-5',
+  'kimi-k1-5':                      'kimi-k1-5',
+  'glm-4':                          'glm-4',
+  'glm-4-plus':                     'glm-4',
+  'step-2':                         'step-2',
+  'stepfun/step-2':                 'step-2',
+  'baichuan-4':                     'baichuan-4',
+  'command-r-plus':                 'command-r-plus',
+  'command-r-plus-08-2024':         'command-r-plus',
+  'nous-hermes-3':                  'nous-hermes-3',
+  'jamba-2':                        'jamba-2',
+  'ai21/jamba-2':                   'jamba-2',
 }
 
 async function fetchArenaFromHF(): Promise<ArenaScore[]> {
