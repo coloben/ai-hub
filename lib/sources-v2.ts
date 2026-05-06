@@ -404,7 +404,7 @@ export const enhancedSourceConnectors: EnhancedSourceConnector[] = [
     category: 'release',
     enabled: true,
     priority: 'critical',
-    description: 'GPT-4o, o1, o3, API updates',
+    description: 'GPT-5, o5, API updates',
     estimatedLatencyMs: 1500,
     twitterHandle: '@OpenAI',
     healthCheckUrl: 'https://openai.com/news/',

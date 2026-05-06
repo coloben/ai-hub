@@ -30,7 +30,7 @@ export async function GET() {
           Classements, benchmarks et alertes des modèles IA en temps réel
         </div>
         <div style={{ display: 'flex', gap: '12px', marginTop: '48px' }}>
-          {['GPT-4o', 'Claude 4', 'Gemini 2.5', 'Llama 4', 'DeepSeek-V3'].map((m) => (
+          {['GPT-5', 'Claude 5', 'Gemini 3', 'Llama 5', 'DeepSeek-V4'].map((m) => (
             <div
               key={m}
               style={{
