@@ -29,10 +29,10 @@ export function Sidebar() {
   return (
     <>
       {/* Desktop rail — left edge, 56px */}
-      <aside className="fixed left-0 top-0 bottom-0 w-14 border-r border-white/10 bg-black z-40 hidden md:flex flex-col">
+      <aside className="fixed left-0 top-0 bottom-0 w-14 border-r border-white/[0.06] z-40 hidden md:flex flex-col" style={{ backgroundColor: '#0B0B0F' }}>
         {/* Logo mark */}
-        <div className="h-14 flex items-center justify-center border-b border-white/10">
-          <Link href="/" className="w-8 h-8 rounded-lg bg-white text-black flex items-center justify-center text-xs font-extrabold">
+        <div className="h-14 flex items-center justify-center border-b border-white/[0.06]">
+          <Link href="/" className="w-8 h-8 rounded-lg bg-white text-[#0B0B0F] flex items-center justify-center text-xs font-extrabold">
             AI
           </Link>
         </div>
@@ -86,7 +86,7 @@ export function Sidebar() {
       </aside>
 
       {/* Mobile bottom bar */}
-      <nav className="fixed bottom-0 left-0 right-0 h-14 bg-black border-t border-white/10 z-40 flex items-center justify-around md:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 h-14 border-t border-white/[0.06] z-40 flex items-center justify-around md:hidden" style={{ backgroundColor: '#0B0B0F' }}>
         {mainItems.slice(0, 5).map((item) => {
           const Icon = item.icon
           const isActive = pathname === item.href

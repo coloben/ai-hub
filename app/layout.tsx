@@ -61,7 +61,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="fr">
-      <body className="antialiased bg-black text-white min-h-screen">
+      <body className="antialiased text-white min-h-screen" style={{ backgroundColor: '#0B0B0F' }}>
         <Sidebar />
 
         {/* Main — full width minus rail. Mobile: full width minus bottom bar */}
@@ -70,7 +70,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </main>
 
         {/* Ticker — desktop only, above content */}
-        <footer className="hidden md:flex fixed bottom-0 left-14 right-0 z-30 h-8 items-center overflow-hidden border-t border-white/10 bg-black">
+        <footer className="hidden md:flex fixed bottom-0 left-14 right-0 z-30 h-8 items-center overflow-hidden border-t border-white/10" style={{ backgroundColor: '#0B0B0F' }}>
           <div className="flex h-full shrink-0 items-center border-r border-white/10 px-3 gap-2">
             <span className="live-dot" />
             <span className="text-[11px] font-semibold uppercase tracking-widest text-white/70">Live</span>

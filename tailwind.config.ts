@@ -5,31 +5,30 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // ARENA — Architectural Black & White
+        // ARENA v2 — Warm dark background, surface islands
         arena: {
-          bg: '#000000',
-          surface: '#0a0a0a',
-          line: '#1a1a1a',
-          hover: '#141414',
-          active: '#1f1f1f',
+          bg: '#0B0B0F',
+          surface: '#141418',
+          line: '#1E1E24',
+          hover: '#1A1A20',
+          active: '#222228',
         },
-        // Borders — VISIBLE. Architectural. Not decorative.
+        // Borders — 2 levels only
         edge: {
-          DEFAULT: 'rgba(255,255,255,0.15)',
-          hover: 'rgba(255,255,255,0.25)',
-          strong: 'rgba(255,255,255,0.40)',
+          DEFAULT: 'rgba(255,255,255,0.06)',
+          hover: 'rgba(255,255,255,0.12)',
+          strong: 'rgba(255,255,255,0.20)',
         },
-        // Text — stark hierarchy
+        // Text — 3 levels only
         ink: {
-          primary: '#ffffff',
+          primary: 'rgba(255,255,255,0.90)',
           secondary: 'rgba(255,255,255,0.55)',
-          tertiary: 'rgba(255,255,255,0.35)',
-          muted: 'rgba(255,255,255,0.18)',
+          tertiary: 'rgba(255,255,255,0.30)',
         },
-        // Single accent — data only
+        // Data accent
         data: '#00d4aa',
-        'data-dim': 'rgba(0,212,170,0.12)',
-        // States — minimal
+        'data-dim': 'rgba(0,212,170,0.10)',
+        // States
         up: '#22c55e',
         down: '#ef4444',
         alert: '#ff6b00',
