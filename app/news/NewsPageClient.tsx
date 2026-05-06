@@ -33,9 +33,13 @@ function initials(source: string): string {
   return clean.slice(0, 2).toUpperCase()
 }
 
-export default async function NewsPageClient() {
+export default async function NewsPageClient({ searchParams }: { searchParams?: { category?: string } }) {
   const allNews = await getLiveNews()
   const sources = Array.from(new Set(allNews.map(n => n.source)))
+  const activeCategory = searchParams?.category as NewsCategory | undefined
+  const filteredNews = activeCategory
+    ? allNews.filter(n => n.category === activeCategory)
+    : allNews
 
   return (
     <div
@@ -53,7 +57,7 @@ export default async function NewsPageClient() {
             <span className="text-xs text-white/30">temps réel</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs text-white/30">{allNews.length} publications</span>
+            <span className="text-xs text-white/30">{filteredNews.length} publications</span>
             <Link
               href="/submit"
               className="rounded-lg border border-[#00d4aa]/40 bg-[#00d4aa]/10 px-3 py-1.5 text-xs font-semibold text-[#00d4aa] hover:bg-[#00d4aa]/20 transition-colors"
@@ -65,7 +69,7 @@ export default async function NewsPageClient() {
 
         {/* Posts — chaque item est un Client Component interactif */}
         <div className="flex-1">
-          {allNews.map(item => (
+          {filteredNews.map(item => (
             <NewsItemInteractive
               key={item.id}
               id={item.id}
@@ -89,14 +93,29 @@ export default async function NewsPageClient() {
 
         <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-white/30">Catégories</p>
         <div className="mb-7 flex flex-col gap-0.5">
+          <Link
+            href="/news"
+            className={`flex items-center justify-between rounded-lg px-2 py-1.5 text-sm transition-colors ${
+              !activeCategory ? 'bg-white/[0.06] text-white' : 'text-white/55 hover:bg-white/[0.04]'
+            }`}
+          >
+            <span>Toutes</span>
+            <span className="text-xs tabular-nums text-white/30">{allNews.length}</span>
+          </Link>
           {(Object.entries(categoryLabel) as [NewsCategory, string][]).map(([cat, label]) => {
             const count = allNews.filter(n => n.category === cat).length
             if (count === 0) return null
             return (
-              <div key={cat} className="flex items-center justify-between rounded-lg px-2 py-1.5 text-sm text-white/55 hover:bg-white/[0.04] cursor-pointer transition-colors">
+              <Link
+                key={cat}
+                href={`/news?category=${cat}`}
+                className={`flex items-center justify-between rounded-lg px-2 py-1.5 text-sm transition-colors ${
+                  activeCategory === cat ? 'bg-white/[0.06] text-white' : 'text-white/55 hover:bg-white/[0.04]'
+                }`}
+              >
                 <span>{label}</span>
                 <span className="text-xs tabular-nums text-white/30">{count}</span>
-              </div>
+              </Link>
             )
           })}
         </div>

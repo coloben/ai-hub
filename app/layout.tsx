@@ -43,17 +43,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   let tickerItems: { source: string; title: string }[] = []
   try {
     const { getLiveNews } = await import('@/lib/feed')
-    const news = await getLiveNews(3)
+    const news = await getLiveNews(8)
     tickerItems = news.slice(0, 12).map(n => ({ source: n.source, title: n.title }))
   } catch {}
 
   if (tickerItems.length === 0) {
     tickerItems = [
-      { source: 'OpenAI',    title: 'GPT-4o : nouveau record Arena ELO — 1310' },
-      { source: 'Anthropic', title: 'Claude 4 disponible en API — contexte 200k' },
-      { source: 'Google',    title: 'Gemini 2.5 Flash — prix réduit de 50%' },
-      { source: 'Meta',      title: 'Llama 4 Scout — 17B actifs, open-source' },
-      { source: 'DeepSeek',  title: 'DeepSeek-V3 — 10x moins cher que GPT-4o' },
+      { source: 'Hacker News', title: 'Recherche active sur les derniers modèles IA' },
+      { source: 'Reddit',    title: 'Discussions en cours sur r/LocalLLaMA' },
+      { source: 'Veille IA',  title: 'Le marché des LLM évolue rapidement' },
+      { source: 'Benchmarks', title: 'Nouveaux scores Arena publiés cette semaine' },
+      { source: 'Releases',   title: 'Plusieurs modèles open-source annoncés' },
+      { source: 'Tarifs',     title: 'Guerre des prix sur les APIs IA' },
     ]
   }
 

@@ -69,5 +69,9 @@ export async function GET(request: NextRequest) {
     last_updated: new Date().toISOString(),
   }
   
-  return NextResponse.json(response)
+  return NextResponse.json(response, {
+    headers: {
+      'Cache-Control': 'public, max-age=300, stale-while-revalidate=600',
+    },
+  })
 }
