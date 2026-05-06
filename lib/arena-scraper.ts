@@ -174,9 +174,139 @@ export async function detectNewArenaModels(): Promise<{ name: string; elo: numbe
   return unknown.slice(0, 20) // max 20 nouveaux
 }
 
+// ── Supabase persistence & quality validation ─────────────────────────────
+
+import { supabaseAdmin, isSupabaseConfigured } from './supabase/admin'
+
+/** Valide la qualité des scores avant stockage */
+function validateScoreQuality(
+  newScore: ArenaScore,
+  previousElo: number | null
+): { isValid: boolean; notes: string; delta: number | null } {
+  const elo = newScore.elo
+  const prev = previousElo
+
+  // Règles de validation
+  if (elo < 800 || elo > 1600) {
+    return { isValid: false, notes: `ELO aberrant (${elo})`, delta: null }
+  }
+
+  if (prev !== null) {
+    const delta = elo - prev
+    // Un modèle ne perd/gagne pas plus de 150 ELO en 24h
+    if (Math.abs(delta) > 150) {
+      return { isValid: false, notes: `Delta trop grand (${delta}) depuis ${prev}`, delta }
+    }
+    // Un modèle ne perd pas plus de 50 ELO sans raison majeure
+    if (delta < -50) {
+      return { isValid: false, notes: `Chute suspecte de ${delta} ELO`, delta }
+    }
+  }
+
+  return { isValid: true, notes: 'OK', delta: prev !== null ? elo - prev : null }
+}
+
+/** Sauvegarde les scores Arena dans Supabase avec validation */
+export async function saveArenaScoresToSupabase(scores: ArenaScore[]): Promise<{
+  saved: number
+  rejected: number
+  newDetected: number
+}> {
+  if (!isSupabaseConfigured() || !supabaseAdmin) {
+    return { saved: 0, rejected: 0, newDetected: 0 }
+  }
+
+  // Récupérer les scores précédents pour validation
+  const { data: previousScores } = await supabaseAdmin
+    .from('arena_scores')
+    .select('model_id, elo')
+    .eq('is_validated', true)
+    .order('fetched_at', { ascending: false })
+
+  const prevMap: Record<string, number> = {}
+  if (previousScores) {
+    for (const row of previousScores) {
+      if (!prevMap[row.model_id]) prevMap[row.model_id] = row.elo
+    }
+  }
+
+  let saved = 0
+  let rejected = 0
+  const newDetected: string[] = []
+
+  for (const score of scores) {
+    const mappedId = ARENA_NAME_MAP[score.model_name]
+    const modelId = mappedId ?? score.model_name
+    const prevElo = prevMap[modelId] ?? null
+
+    const validation = validateScoreQuality(score, prevElo)
+
+    if (!mappedId && !newDetected.includes(score.model_name)) {
+      newDetected.push(score.model_name)
+    }
+
+    const { error } = await supabaseAdmin.from('arena_scores').insert({
+      model_id: modelId,
+      model_name: score.model_name,
+      elo: score.elo,
+      rank: score.rank,
+      num_battles: score.num_battles,
+      source: 'arena_live',
+      is_validated: validation.isValid,
+      validation_notes: validation.notes,
+      delta_from_previous: validation.delta,
+      previous_elo: prevElo,
+    })
+
+    if (error) {
+      console.error('Supabase insert error:', error)
+      rejected++
+    } else {
+      saved++
+      if (!validation.isValid) rejected++
+    }
+  }
+
+  return { saved, rejected, newDetected: newDetected.length }
+}
+
+/** Lit les derniers scores validés depuis Supabase */
+export async function getLatestScoresFromSupabase(): Promise<ArenaScore[]> {
+  if (!isSupabaseConfigured() || !supabaseAdmin) return []
+
+  const { data, error } = await supabaseAdmin
+    .from('arena_scores')
+    .select('*')
+    .eq('is_validated', true)
+    .order('fetched_at', { ascending: false })
+    .limit(100)
+
+  if (error || !data) return []
+
+  // Prendre le plus récent par model_id
+  const seen = new Set<string>()
+  const result: ArenaScore[] = []
+  for (const row of data) {
+    if (seen.has(row.model_id)) continue
+    seen.add(row.model_id)
+    result.push({
+      model_name: row.model_name.toLowerCase(),
+      elo: row.elo,
+      rank: row.rank,
+      num_battles: row.num_battles ?? 0,
+      updated_at: row.fetched_at,
+    })
+  }
+  return result
+}
+
 export async function getMergedModels(): Promise<Model[]> {
+  // 1. Essayer Supabase en priorité (qualité validée)
+  const dbScores = await getLatestScoresFromSupabase()
+
+  // 2. Sinon scraper live
   const [arenaScores, speedMap] = await Promise.allSettled([
-    getArenaScores(),
+    dbScores.length > 0 ? Promise.resolve(dbScores) : getArenaScores(),
     fetchSpeedFromArtificialAnalysis(),
   ])
 

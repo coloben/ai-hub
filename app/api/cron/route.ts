@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { CronResponse } from '@/lib/types'
 import { runScheduledIngestion, ScheduleMode, getSchedulerMetrics, getAllSourceHealth } from '@/lib/scheduler'
 import { generateAlertEvents } from '@/lib/alerts'
+import { getArenaScores, saveArenaScoresToSupabase, detectNewArenaModels } from '@/lib/arena-scraper'
+import { isSupabaseConfigured } from '@/lib/supabase/admin'
 
 export async function POST(request: NextRequest) {
   const authHeader = request.headers.get('authorization')
@@ -16,18 +18,52 @@ export async function POST(request: NextRequest) {
   const mode = (searchParams.get('mode') as ScheduleMode) || 'full'
   
   const startTime = Date.now()
+  const errors: string[] = []
+  let arenaResult = { saved: 0, rejected: 0, newDetected: 0, source: 'disabled' as string }
   
   try {
-    // Run scheduled ingestion with specified mode
+    // ── 1. News ingestion (existing) ──────────────────────────────
     const result = await runScheduledIngestion(mode)
+    errors.push(...result.errors)
     
     // Generate alerts if full or daily mode
     if (mode === 'full' || mode === 'daily') {
       try {
         generateAlertEvents()
       } catch (err) {
-        result.errors.push(`alerts: ${err instanceof Error ? err.message : String(err)}`)
+        errors.push(`alerts: ${err instanceof Error ? err.message : String(err)}`)
       }
+    }
+    
+    // ── 2. Arena scores scraping + quality validation ─────────────
+    try {
+      const arenaScores = await getArenaScores()
+      const newModels = await detectNewArenaModels()
+
+      if (arenaScores.length > 0) {
+        if (isSupabaseConfigured()) {
+          const saved = await saveArenaScoresToSupabase(arenaScores)
+          arenaResult = {
+            saved: saved.saved,
+            rejected: saved.rejected,
+            newDetected: saved.newDetected + newModels.length,
+            source: 'supabase_stored',
+          }
+        } else {
+          // Pas de Supabase : on logue les scores détectés sans stocker
+          arenaResult = {
+            saved: 0,
+            rejected: 0,
+            newDetected: newModels.length,
+            source: 'detected_only_no_db',
+          }
+        }
+      } else {
+        arenaResult.source = 'arena_fetch_failed'
+      }
+    } catch (err) {
+      errors.push(`arena: ${err instanceof Error ? err.message : String(err)}`)
+      arenaResult.source = 'error'
     }
     
     // Get current metrics
@@ -41,11 +77,12 @@ export async function POST(request: NextRequest) {
       circuit_breakers_open: number
       items_ingested: number
       average_latency_ms: number
+      arena: typeof arenaResult
     } = {
       refreshed: result.mode === 'fast' 
         ? [`${result.sources_processed} critical sources (fast mode)`]
         : [`${result.sources_processed} sources (${mode} mode)`],
-      errors: result.errors,
+      errors,
       duration_ms: Date.now() - startTime,
       mode: result.mode,
       sources_healthy: metrics.sources_healthy,
@@ -53,6 +90,7 @@ export async function POST(request: NextRequest) {
       circuit_breakers_open: result.circuit_breakers_open,
       items_ingested: result.items_ingested,
       average_latency_ms: metrics.average_latency_ms,
+      arena: arenaResult,
     }
 
     return NextResponse.json(response)
@@ -85,11 +123,7 @@ export async function GET(request: NextRequest) {
     average_latency_ms: metrics.average_latency_ms,
     ...(isAuthenticated && {
       source_health: sourceHealth,
-      crons: {
-        fast: '*/15 * * * *',
-        full: '0 * * * *',
-        daily: '0 6 * * *',
-      }
+      cron_schedule: '0 6 * * *',
     }),
   })
 }
