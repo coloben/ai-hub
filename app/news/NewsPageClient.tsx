@@ -78,6 +78,7 @@ export default async function NewsPageClient() {
               tags={item.tags}
               is_breaking={item.is_breaking}
               hype_score={item.hype_score}
+              commentCount={item.comment_count}
             />
           ))}
         </div>

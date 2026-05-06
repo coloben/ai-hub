@@ -230,3 +230,38 @@ tr:hover td {
   color: rgba(255,255,255,0.85);
   background: rgba(255,255,255,0.04);
 }
+
+/* ── Legacy utility classes (backward-compat pour pages existantes) ────────── */
+
+.text-gradient {
+  background: linear-gradient(135deg, #00d4aa 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-text-muted {
+  color: rgba(255,255,255,0.55);
+}
+
+.text-text-faint {
+  color: rgba(255,255,255,0.30);
+}
+
+.intel-card {
+  background: #141418;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+}
+
+.mesh-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.signal-ring {
+  border: 1px solid rgba(255,255,255,0.10);
+}

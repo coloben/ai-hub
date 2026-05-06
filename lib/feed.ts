@@ -17,6 +17,11 @@
 import { NewsItem, NewsCategory } from './types'
 import { mockNews } from './mock-data'
 
+// ── Cache in-memory (évite de spammer HN/Reddit à chaque req) ───────────────
+
+let _cache: { items: NewsItem[]; ts: number } | null = null
+const CACHE_TTL_MS = 5 * 60 * 1000 // 5 minutes
+
 // ── Types sources ────────────────────────────────────────────────────────────
 
 interface HNHit {
@@ -159,6 +164,8 @@ async function fetchHN(query: string, hits = 20): Promise<NewsItem[]> {
           tags: extractTags(title, text),
           is_breaking: breaking,
           hype_score: computeHypeScore(h.points, h.num_comments),
+          comment_count: h.num_comments,
+          engagement_score: h.points,
         } satisfies NewsItem
       })
   } catch {
@@ -202,6 +209,8 @@ async function fetchReddit(subreddit: string, limit = 10, time = 'day'): Promise
         tags: extractTags(title, text),
         is_breaking: breaking,
         hype_score: computeHypeScore(d.ups, d.num_comments),
+        comment_count: d.num_comments,
+        engagement_score: d.ups,
       } satisfies NewsItem
     })
   } catch {
@@ -227,8 +236,13 @@ function dedup(items: NewsItem[]): NewsItem[] {
  * Retourne les news fraîches depuis HN + Reddit.
  * Classification par contenu, hype score = engagement réel.
  * Fallback mockNews uniquement si TOUT échoue.
+ * Cache in-memory de 5 min pour ne pas spammer les APIs.
  */
 export async function getLiveNews(limitTotal = 30): Promise<NewsItem[]> {
+  if (_cache && Date.now() - _cache.ts < CACHE_TTL_MS) {
+    return _cache.items.slice(0, limitTotal)
+  }
+
   const [hnAI, hnLLM, hnOpenAI, reddit] = await Promise.allSettled([
     fetchHN('artificial intelligence', 15),
     fetchHN('LLM large language model', 10),
@@ -238,9 +252,13 @@ export async function getLiveNews(limitTotal = 30): Promise<NewsItem[]> {
 
   const live: NewsItem[] = []
   if (hnAI.status === 'fulfilled') live.push(...hnAI.value)
+  else console.warn('[feed] HN AI failed:', hnAI.reason)
   if (hnLLM.status === 'fulfilled') live.push(...hnLLM.value)
+  else console.warn('[feed] HN LLM failed:', hnLLM.reason)
   if (hnOpenAI.status === 'fulfilled') live.push(...hnOpenAI.value)
+  else console.warn('[feed] HN OpenAI failed:', hnOpenAI.reason)
   if (reddit.status === 'fulfilled') live.push(...reddit.value)
+  else console.warn('[feed] Reddit failed:', reddit.reason)
 
   if (live.length === 0) {
     return [...mockNews].sort(
@@ -248,9 +266,12 @@ export async function getLiveNews(limitTotal = 30): Promise<NewsItem[]> {
     )
   }
 
-  return dedup(live)
+  const result = dedup(live)
     .sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime())
-    .slice(0, limitTotal)
+    .slice(0, 60) // cache plus pour éviter re-fetch
+
+  _cache = { items: result, ts: Date.now() }
+  return result.slice(0, limitTotal)
 }
 
 /**

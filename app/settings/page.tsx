@@ -41,7 +41,7 @@ export default function SettingsPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(({ data: { user } }: { data: { user: any } }) => {
       if (user) setUserId(user.id)
     })
     fetch('/api/me')

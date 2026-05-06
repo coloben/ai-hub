@@ -34,7 +34,7 @@ export function NotificationBell() {
 
   // Charger user + notifications
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(({ data: { user } }: { data: { user: any } }) => {
       if (!user) return
       setUserId(user.id)
       fetch('/api/notifications')
@@ -57,7 +57,7 @@ export function NotificationBell() {
         schema: 'public',
         table: 'notifications',
         filter: `user_id=eq.${userId}`,
-      }, payload => {
+      }, (payload: any) => {
         const n = payload.new as Notification
         setNotifications(prev => [n, ...prev].slice(0, 50))
         setUnread(u => u + 1)

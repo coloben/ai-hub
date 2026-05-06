@@ -2,7 +2,7 @@
 import { mockModels } from '@/lib/mock-data'
 import { getLiveNews } from '@/lib/feed'
 import { FeedCard } from '@/components/FeedCard'
-import { ArrowUpRight, GitCompare, FileText, Bell, Zap } from 'lucide-react'
+import { ArrowUpRight, GitCompare, FileText, Bell, Zap, Newspaper } from 'lucide-react'
 
 export default async function Home() {
   const allNews = await getLiveNews()
@@ -143,7 +143,7 @@ export default async function Home() {
         <section className="surface-section p-6">
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
-              <NewspaperIcon size={16} className="text-white/50" />
+              <Newspaper size={16} className="text-white/50" />
               <h2 className="text-sm font-semibold text-white">Feed IA</h2>
               <span className="text-[11px] text-white/25">{posts.length} items</span>
             </div>
@@ -190,16 +190,6 @@ export default async function Home() {
         </section>
       </div>
     </div>
-  )
-}
-
-function NewspaperIcon({ size, className }: { size: number; className?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6l-2-2H5a2 2 0 0 0-2 2Z" />
-      <path d="M8 13h8" />
-      <path d="M8 17h5" />
-    </svg>
   )
 }
 

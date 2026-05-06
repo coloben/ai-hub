@@ -14,19 +14,19 @@ export function AuthButton() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(({ data: { user } }: { data: { user: any } }) => {
       setUser(user)
       if (user) {
         supabase.from('profiles').select('username, karma').eq('id', user.id).single()
-          .then(({ data }) => setProfile(data))
+          .then(({ data }: { data: any }) => setProfile(data))
       }
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       setUser(session?.user ?? null)
       if (session?.user) {
         supabase.from('profiles').select('username, karma').eq('id', session.user.id).single()
-          .then(({ data }) => setProfile(data))
+          .then(({ data }: { data: any }) => setProfile(data))
       } else {
         setProfile(null)
       }

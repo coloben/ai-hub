@@ -12,6 +12,9 @@ export interface NewsItem {
   tags: string[]
   is_breaking: boolean
   hype_score: number
+  // Engagement réel (pas inventé)
+  comment_count?: number
+  engagement_score?: number // points HN, upvotes Reddit...
   // Enrichment fields
   sentiment?: 'positive' | 'negative' | 'neutral'
   entities?: string[] // Models, companies, benchmarks mentioned

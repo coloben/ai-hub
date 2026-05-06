@@ -36,10 +36,10 @@ export function CommentDrawer({ postId, postTitle, open, onClose }: Props) {
 
   // Auth check
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(({ data: { user } }: { data: { user: any } }) => {
       if (user) {
         supabase.from('profiles').select('username').eq('id', user.id).single()
-          .then(({ data }) => setUser({ id: user.id, username: data?.username }))
+          .then(({ data }: { data: any }) => setUser({ id: user.id, username: data?.username }))
       }
     })
   }, [])
@@ -64,7 +64,7 @@ export function CommentDrawer({ postId, postTitle, open, onClose }: Props) {
         schema: 'public',
         table: 'comments',
         filter: `post_id=eq.${postId}`,
-      }, payload => {
+      }, (payload: any) => {
         const c = payload.new as Comment
         setComments(prev => prev.some(x => x.id === c.id) ? prev : [c, ...prev])
       })

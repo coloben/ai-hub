@@ -102,7 +102,7 @@ export default async function ProfilePage({ params }: { params: { username: stri
           </div>
         ) : (
           <div className="flex flex-col gap-2">
-            {posts.map(post => (
+            {posts.map((post: any) => (
               <div key={post.id} className="flex items-center gap-4 rounded-xl border border-border bg-surface px-4 py-3">
                 <span className={`shrink-0 text-xs font-bold tabular-nums ${post.score >= 0 ? 'text-success' : 'text-error'}`}>
                   {post.score > 0 ? `+${post.score}` : post.score}

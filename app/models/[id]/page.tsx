@@ -41,9 +41,9 @@ export default async function ModelPage({ params }: { params: { id: string } }) 
 
   // Stats moyennes des reviews
   const avgRatings = reviews && reviews.length > 0 ? {
-    quality: reviews.reduce((a, r) => a + (r.rating_quality ?? 0), 0) / reviews.length,
-    speed: reviews.reduce((a, r) => a + (r.rating_speed ?? 0), 0) / reviews.length,
-    value: reviews.reduce((a, r) => a + (r.rating_value ?? 0), 0) / reviews.length,
+    quality: reviews.reduce((a: number, r: any) => a + (r.rating_quality ?? 0), 0) / reviews.length,
+    speed: reviews.reduce((a: number, r: any) => a + (r.rating_speed ?? 0), 0) / reviews.length,
+    value: reviews.reduce((a: number, r: any) => a + (r.rating_value ?? 0), 0) / reviews.length,
   } : null
 
   // Modèles similaires (même provider ou même subcategory)

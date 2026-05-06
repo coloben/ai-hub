@@ -32,6 +32,37 @@ const config: Config = {
         up: '#22c55e',
         down: '#ef4444',
         alert: '#ff6b00',
+
+        // ── Backward-compatible semantic aliases ──
+        // These ensure every existing component renders correctly
+        // without touching 50+ files manually.
+        text: {
+          DEFAULT: 'rgba(255,255,255,0.90)',
+          2: 'rgba(255,255,255,0.55)',
+          3: 'rgba(255,255,255,0.30)',
+        },
+        surface: {
+          DEFAULT: '#141418',
+          2: 'rgba(255,255,255,0.04)',
+          3: 'rgba(255,255,255,0.03)',
+        },
+        border: 'rgba(255,255,255,0.06)',
+        'border-hover': 'rgba(255,255,255,0.12)',
+        divider: 'rgba(255,255,255,0.06)',
+        primary: '#00d4aa',
+        success: '#22c55e',
+        warn: '#f59e0b',
+        amber: '#f59e0b',
+        error: '#ef4444',
+        info: '#3b82f6',
+      },
+      backgroundColor: {
+        'primary-dim': 'rgba(0,212,170,0.10)',
+        'success-dim': 'rgba(34,197,94,0.10)',
+        'warn-dim': 'rgba(245,158,11,0.10)',
+        'amber-dim': 'rgba(245,158,11,0.10)',
+        'error-dim': 'rgba(239,68,68,0.10)',
+        'info-dim': 'rgba(59,130,246,0.10)',
       },
       fontFamily: {
         sans: ['Inter','-apple-system','BlinkMacSystemFont','Segoe UI','system-ui','sans-serif'],

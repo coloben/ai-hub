@@ -45,7 +45,7 @@ export default function OnboardingClient() {
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(({ data: { user } }: { data: { user: any } }) => {
       if (!user) { router.push('/login'); return }
       setUserId(user.id)
       const suggested = (user.user_metadata?.user_name || user.email?.split('@')[0] || '')

@@ -44,12 +44,14 @@ export default function FeedClient() {
       })
       .catch(() => setLoading(false))
 
-    // Charger les news
-    fetch('/api/models')
-      .then(() => {})
-      .catch(() => {})
-
-    setNews(mockNews)
+    // Charger les news réelles
+    fetch('/api/feed')
+      .then(r => r.json())
+      .then(d => {
+        if (Array.isArray(d)) setNews(d)
+        else setNews(d.news ?? [])
+      })
+      .catch(() => setNews(mockNews))
   }, [])
 
   if (loggedIn === false) {
@@ -217,6 +219,7 @@ export default function FeedClient() {
                 tags={item.tags}
                 is_breaking={item.is_breaking}
                 hype_score={item.hype_score}
+                commentCount={item.comment_count}
               />
             ))
           )}

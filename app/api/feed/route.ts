@@ -39,10 +39,8 @@ export async function GET(request: NextRequest) {
   
   if (source !== 'all') {
     const sourceMap: Record<string, string[]> = {
-      hf: ['HuggingFace'],
-      arxiv: ['ArXiv'],
-      news: ['The Verge', 'VentureBeat', 'MIT Tech Review'],
-      blogs: ['OpenAI', 'Anthropic', 'Google', 'Meta'],
+      hn: ['news.ycombinator.com'],
+      reddit: ['Reddit r/LocalLLaMA'],
     }
     const allowedSources = sourceMap[source]
     if (allowedSources) {
