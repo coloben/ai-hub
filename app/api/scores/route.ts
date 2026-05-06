@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getArenaScores, getMergedModels } from '@/lib/arena-scraper'
+import { getArenaScores, getMergedModels, detectNewArenaModels, ARENA_NAME_MAP } from '@/lib/arena-scraper'
 
 export const revalidate = 3600
 
@@ -13,21 +13,32 @@ export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS })
 }
 
-// GET /api/scores — retourne les scores Arena live
+// GET /api/scores — retourne TOP modèles (meilleurs scores) + NOUVEAUX modèles détectés
 export async function GET() {
   const start = Date.now()
   try {
-    const [arenaScores, mergedModels] = await Promise.allSettled([
+    const [arenaScores, mergedModels, newDetected] = await Promise.allSettled([
       getArenaScores(),
       getMergedModels(),
+      detectNewArenaModels(),
     ])
 
     const scores = arenaScores.status === 'fulfilled' ? arenaScores.value : []
     const models = mergedModels.status === 'fulfilled' ? mergedModels.value : []
+    const newModels = newDetected.status === 'fulfilled' ? newDetected.value : []
+
+    // TOP 20 modèles par ELO (meilleurs scores)
+    const topModels = scores.slice(0, 20).map(s => ({
+      name: s.model_name,
+      elo: s.elo,
+      rank: s.rank,
+      mapped_to: ARENA_NAME_MAP[s.model_name] ?? null,
+    }))
 
     return NextResponse.json({
-      arena_scores: scores.slice(0, 50),
-      models_updated: models.length,
+      top_models: topModels,
+      new_models_detected: newModels,
+      models_enriched: models.length,
       source: scores.length > 0 ? 'arena_live' : 'mock_fallback',
       fetched_at: new Date().toISOString(),
       duration_ms: Date.now() - start,
@@ -53,10 +64,15 @@ export async function POST(request: NextRequest) {
 
   const start = Date.now()
   try {
-    const models = await getMergedModels()
+    const [models, newModels] = await Promise.all([
+      getMergedModels(),
+      detectNewArenaModels(),
+    ])
     return NextResponse.json({
       refreshed: true,
       models_count: models.length,
+      new_models_detected: newModels.length,
+      new_models: newModels.slice(0, 10),
       duration_ms: Date.now() - start,
       refreshed_at: new Date().toISOString(),
     })

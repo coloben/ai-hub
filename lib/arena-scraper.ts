@@ -25,7 +25,7 @@ interface HFArenaRow {
 }
 
 // Mapping noms Arena → IDs dans mock-data (plausible mai 2026)
-const ARENA_NAME_MAP: Record<string, string> = {
+export const ARENA_NAME_MAP: Record<string, string> = {
   'gpt-5':                          'gpt-5',
   'gpt-5-2026-04-15':               'gpt-5',
   'gpt-5-mini':                     'gpt-5-mini',
@@ -49,71 +49,85 @@ const ARENA_NAME_MAP: Record<string, string> = {
   'grok-4-beta':                    'grok-4',
   'qwen-3':                         'qwen-3',
   'qwen3-72b':                      'qwen-3',
-  'kimi-k1.5':                      'kimi-k1-5',
-  'kimi-k1-5':                      'kimi-k1-5',
-  'glm-4':                          'glm-4',
-  'glm-4-plus':                     'glm-4',
-  'step-2':                         'step-2',
-  'stepfun/step-2':                 'step-2',
-  'baichuan-4':                     'baichuan-4',
-  'command-r-plus':                 'command-r-plus',
-  'command-r-plus-08-2024':         'command-r-plus',
-  'nous-hermes-3':                  'nous-hermes-3',
-  'jamba-2':                        'jamba-2',
-  'ai21/jamba-2':                   'jamba-2',
+  'kimi-k2.6':                      'kimi-k2-6',
+  'kimi-k2-6':                      'kimi-k2-6',
+  'glm-5':                          'glm-5',
+  'glm-5-plus':                     'glm-5',
+  'step-3':                         'step-3',
+  'stepfun/step-3':                 'step-3',
+  'baichuan-5':                     'baichuan-5',
+  'command-r2-plus':                'command-r2-plus',
+  'command-r2-plus-2025':           'command-r2-plus',
+  'nous-hermes-4':                  'nous-hermes-4',
+  'jamba-3':                        'jamba-3',
+  'ai21/jamba-3':                   'jamba-3',
+  'apple-intelligence-3':           'apple-intelligence-3',
 }
 
-async function fetchArenaFromHF(): Promise<ArenaScore[]> {
-  try {
-    // Endpoint HuggingFace Spaces API qui expose les scores Arena
-    const res = await fetch(
-      'https://huggingface.co/spaces/lmsys/chatbot-arena-leaderboard/resolve/main/leaderboard_table_20240515.csv',
-      { next: { revalidate: 3600 }, signal: AbortSignal.timeout(8000) }
-    )
-    if (!res.ok) throw new Error(`HF status ${res.status}`)
-    const text = await res.text()
-    const lines = text.trim().split('\n').slice(1) // skip header
-    const scores: ArenaScore[] = []
-    lines.forEach((line, i) => {
-      const cols = line.split(',')
-      if (cols.length < 2) return
-      const name = cols[0]?.replace(/"/g, '').trim().toLowerCase()
-      const elo = parseInt(cols[1] ?? '0')
-      if (name && elo > 800) {
-        scores.push({ model_name: name, elo, rank: i + 1, num_battles: 0, updated_at: new Date().toISOString() })
+const ARENA_SOURCES = [
+  // API JSON non-officielle — liste de fichiers possibles
+  'https://huggingface.co/datasets/lmarena-ai/chatbot-arena-leaderboard/resolve/main/elo_results.json',
+  'https://huggingface.co/datasets/lmarena-ai/chatbot-arena-leaderboard/resolve/main/elo_results_20241201.json',
+  'https://huggingface.co/datasets/lmarena-ai/chatbot-arena-leaderboard/resolve/main/elo_results_20250101.json',
+  'https://huggingface.co/datasets/lmarena-ai/chatbot-arena-leaderboard/resolve/main/elo_results_20250201.json',
+  'https://huggingface.co/datasets/lmarena-ai/chatbot-arena-leaderboard/resolve/main/elo_results_20250301.json',
+  'https://huggingface.co/datasets/lmarena-ai/chatbot-arena-leaderboard/resolve/main/elo_results_20250401.json',
+  'https://huggingface.co/datasets/lmarena-ai/chatbot-arena-leaderboard/resolve/main/elo_results_20250501.json',
+  // CSV fallback
+  'https://huggingface.co/spaces/lmsys/chatbot-arena-leaderboard/resolve/main/leaderboard_table.csv',
+]
+
+async function fetchArenaJSON(url: string): Promise<ArenaScore[]> {
+  const res = await fetch(url, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(8000) })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  const data = await res.json() as { model_order?: string[]; elo_rating_final?: Record<string, number> }
+  if (!data.elo_rating_final) throw new Error('No elo_rating_final')
+
+  const sorted = Object.entries(data.elo_rating_final)
+    .sort((a, b) => b[1] - a[1])
+    .map(([name, elo], i) => ({
+      model_name: name.toLowerCase().trim(),
+      elo: Math.round(elo),
+      rank: i + 1,
+      num_battles: 0,
+      updated_at: new Date().toISOString(),
+    }))
+  return sorted
+}
+
+async function fetchArenaCSV(url: string): Promise<ArenaScore[]> {
+  const res = await fetch(url, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(8000) })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  const text = await res.text()
+  const lines = text.trim().split('\n').slice(1)
+  const scores: ArenaScore[] = []
+  lines.forEach((line, i) => {
+    const cols = line.split(',')
+    if (cols.length < 2) return
+    const name = cols[0]?.replace(/"/g, '').trim().toLowerCase()
+    const elo = parseInt(cols[1] ?? '0')
+    if (name && elo > 800) {
+      scores.push({ model_name: name, elo, rank: i + 1, num_battles: 0, updated_at: new Date().toISOString() })
+    }
+  })
+  if (scores.length === 0) throw new Error('Empty CSV')
+  return scores
+}
+
+async function fetchArenaFromWeb(): Promise<ArenaScore[]> {
+  // Tente chaque source dans l'ordre jusqu'à ce qu'une réussisse
+  for (const url of ARENA_SOURCES) {
+    try {
+      if (url.endsWith('.json')) {
+        return await fetchArenaJSON(url)
+      } else {
+        return await fetchArenaCSV(url)
       }
-    })
-    return scores
-  } catch {
-    return []
+    } catch {
+      continue
+    }
   }
-}
-
-async function fetchArenaFromAPI(): Promise<ArenaScore[]> {
-  try {
-    // API non-officielle mais stable utilisée par plusieurs trackers
-    const res = await fetch(
-      'https://huggingface.co/datasets/lmarena-ai/chatbot-arena-leaderboard/resolve/main/elo_results_20241201.json',
-      { next: { revalidate: 3600 }, signal: AbortSignal.timeout(8000) }
-    )
-    if (!res.ok) throw new Error(`status ${res.status}`)
-    const data = await res.json() as { model_order?: string[]; elo_rating_final?: Record<string, number> }
-
-    if (!data.elo_rating_final) return []
-
-    const sorted = Object.entries(data.elo_rating_final)
-      .sort((a, b) => b[1] - a[1])
-      .map(([name, elo], i) => ({
-        model_name: name.toLowerCase(),
-        elo: Math.round(elo),
-        rank: i + 1,
-        num_battles: 0,
-        updated_at: new Date().toISOString(),
-      }))
-    return sorted
-  } catch {
-    return []
-  }
+  return []
 }
 
 async function fetchSpeedFromArtificialAnalysis(): Promise<Record<string, number>> {
@@ -125,7 +139,6 @@ async function fetchSpeedFromArtificialAnalysis(): Promise<Record<string, number
     })
     if (!res.ok) return {}
     const html = await res.text()
-    // Cherche le JSON data dans le HTML (Next.js __NEXT_DATA__)
     const match = html.match(/"throughput_tokens_per_second":(\d+).*?"model_name":"([^"]+)"/g)
     if (!match) return {}
     const map: Record<string, number> = {}
@@ -141,16 +154,24 @@ async function fetchSpeedFromArtificialAnalysis(): Promise<Record<string, number
 }
 
 export async function getArenaScores(): Promise<ArenaScore[]> {
-  const [apiScores, csvScores] = await Promise.allSettled([
-    fetchArenaFromAPI(),
-    fetchArenaFromHF(),
-  ])
-
-  const scores = apiScores.status === 'fulfilled' && apiScores.value.length > 0
-    ? apiScores.value
-    : csvScores.status === 'fulfilled' ? csvScores.value : []
-
+  const scores = await fetchArenaFromWeb()
   return scores
+}
+
+/** Détecte les modèles présents sur Arena mais ABSENTS de notre base mockModels */
+export async function detectNewArenaModels(): Promise<{ name: string; elo: number; rank: number }[]> {
+  const scores = await getArenaScores()
+  const knownIds = new Set(Object.values(ARENA_NAME_MAP))
+  const knownNames = new Set(mockModels.map(m => m.id))
+
+  const unknown: { name: string; elo: number; rank: number }[] = []
+  for (const s of scores) {
+    const mappedId = ARENA_NAME_MAP[s.model_name]
+    if (!mappedId && !knownNames.has(s.model_name)) {
+      unknown.push({ name: s.model_name, elo: s.elo, rank: s.rank })
+    }
+  }
+  return unknown.slice(0, 20) // max 20 nouveaux
 }
 
 export async function getMergedModels(): Promise<Model[]> {
