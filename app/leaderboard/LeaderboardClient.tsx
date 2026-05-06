@@ -320,9 +320,7 @@ export default function LeaderboardClient() {
                             <span>Contexte : {model.context_window.toLocaleString()} tokens</span>
                             <span>Type : {model.type}</span>
                             <a 
-                              href={model.changelog_url} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
+                              href={`/models/${model.id}`} 
                               className="text-primary hover:underline"
                               onClick={(e) => e.stopPropagation()}
                             >

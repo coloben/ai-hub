@@ -114,9 +114,7 @@ export default function TimelinePage() {
                       </div>
                       
                       <a 
-                        href={model.changelog_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        href={`/models/${model.id}`}
                         className="text-primary hover:underline text-xs"
                       >
                         Détails →
