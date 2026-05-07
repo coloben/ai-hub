@@ -15,6 +15,25 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   created_at    timestamptz DEFAULT now()
 );
 
+-- Fix : ajoute les colonnes si la table profiles préexiste avec un ancien schéma
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS username text,
+  ADD COLUMN IF NOT EXISTS display_name text,
+  ADD COLUMN IF NOT EXISTS avatar_url text,
+  ADD COLUMN IF NOT EXISTS bio text,
+  ADD COLUMN IF NOT EXISTS karma int DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now();
+
+-- Contrainte unique sur username (idempotente)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_indexes WHERE indexname = 'profiles_username_key'
+  ) THEN
+    ALTER TABLE public.profiles ADD CONSTRAINT profiles_username_key UNIQUE (username);
+  END IF;
+END $$;
+
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "profiles_public_read" ON public.profiles;
 CREATE POLICY "profiles_public_read" ON public.profiles FOR SELECT USING (true);
@@ -171,3 +190,32 @@ CREATE TABLE IF NOT EXISTS public.news_cache (
 ALTER TABLE public.news_cache ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "news_cache_public_read" ON public.news_cache;
 CREATE POLICY "news_cache_public_read" ON public.news_cache FOR SELECT USING (true);
+
+
+-- 7. Storage : bucket avatars (photos de profil)
+-- ============================================================
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES ('avatars', 'avatars', true, 5242880, '{image/png,image/jpeg,image/jpg}')
+ON CONFLICT (id) DO UPDATE SET
+  public = true,
+  file_size_limit = 5242880,
+  allowed_mime_types = '{image/png,image/jpeg,image/jpg}';
+
+-- Policies storage : tout le monde peut lire, authentifié peut écrire
+DROP POLICY IF EXISTS "avatars_public_select" ON storage.objects;
+CREATE POLICY "avatars_public_select" ON storage.objects FOR SELECT USING (bucket_id = 'avatars');
+
+DROP POLICY IF EXISTS "avatars_owner_insert" ON storage.objects;
+CREATE POLICY "avatars_owner_insert" ON storage.objects FOR INSERT WITH CHECK (
+  bucket_id = 'avatars' AND auth.uid() IS NOT NULL
+);
+
+DROP POLICY IF EXISTS "avatars_owner_update" ON storage.objects;
+CREATE POLICY "avatars_owner_update" ON storage.objects FOR UPDATE USING (
+  bucket_id = 'avatars' AND auth.uid() IS NOT NULL
+);
+
+DROP POLICY IF EXISTS "avatars_owner_delete" ON storage.objects;
+CREATE POLICY "avatars_owner_delete" ON storage.objects FOR DELETE USING (
+  bucket_id = 'avatars' AND auth.uid() IS NOT NULL
+);
