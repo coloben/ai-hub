@@ -16,7 +16,9 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 );
 
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "profiles_public_read" ON public.profiles;
 CREATE POLICY "profiles_public_read" ON public.profiles FOR SELECT USING (true);
+DROP POLICY IF EXISTS "profiles_owner_write" ON public.profiles;
 CREATE POLICY "profiles_owner_write" ON public.profiles FOR ALL USING (auth.uid() = id);
 
 -- Trigger : créer un profil à l'inscription
@@ -53,7 +55,9 @@ CREATE TABLE IF NOT EXISTS public.comments (
 );
 
 ALTER TABLE public.comments ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "comments_public_read" ON public.comments;
 CREATE POLICY "comments_public_read" ON public.comments FOR SELECT USING (true);
+DROP POLICY IF EXISTS "comments_owner_all" ON public.comments;
 CREATE POLICY "comments_owner_all"   ON public.comments FOR ALL USING (auth.uid() = user_id);
 
 CREATE INDEX IF NOT EXISTS idx_comments_post ON public.comments(post_id, created_at);
@@ -73,7 +77,9 @@ CREATE TABLE IF NOT EXISTS public.votes (
 );
 
 ALTER TABLE public.votes ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "votes_public_read" ON public.votes;
 CREATE POLICY "votes_public_read" ON public.votes FOR SELECT USING (true);
+DROP POLICY IF EXISTS "votes_owner_all" ON public.votes;
 CREATE POLICY "votes_owner_all"   ON public.votes FOR ALL USING (auth.uid() = user_id);
 
 CREATE INDEX IF NOT EXISTS idx_votes_target ON public.votes(target_id);
@@ -94,6 +100,7 @@ CREATE TABLE IF NOT EXISTS public.user_alerts (
 );
 
 ALTER TABLE public.user_alerts ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "user_alerts_owner" ON public.user_alerts;
 CREATE POLICY "user_alerts_owner" ON public.user_alerts FOR ALL USING (auth.uid() = user_id);
 CREATE INDEX IF NOT EXISTS idx_user_alerts_user ON public.user_alerts(user_id, is_active);
 
@@ -118,6 +125,7 @@ CREATE TABLE public.arena_scores (
 );
 
 ALTER TABLE public.arena_scores ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "arena_scores_public_read" ON public.arena_scores;
 CREATE POLICY "arena_scores_public_read" ON public.arena_scores FOR SELECT USING (true);
 CREATE INDEX IF NOT EXISTS idx_arena_scores_model ON public.arena_scores(model_id);
 CREATE INDEX IF NOT EXISTS idx_arena_scores_scraped ON public.arena_scores(scraped_at DESC);
@@ -161,4 +169,5 @@ CREATE TABLE IF NOT EXISTS public.news_cache (
 );
 
 ALTER TABLE public.news_cache ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "news_cache_public_read" ON public.news_cache;
 CREATE POLICY "news_cache_public_read" ON public.news_cache FOR SELECT USING (true);
