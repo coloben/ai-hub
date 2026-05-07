@@ -13,14 +13,25 @@ export default function UserNav() {
 
   useEffect(() => {
     const supabase = createClient()
-    supabase.auth.getUser().then(async ({ data: { user } }: { data: { user: any } }) => {
-      setUser(user)
-      if (user) {
-        const { data: p } = await supabase.from('profiles').select('*').eq('id', user.id).single()
-        setProfile(p)
-      }
-      setLoading(false)
-    })
+
+    // Timeout de sécurité pour éviter le loading infini
+    const timeout = setTimeout(() => setLoading(false), 3000)
+
+    supabase.auth.getUser()
+      .then(async ({ data: { user } }: { data: { user: any } }) => {
+        clearTimeout(timeout)
+        setUser(user)
+        if (user) {
+          const { data: p } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+          setProfile(p)
+        }
+        setLoading(false)
+      })
+      .catch((err: any) => {
+        clearTimeout(timeout)
+        console.error('[UserNav] getUser error:', err)
+        setLoading(false)
+      })
 
     const { data: listener } = supabase.auth.onAuthStateChange(async (event: string, session: any) => {
       const u = session?.user ?? null
@@ -33,7 +44,10 @@ export default function UserNav() {
       }
     })
 
-    return () => listener.subscription.unsubscribe()
+    return () => {
+      clearTimeout(timeout)
+      listener.subscription.unsubscribe()
+    }
   }, [])
 
   useEffect(() => {
