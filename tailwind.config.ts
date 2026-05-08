@@ -25,6 +25,8 @@ const config: Config = {
           secondary: 'rgba(255,255,255,0.55)',
           tertiary: 'rgba(255,255,255,0.30)',
         },
+        // Root background alias — used as bg-bg in drawer/overlay components
+        bg: '#0B0B0F',
         // Data accent
         data: '#00d4aa',
         'data-dim': 'rgba(0,212,170,0.10)',
@@ -97,6 +99,7 @@ const config: Config = {
       animation: {
         'fade-in': 'fadeIn 0.15s ease-out both',
         'slide-up': 'slideUp 0.2s ease-out both',
+        'slide-right': 'slideRight 0.22s ease-out both',
         'pulse-soft': 'pulseSoft 2s ease-in-out infinite',
         'ticker': 'ticker 50s linear infinite',
       },
@@ -108,6 +111,10 @@ const config: Config = {
         slideUp: {
           '0%': { opacity: '0', transform: 'translateY(4px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        slideRight: {
+          '0%': { opacity: '0', transform: 'translateX(24px)' },
+          '100%': { opacity: '1', transform: 'translateX(0)' },
         },
         pulseSoft: {
           '0%, 100%': { opacity: '1' },

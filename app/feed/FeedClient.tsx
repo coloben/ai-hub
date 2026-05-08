@@ -195,23 +195,7 @@ export default function FeedClient() {
       )}
 
       {/* News */}
-      {loading ? (
-        <div className="flex flex-col gap-0">
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} className="border-b border-border py-4 px-2 animate-pulse">
-              <div className="flex gap-3">
-                <div className="h-9 w-9 rounded-full bg-surface-2 shrink-0" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-3 w-20 rounded bg-surface-2" />
-                  <div className="h-4 w-full rounded bg-surface-2" />
-                  <div className="h-3 w-3/4 rounded bg-surface-2" />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="rounded-xl border border-border overflow-hidden">
+      <div className="rounded-xl border border-border overflow-hidden">
           {filteredNews.length === 0 ? (
             <div className="py-16 text-center">
               <p className="text-3xl mb-2">📭</p>
@@ -239,7 +223,6 @@ export default function FeedClient() {
             ))
           )}
         </div>
-      )}
     </div>
   )
 }

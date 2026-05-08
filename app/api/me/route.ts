@@ -24,7 +24,7 @@ export async function PATCH(request: Request) {
   if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 
   const updates = await request.json()
-  const allowed = ['username', 'interests', 'followed_models', 'avatar_url']
+  const allowed = ['username', 'display_name', 'bio', 'interests', 'followed_models', 'avatar_url']
   const safe = Object.fromEntries(
     Object.entries(updates).filter(([k]) => allowed.includes(k))
   )
@@ -42,7 +42,7 @@ export async function PATCH(request: Request) {
     .from('profiles')
     .update(safe)
     .eq('id', user.id)
-    .select('username, karma, level, interests, followed_models')
+    .select('username, display_name, bio, karma, level, interests, followed_models, avatar_url')
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

@@ -4,12 +4,13 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutGrid, Newspaper, Trophy, BarChart3, GitCompare, Bell,
-  FileText, Calculator, Clock, BookOpen, Plus, Settings
+  FileText, Calculator, Clock, BookOpen, Plus, Settings, Rss
 } from 'lucide-react'
 
 const mainItems = [
   { href: '/', icon: LayoutGrid, label: 'Dashboard' },
   { href: '/news', icon: Newspaper, label: 'Feed IA' },
+  { href: '/feed', icon: Rss, label: 'Mon Feed' },
   { href: '/leaderboard', icon: Trophy, label: 'Classement' },
   { href: '/benchmarks', icon: BarChart3, label: 'Benchmarks' },
   { href: '/compare', icon: GitCompare, label: 'Comparer' },
@@ -87,7 +88,7 @@ export function Sidebar() {
 
       {/* Mobile bottom bar */}
       <nav className="fixed bottom-0 left-0 right-0 h-14 border-t border-white/[0.06] z-40 flex items-center justify-around md:hidden" style={{ backgroundColor: '#0B0B0F' }}>
-        {mainItems.slice(0, 5).map((item) => {
+        {mainItems.slice(0, 6).map((item) => {
           const Icon = item.icon
           const isActive = pathname === item.href
           return (

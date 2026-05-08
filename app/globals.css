@@ -199,7 +199,7 @@ body {
 }
 .ticker-content {
   display: flex;
-  animation: ticker 45s linear infinite;
+  animation: ticker 50s linear infinite;
 }
 
 /* Reduced motion */
@@ -265,6 +265,44 @@ tr:hover td {
 .signal-ring {
   border: 1px solid rgba(255,255,255,0.10);
 }
+
+/* ── Score badges (Leaderboard) ─────────────────────────────────────────── */
+.badge-s {
+  background: rgba(0,212,170,0.12);
+  color: #00d4aa;
+  border: 1px solid rgba(0,212,170,0.25);
+}
+.badge-a {
+  background: rgba(34,197,94,0.10);
+  color: #22c55e;
+  border: 1px solid rgba(34,197,94,0.20);
+}
+.badge-b {
+  background: rgba(245,158,11,0.10);
+  color: #f59e0b;
+  border: 1px solid rgba(245,158,11,0.20);
+}
+.badge-c {
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.45);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* Live pulse — variante du live-dot utilisée sur login */
+.live-pulse {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  animation: pulseSoft 2s ease-in-out infinite;
+  box-shadow: 0 0 0 2px rgba(34,197,94,0.20);
+}
+
+/* text-accent / bg-accent-dim — alias de data pour compatibilité constants.ts */
+.text-accent  { color: #00d4aa; }
+.bg-accent-dim { background-color: rgba(0,212,170,0.10); }
+.text-info-dim { color: rgba(59,130,246,0.55); }
 
 /* Vote animations */
 .karma-float {

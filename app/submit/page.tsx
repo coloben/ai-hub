@@ -123,7 +123,7 @@ export default function SubmitPage() {
                 className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-medium transition-all ${
                   category === cat.id
                     ? 'border-primary/60 bg-primary/10 text-text'
-                    : 'border-border bg-surface text-text-2 hover:border-border-2'
+                    : 'border-border bg-surface text-text-2 hover:border-white/20'
                 }`}
               >
                 <span>{cat.icon}</span>{cat.label}

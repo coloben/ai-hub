@@ -95,7 +95,7 @@ export default function UserNav() {
           </div>
 
           <Link
-            href="/profile"
+            href="/profile/me"
             onClick={() => setOpen(false)}
             className="flex items-center gap-3 px-4 py-2.5 text-sm text-white hover:bg-white/10 transition-colors"
           >

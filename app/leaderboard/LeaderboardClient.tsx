@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, Fragment } from 'react'
 import { mockModels } from '@/lib/mock-data'
 import { Model } from '@/lib/types'
 
@@ -238,12 +238,9 @@ export default function LeaderboardClient() {
             </thead>
             <tbody>
               {displayModels.map((model, index) => (
-                <>
-                  <tr 
-                    key={model.id}
-                    className={`border-b border-divider hover:bg-surface-2 transition-colors cursor-pointer ${
-                      index % 2 === 0 ? 'bg-surface' : 'bg-surface'
-                    }`}
+                <Fragment key={model.id}>
+                  <tr
+                    className="border-b border-divider hover:bg-surface-2 transition-colors cursor-pointer"
                     onClick={() => setExpandedModel(expandedModel === model.id ? null : model.id)}
                   >
                     <td className="py-3 px-2">
@@ -331,7 +328,7 @@ export default function LeaderboardClient() {
                       </td>
                     </tr>
                   )}
-                </>
+                </Fragment>
               ))}
             </tbody>
           </table>

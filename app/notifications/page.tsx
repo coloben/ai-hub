@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { timeAgo } from '@/lib/utils'
 
 interface Notification {
   id: string
@@ -11,15 +12,6 @@ interface Notification {
   url: string | null
   is_read: boolean
   created_at: string
-}
-
-function timeAgo(date: string): string {
-  const m = Math.floor((Date.now() - new Date(date).getTime()) / 60000)
-  if (m < 2) return 'à l\'instant'
-  if (m < 60) return `${m}m`
-  const h = Math.floor(m / 60)
-  if (h < 24) return `${h}h`
-  return `${Math.floor(h / 24)}j`
 }
 
 const TYPE_ICON: Record<string, string> = {
@@ -144,7 +136,7 @@ export default function NotificationsPage() {
             <div
               key={n.id}
               onClick={() => { markOne(n.id); if (n.url) window.location.href = n.url }}
-              className={`flex cursor-pointer items-start gap-4 rounded-xl border p-4 transition-all hover:border-border-2 ${
+              className={`flex cursor-pointer items-start gap-4 rounded-xl border p-4 transition-all hover:border-white/20 ${
                 !n.is_read
                   ? 'border-primary/20 bg-primary/5'
                   : 'border-border bg-surface'

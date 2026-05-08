@@ -109,7 +109,7 @@ export default function SettingsPage() {
   }
 
   async function deleteAccount() {
-    if (!confirm('Supprimer définitivement votre compte ? Cette action est irréversible.')) return
+    if (!confirm('Se déconnecter de ce compte ? Pour supprimer définitivement votre compte, contactez le support.')) return
     await supabase.auth.signOut()
     router.push('/')
   }
@@ -299,12 +299,12 @@ export default function SettingsPage() {
       {/* Danger zone */}
       <div className="mt-8 rounded-2xl border border-error/20 bg-error/5 p-5">
         <h2 className="mb-1 text-sm font-semibold text-error">Zone de danger</h2>
-        <p className="mb-4 text-xs text-text-3">Ces actions sont irréversibles.</p>
+        <p className="mb-4 text-xs text-text-3">La suppression définitive du compte nécessite de contacter le support.</p>
         <button
           onClick={deleteAccount}
           className="rounded-lg border border-error/30 bg-error/10 px-4 py-2 text-xs font-semibold text-error hover:bg-error/20 transition-colors"
         >
-          Supprimer mon compte
+          Se déconnecter
         </button>
       </div>
     </div>
