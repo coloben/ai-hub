@@ -3,6 +3,8 @@ import './globals.css'
 import { Sidebar } from '@/components/Sidebar'
 import UserNav from '@/components/auth/user-nav'
 import { PageTitle } from '@/components/PageTitle'
+import { GlobalSearch } from '@/components/GlobalSearch'
+import { NotificationBell } from '@/components/NotificationBell'
 
 const BASE_URL = 'https://ai-hub-cnb3.vercel.app'
 
@@ -69,13 +71,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
         {/* Main — full width minus rail. Mobile: full width minus bottom bar */}
         <main className="md:ml-[220px] min-h-screen pb-14 md:pb-8">
-          <header className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-white/10 px-4 py-3 backdrop-blur-md" style={{ backgroundColor: 'rgba(11,11,15,0.8)' }}>
+          <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-white/10 px-4 py-2.5 backdrop-blur-md" style={{ backgroundColor: 'rgba(11,11,15,0.85)' }}>
             <PageTitle />
+            <div className="flex-1" />
+            <GlobalSearch />
+            <NotificationBell />
             <UserNav />
           </header>
-          <div className="p-4 md:p-6">
-            {children}
-          </div>
+          {children}
         </main>
 
         {/* Ticker — desktop only, above content */}

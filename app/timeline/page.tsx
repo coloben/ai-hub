@@ -68,7 +68,7 @@ export default function TimelinePage() {
                 {models.map((model) => (
                   <div 
                     key={model.id}
-                    className="bg-surface-2 rounded p-4 hover:bg-surface-offset transition-colors"
+                    className="bg-white/[0.03] rounded-lg p-4 hover:bg-white/[0.06] transition-colors"
                   >
                     <div className="flex items-start gap-4">
                       <div 

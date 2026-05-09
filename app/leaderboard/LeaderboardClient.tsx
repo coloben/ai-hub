@@ -4,7 +4,7 @@ import { useState, useMemo, Fragment } from 'react'
 import { mockModels } from '@/lib/mock-data'
 import { Model } from '@/lib/types'
 
-type SortField = 'arena_elo' | 'mmlu' | 'humaneval' | 'math' | 'gpqa' | 'speed_tps' | 'price_input' | 'release_date'
+type SortField = 'arena_elo' | 'mmlu' | 'humaneval' | 'math' | 'gpqa' | 'swe_bench' | 'speed_tps' | 'price_input' | 'release_date'
 type ScoreField = Exclude<SortField, 'release_date'>
 type FilterType = 'all' | 'proprietary' | 'open'
 
@@ -14,6 +14,7 @@ const sortLabels: Record<SortField, string> = {
   humaneval: 'HumanEval',
   math: 'MATH',
   gpqa: 'GPQA',
+  swe_bench: 'SWE-bench',
   speed_tps: 'Vitesse',
   price_input: '$/1M entrée',
   release_date: 'Sortie',
@@ -110,7 +111,7 @@ export default function LeaderboardClient() {
   }
 
   const exportCSV = () => {
-    const headers = ['Rank', 'Model', 'Provider', 'Type', 'Arena ELO', 'MMLU', 'HumanEval', 'MATH', 'GPQA', 'Speed', 'Price In', 'Price Out', 'Released']
+    const headers = ['Rank', 'Model', 'Provider', 'Type', 'Arena ELO', 'MMLU', 'HumanEval', 'MATH', 'GPQA', 'SWE-bench', 'Speed', 'Price In', 'Price Out', 'Released']
     const rows = filteredModels.map((m, i) => [
       i + 1,
       m.name,
@@ -121,6 +122,7 @@ export default function LeaderboardClient() {
       m.scores.humaneval ?? '',
       m.scores.math ?? '',
       m.scores.gpqa ?? '',
+      m.scores.swe_bench ?? '',
       m.scores.speed_tps ?? '',
       m.scores.price_input ?? '',
       m.scores.price_output ?? '',
@@ -215,13 +217,19 @@ export default function LeaderboardClient() {
                 >
                   MATH {sortField === 'math' && (sortDirection === 'desc' ? '↓' : '↑')}
                 </th>
-                <th 
+                <th
                   className="text-left py-3 px-2 text-2xs font-medium text-text-2 uppercase tracking-wider cursor-pointer hover:text-text"
                   onClick={() => handleSort('gpqa')}
                 >
                   GPQA {sortField === 'gpqa' && (sortDirection === 'desc' ? '↓' : '↑')}
                 </th>
-                <th 
+                <th
+                  className="text-left py-3 px-2 text-2xs font-medium text-text-2 uppercase tracking-wider cursor-pointer hover:text-text"
+                  onClick={() => handleSort('swe_bench')}
+                >
+                  SWE-bench {sortField === 'swe_bench' && (sortDirection === 'desc' ? '↓' : '↑')}
+                </th>
+                <th
                   className="text-left py-3 px-2 text-2xs font-medium text-text-2 uppercase tracking-wider cursor-pointer hover:text-text"
                   onClick={() => handleSort('speed_tps')}
                 >
@@ -298,6 +306,11 @@ export default function LeaderboardClient() {
                         {formatScore(model.scores.gpqa)}
                       </span>
                     </td>
+                    <td className="py-3 px-2">
+                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-2xs font-mono font-medium tabular-nums ${scoreBadgeClass(model.scores.swe_bench ?? null, 'swe_bench')}`}>
+                        {model.scores.swe_bench != null ? `${model.scores.swe_bench}%` : '—'}
+                      </span>
+                    </td>
                     <td className="py-3 px-2 font-mono text-sm tabular-nums text-text-2">
                       {formatScore(model.scores.speed_tps)}
                     </td>
@@ -310,7 +323,7 @@ export default function LeaderboardClient() {
                   </tr>
                   {expandedModel === model.id && (
                     <tr className="bg-surface-2">
-                      <td colSpan={11} className="py-4 px-6">
+                      <td colSpan={12} className="py-4 px-6">
                         <div className="text-sm text-text-2">
                           <p className="mb-2">{model.description}</p>
                           <div className="flex items-center gap-4 text-2xs">

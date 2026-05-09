@@ -27,6 +27,7 @@ export interface ModelScores {
   humaneval: number | null
   math: number | null
   gpqa: number | null
+  swe_bench?: number | null  // SWE-bench Verified (%)
   speed_tps: number | null
   price_input: number | null
   price_output: number | null
