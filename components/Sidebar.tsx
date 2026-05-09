@@ -4,7 +4,8 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutGrid, Newspaper, Trophy, BarChart3, GitCompare, Bell,
-  FileText, Calculator, Clock, BookOpen, Plus, Settings, Rss
+  FileText, Calculator, Clock, BookOpen, Plus, Settings, Rss,
+  ChevronRight
 } from 'lucide-react'
 
 const mainItems = [
@@ -19,7 +20,7 @@ const mainItems = [
 
 const toolItems = [
   { href: '/briefing', icon: FileText, label: 'Briefing' },
-  { href: '/cost-calculator', icon: Calculator, label: 'Coûts' },
+  { href: '/cost-calculator', icon: Calculator, label: 'Calculateur' },
   { href: '/timeline', icon: Clock, label: 'Timeline' },
   { href: '/glossary', icon: BookOpen, label: 'Glossaire' },
 ]
@@ -29,65 +30,116 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Desktop rail — left edge, 56px */}
-      <aside className="fixed left-0 top-0 bottom-0 w-14 border-r border-white/[0.06] z-40 hidden md:flex flex-col" style={{ backgroundColor: '#0B0B0F' }}>
-        {/* Logo mark */}
-        <div className="h-14 flex items-center justify-center border-b border-white/[0.06]">
-          <Link href="/" className="w-8 h-8 rounded-lg bg-white text-[#0B0B0F] flex items-center justify-center text-xs font-extrabold">
+      {/* Desktop sidebar — 220px labeled */}
+      <aside
+        className="fixed left-0 top-0 bottom-0 w-[220px] z-40 hidden md:flex flex-col border-r border-white/[0.06]"
+        style={{ backgroundColor: '#0B0B0F' }}
+      >
+        {/* Logo + brand */}
+        <div className="h-14 flex items-center gap-3 px-4 border-b border-white/[0.06] shrink-0">
+          <div className="w-7 h-7 rounded-[6px] bg-white flex items-center justify-center text-[10px] font-black text-[#0B0B0F] shrink-0 tracking-tight">
             AI
-          </Link>
+          </div>
+          <div className="min-w-0">
+            <p className="text-[14px] font-bold text-white leading-none tracking-tight">AI Hub</p>
+            <div className="flex items-center gap-1.5 mt-[3px]">
+              <span className="live-dot" style={{ width: 6, height: 6, minWidth: 6 }} />
+              <span className="text-[10px] font-semibold text-white/30 uppercase tracking-[0.10em]">Live</span>
+            </div>
+          </div>
         </div>
 
-        {/* Main nav */}
-        <nav className="nav-rail flex-1 py-2">
-          {mainItems.map((item) => {
-            const Icon = item.icon
-            const isActive = pathname === item.href
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={isActive ? 'active' : ''}
-                title={item.label}
-                aria-label={item.label}
-              >
-                <Icon size={20} strokeWidth={isActive ? 2.5 : 1.5} />
-              </Link>
-            )
-          })}
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto py-3">
+          {/* Main */}
+          <div className="px-3">
+            <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-white/20 px-2 mb-1.5">
+              Navigation
+            </p>
+            {mainItems.map((item) => {
+              const Icon = item.icon
+              const isActive = pathname === item.href
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`
+                    flex items-center gap-2.5 px-2 py-[7px] rounded-lg mb-0.5 transition-all duration-150 group
+                    ${isActive
+                      ? 'bg-white text-black'
+                      : 'text-white/40 hover:text-white/80 hover:bg-white/[0.05]'
+                    }
+                  `}
+                >
+                  <Icon
+                    size={15}
+                    strokeWidth={isActive ? 2.5 : 1.8}
+                    className="shrink-0"
+                  />
+                  <span className="text-[13px] font-medium leading-none">{item.label}</span>
+                  {isActive && (
+                    <ChevronRight size={12} className="ml-auto opacity-30" />
+                  )}
+                </Link>
+              )
+            })}
+          </div>
 
-          <div className="w-5 h-px bg-white/10 my-2" />
+          {/* Divider */}
+          <div className="mx-5 my-3 h-px bg-white/[0.06]" />
 
-          {toolItems.map((item) => {
-            const Icon = item.icon
-            const isActive = pathname === item.href
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={isActive ? 'active' : ''}
-                title={item.label}
-                aria-label={item.label}
-              >
-                <Icon size={18} strokeWidth={isActive ? 2.5 : 1.5} />
-              </Link>
-            )
-          })}
+          {/* Tools */}
+          <div className="px-3">
+            <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-white/20 px-2 mb-1.5">
+              Outils
+            </p>
+            {toolItems.map((item) => {
+              const Icon = item.icon
+              const isActive = pathname === item.href
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`
+                    flex items-center gap-2.5 px-2 py-[7px] rounded-lg mb-0.5 transition-all duration-150
+                    ${isActive
+                      ? 'bg-white text-black'
+                      : 'text-white/35 hover:text-white/70 hover:bg-white/[0.05]'
+                    }
+                  `}
+                >
+                  <Icon size={14} strokeWidth={isActive ? 2.5 : 1.8} className="shrink-0" />
+                  <span className="text-[13px] font-medium leading-none">{item.label}</span>
+                </Link>
+              )
+            })}
+          </div>
         </nav>
 
-        {/* Bottom */}
-        <div className="nav-rail pb-2">
-          <Link href="/submit" title="Poster" aria-label="Poster">
-            <Plus size={20} strokeWidth={1.5} />
+        {/* Bottom actions */}
+        <div className="border-t border-white/[0.06] px-3 py-3 space-y-0.5 shrink-0">
+          <Link
+            href="/submit"
+            className="flex items-center gap-2.5 px-2 py-[7px] rounded-lg text-white/35 hover:text-white/70 hover:bg-white/[0.05] transition-all duration-150"
+          >
+            <Plus size={14} strokeWidth={1.8} className="shrink-0" />
+            <span className="text-[13px] font-medium">Soumettre</span>
           </Link>
-          <Link href="/settings" title="Paramètres" aria-label="Paramètres">
-            <Settings size={18} strokeWidth={1.5} />
+          <Link
+            href="/settings"
+            className="flex items-center gap-2.5 px-2 py-[7px] rounded-lg text-white/35 hover:text-white/70 hover:bg-white/[0.05] transition-all duration-150"
+          >
+            <Settings size={14} strokeWidth={1.8} className="shrink-0" />
+            <span className="text-[13px] font-medium">Paramètres</span>
           </Link>
         </div>
       </aside>
 
       {/* Mobile bottom bar */}
-      <nav className="fixed bottom-0 left-0 right-0 h-14 border-t border-white/[0.06] z-40 flex items-center justify-around md:hidden" style={{ backgroundColor: '#0B0B0F' }}>
+      <nav
+        className="fixed bottom-0 left-0 right-0 h-14 border-t border-white/[0.06] z-40 flex items-center justify-around md:hidden"
+        style={{ backgroundColor: '#0B0B0F' }}
+      >
         {mainItems.slice(0, 6).map((item) => {
           const Icon = item.icon
           const isActive = pathname === item.href

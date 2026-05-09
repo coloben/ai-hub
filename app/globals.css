@@ -47,6 +47,15 @@ body {
   border-radius: 12px;
 }
 
+/* ── Stat bar pill ──────────────────────────────────────────────────────── */
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* ── Line items ──────────────────────────────────────────────────────────── */
 .line-item {
   display: flex;

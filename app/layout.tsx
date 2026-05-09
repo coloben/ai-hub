@@ -68,7 +68,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <Sidebar />
 
         {/* Main — full width minus rail. Mobile: full width minus bottom bar */}
-        <main className="md:ml-14 min-h-screen pb-14 md:pb-8">
+        <main className="md:ml-[220px] min-h-screen pb-14 md:pb-8">
           <header className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-white/10 px-4 py-3 backdrop-blur-md" style={{ backgroundColor: 'rgba(11,11,15,0.8)' }}>
             <PageTitle />
             <UserNav />
@@ -79,7 +79,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </main>
 
         {/* Ticker — desktop only, above content */}
-        <footer className="hidden md:flex fixed bottom-0 left-14 right-0 z-30 h-8 items-center overflow-hidden border-t border-white/10" style={{ backgroundColor: '#0B0B0F' }}>
+        <footer className="hidden md:flex fixed bottom-0 left-[220px] right-0 z-30 h-8 items-center overflow-hidden border-t border-white/10" style={{ backgroundColor: '#0B0B0F' }}>
           <div className="flex h-full shrink-0 items-center border-r border-white/10 px-3 gap-2">
             <span className="live-dot" />
             <span className="text-[11px] font-semibold uppercase tracking-widest text-white/70">Live</span>
