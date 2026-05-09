@@ -8,13 +8,13 @@ import {
 } from 'lucide-react'
 
 const mainItems = [
-  { href: '/', icon: LayoutGrid, label: 'Dashboard' },
-  { href: '/news', icon: Newspaper, label: 'Feed IA' },
-  { href: '/feed', icon: Rss, label: 'Mon Feed' },
-  { href: '/leaderboard', icon: Trophy, label: 'Classement' },
-  { href: '/benchmarks', icon: BarChart3, label: 'Benchmarks' },
-  { href: '/compare', icon: GitCompare, label: 'Comparer' },
-  { href: '/alerts', icon: Bell, label: 'Alertes' },
+  { href: '/', icon: LayoutGrid, label: 'Dashboard', short: 'Home' },
+  { href: '/news', icon: Newspaper, label: 'Feed IA', short: 'News' },
+  { href: '/feed', icon: Rss, label: 'Mon Feed', short: 'Feed' },
+  { href: '/leaderboard', icon: Trophy, label: 'Classement', short: 'Top' },
+  { href: '/benchmarks', icon: BarChart3, label: 'Benchmarks', short: 'Bench' },
+  { href: '/compare', icon: GitCompare, label: 'Comparer', short: 'VS' },
+  { href: '/alerts', icon: Bell, label: 'Alertes', short: 'Alertes' },
 ]
 
 const toolItems = [
@@ -99,7 +99,7 @@ export function Sidebar() {
               aria-label={item.label}
             >
               <Icon size={20} strokeWidth={isActive ? 2.5 : 1.5} />
-              <span className="text-[10px]">{item.label.slice(0, 6)}</span>
+              <span className="text-[10px]">{item.short}</span>
             </Link>
           )
         })}

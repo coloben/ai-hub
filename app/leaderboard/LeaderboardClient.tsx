@@ -105,7 +105,7 @@ export default function LeaderboardClient() {
       setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc')
     } else {
       setSortField(field)
-      setSortDirection('desc')
+      setSortDirection(field === 'price_input' ? 'asc' : 'desc')
     }
   }
 
@@ -250,7 +250,7 @@ export default function LeaderboardClient() {
                         index === 2 ? 'text-warn font-medium' :
                         'text-text-3'
                       }`}>
-                        {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : index + 1}
+                        {index === 0 ? '#1' : index === 1 ? '#2' : index === 2 ? '#3' : index + 1}
                       </span>
                     </td>
                     <td className="py-3 px-2">

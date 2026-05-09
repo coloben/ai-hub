@@ -91,7 +91,7 @@ export function FeedCard({ item, index }: FeedCardProps) {
             ))}
           </div>
 
-          <div className="ml-auto flex items-center gap-3 opacity-0 hover:opacity-100 transition-opacity">
+          <div className="ml-auto flex items-center gap-3 opacity-30 hover:opacity-100 transition-opacity">
             <span className="text-[11px] text-white/20 flex items-center gap-1">
               <MessageSquare size={13} />
               {item.comment_count ?? 0}

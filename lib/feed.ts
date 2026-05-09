@@ -1,15 +1,17 @@
 /**
- * feed.ts — Pipeline de données IA temps réel — 7 sources indépendantes.
+ * feed.ts — Pipeline de données IA temps réel — 11 sources indépendantes.
  *
  * Architecture :
- *   ① Hugging Face Daily Papers  — papers IA du jour, curés par la communauté HF
- *   ② Papers with Code           — papers ML avec implémentations GitHub
- *   ③ HF Models trending         — nouveaux modèles qui montent (likes 7j)
- *   ④ Hacker News Algolia        — communauté tech (2 requêtes consolidées)
- *   ⑤ RSS VentureBeat AI         — journalisme pro IA (sans dépendance XML)
- *   ⑥ RSS The Verge AI           — couverture grand public / industry
- *   ⑦ Reddit r/LocalLLaMA        — communauté open-source modèles
- *   ⑧ Reddit r/singularity       — news mainstream IA, très actif
+ *   ① arXiv cs.AI+cs.CL          — papers académiques du jour (200+/jour)
+ *   ② Blogs officiels labs        — OpenAI + Google DeepMind + Mistral (RSS)
+ *   ③ Hugging Face Daily Papers  — papers IA du jour, curés par communauté HF
+ *   ④ Papers with Code           — papers ML avec implémentations GitHub
+ *   ⑤ HF Models trending         — nouveaux modèles qui montent (likes 7j)
+ *   ⑥ Hacker News Algolia        — communauté tech (2 requêtes consolidées)
+ *   ⑦ RSS VentureBeat AI         — journalisme pro IA
+ *   ⑧ RSS The Verge AI           — couverture grand public / industry
+ *   ⑨ Reddit r/LocalLLaMA        — communauté open-source modèles
+ *   ⑩ Reddit r/singularity       — news mainstream IA, très actif
  *
  * Toutes les sources tournent en parallèle (Promise.allSettled) avec timeout 8s.
  * Cache in-memory 5 min. Fallback mockNews si TOUT échoue.
@@ -147,7 +149,44 @@ function sanitizeText(text: string | null, maxLen = 280): string {
   return text.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim().slice(0, maxLen)
 }
 
-// ── ① Hugging Face Daily Papers ──────────────────────────────────────────────
+// ── ① arXiv cs.AI + cs.CL ────────────────────────────────────────────────────
+
+async function fetchArXiv(): Promise<NewsItem[]> {
+  try {
+    const res = await fetch('https://rss.arxiv.org/rss/cs.AI+cs.CL', {
+      next: { revalidate: 3600 },
+      signal: AbortSignal.timeout(8000),
+      headers: { 'User-Agent': 'AI-Hub/1.0', 'Accept': 'application/rss+xml, application/xml, text/xml' },
+    })
+    if (!res.ok) return []
+    const xml = await res.text()
+    const raw = parseRSSItems(xml, 'arXiv', 25)
+    // arXiv title format: "Paper title (arXiv:2501.12345v1 [cs.CL])" — strip the suffix
+    return raw.map(item => ({
+      ...item,
+      title: item.title.replace(/\s*\(arXiv:[^\)]+\)\s*$/, '').trim(),
+      category: 'research' as NewsCategory,
+      hype_score: 50,
+    }))
+  } catch { return [] }
+}
+
+// ── ② Blogs officiels des labs ────────────────────────────────────────────────
+
+async function fetchOfficialBlogs(): Promise<NewsItem[]> {
+  const blogs: { url: string; source: string }[] = [
+    { url: 'https://openai.com/news/rss.xml',       source: 'OpenAI Blog' },
+    { url: 'https://deepmind.google/blog/rss.xml',  source: 'Google DeepMind' },
+    { url: 'https://mistral.ai/news/rss/',           source: 'Mistral AI' },
+  ]
+  const results = await Promise.allSettled(blogs.map(b => fetchRSS(b.url, b.source, 8)))
+  const items: NewsItem[] = []
+  results.forEach(r => { if (r.status === 'fulfilled') items.push(...r.value) })
+  // Official sources méritent un boost de hype (signal fort)
+  return items.map(item => ({ ...item, hype_score: Math.max(item.hype_score, 70), is_breaking: item.hype_score >= 75 }))
+}
+
+// ── ③ Hugging Face Daily Papers ──────────────────────────────────────────────
 
 async function fetchHuggingFacePapers(): Promise<NewsItem[]> {
   try {
@@ -424,13 +463,15 @@ export async function getLiveNews(limitTotal = 30): Promise<NewsItem[]> {
     return _cache.items.slice(0, limitTotal)
   }
 
-  const [hfPapers, pwcPapers, hfModels, hnMain, hnModels, rssVB, rssVerge, redditLLaMA, redditSingularity] =
+  const [arxiv, officialBlogs, hfPapers, pwcPapers, hfModels, hnMain, hnModels, rssVB, rssVerge, redditLLaMA, redditSingularity] =
     await Promise.allSettled([
+      fetchArXiv(),
+      fetchOfficialBlogs(),
       fetchHuggingFacePapers(),
       fetchPapersWithCode(),
       fetchHFModelReleases(),
-      fetchHN('artificial intelligence large language model', 14),
-      fetchHN('Claude Gemini GPT DeepSeek Llama Qwen release', 10),
+      fetchHN('artificial intelligence large language model', 12),
+      fetchHN('Claude Gemini GPT DeepSeek Llama Qwen release', 8),
       fetchRSS('https://venturebeat.com/category/ai/feed/', 'VentureBeat AI', 10),
       fetchRSS('https://www.theverge.com/rss/ai-artificial-intelligence/index.xml', 'The Verge AI', 10),
       fetchReddit('LocalLLaMA', 8, 'day'),
@@ -443,6 +484,8 @@ export async function getLiveNews(limitTotal = 30): Promise<NewsItem[]> {
     else console.warn(`[feed] ${label} failed:`, r.reason)
   }
 
+  log('arXiv', arxiv)
+  log('Official Blogs', officialBlogs)
   log('HF Papers', hfPapers)
   log('Papers with Code', pwcPapers)
   log('HF Models', hfModels)
