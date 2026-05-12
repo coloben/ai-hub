@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { CronResponse } from '@/lib/types'
 import { runScheduledIngestion, ScheduleMode, getSchedulerMetrics, getAllSourceHealth } from '@/lib/scheduler'
 import { generateAlertEvents } from '@/lib/alerts'
@@ -66,6 +67,12 @@ export async function POST(request: NextRequest) {
       arenaResult.source = 'error'
     }
     
+    // Invalidate static caches after successful ingestion
+    revalidatePath('/')
+    revalidatePath('/leaderboard')
+    revalidatePath('/news')
+    revalidatePath('/feed')
+
     // Get current metrics
     const metrics = getSchedulerMetrics()
     const sourceHealth = getAllSourceHealth()

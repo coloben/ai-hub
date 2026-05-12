@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import Link from 'next/link'
 import { mockModels } from '@/lib/mock-data'
 import { getLiveNews } from '@/lib/feed'

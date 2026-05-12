@@ -155,7 +155,7 @@ async function fetchArXiv(): Promise<NewsItem[]> {
   try {
     const res = await fetch('https://rss.arxiv.org/rss/cs.AI+cs.CL', {
       next: { revalidate: 3600 },
-      signal: AbortSignal.timeout(8000),
+      signal: AbortSignal.timeout(3000),
       headers: { 'User-Agent': 'AI-Hub/1.0', 'Accept': 'application/rss+xml, application/xml, text/xml' },
     })
     if (!res.ok) return []
@@ -192,7 +192,7 @@ async function fetchHuggingFacePapers(): Promise<NewsItem[]> {
   try {
     const res = await fetch('https://huggingface.co/api/daily_papers', {
       next: { revalidate: 3600 },
-      signal: AbortSignal.timeout(8000),
+      signal: AbortSignal.timeout(3000),
     })
     if (!res.ok) return []
     const papers = await res.json() as HFPaper[]
@@ -227,7 +227,7 @@ async function fetchPapersWithCode(): Promise<NewsItem[]> {
   try {
     const res = await fetch('https://paperswithcode.com/api/v1/papers/?format=json&ordering=-published&limit=15', {
       next: { revalidate: 3600 },
-      signal: AbortSignal.timeout(8000),
+      signal: AbortSignal.timeout(3000),
       headers: { 'User-Agent': 'AI-Hub/1.0' },
     })
     if (!res.ok) return []
@@ -264,7 +264,7 @@ async function fetchHFModelReleases(): Promise<NewsItem[]> {
   try {
     const res = await fetch(
       'https://huggingface.co/api/models?sort=likes7d&direction=-1&limit=15&filter=text-generation',
-      { next: { revalidate: 3600 }, signal: AbortSignal.timeout(8000) }
+      { next: { revalidate: 3600 }, signal: AbortSignal.timeout(3000) }
     )
     if (!res.ok) return []
     const models = await res.json() as HFModel[]
@@ -301,7 +301,7 @@ async function fetchHN(query: string, hits = 20): Promise<NewsItem[]> {
   try {
     const res = await fetch(
       `https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(query)}&tags=story&hitsPerPage=${hits}`,
-      { next: { revalidate: 600 }, signal: AbortSignal.timeout(8000) }
+      { next: { revalidate: 600 }, signal: AbortSignal.timeout(3000) }
     )
     if (!res.ok) return []
     const json = await res.json() as { hits?: HNHit[] }
@@ -390,7 +390,7 @@ async function fetchRSS(url: string, source: string, limit = 12): Promise<NewsIt
   try {
     const res = await fetch(url, {
       next: { revalidate: 1800 },
-      signal: AbortSignal.timeout(8000),
+      signal: AbortSignal.timeout(3000),
       headers: { 'User-Agent': 'AI-Hub/1.0 (news aggregator)', 'Accept': 'application/rss+xml, application/xml, text/xml' },
     })
     if (!res.ok) return []
@@ -407,7 +407,7 @@ async function fetchReddit(subreddit: string, limit = 10, time = 'day'): Promise
       `https://www.reddit.com/r/${subreddit}/top.json?limit=${limit}&t=${time}`,
       {
         next: { revalidate: 600 },
-        signal: AbortSignal.timeout(8000),
+        signal: AbortSignal.timeout(3000),
         headers: { 'User-Agent': 'AI-Hub/1.0 (by /u/ai-hub-bot)' },
       }
     )

@@ -1,8 +1,12 @@
 {
   "crons": [
     {
-      "path": "/api/cron?mode=daily",
+      "path": "/api/cron/rss",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/arena",
+      "schedule": "0 7 * * *"
     }
   ]
 }

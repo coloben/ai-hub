@@ -7,7 +7,10 @@ function detectMode(): DbMode {
   if (process.env.DATABASE_URL) return 'postgres'
   const supaKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   if (process.env.NEXT_PUBLIC_SUPABASE_URL && supaKey) return 'supabase'
-  return 'memory'
+  if (process.env.NODE_ENV === 'development') return 'memory'
+  throw new Error(
+    'Aucune base de données configurée. Définissez DATABASE_URL (Postgres/Neon) ou NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_KEY dans Vercel.'
+  )
 }
 
 export const DB_MODE: DbMode = detectMode()
