@@ -7,11 +7,11 @@ const BASE_URL = 'https://ai-hub-cnb3.vercel.app'
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
-    default: 'AI Hub — Veille Intelligence Artificielle',
+    default: 'AI Hub — Le Reddit de l\'IA',
     template: '%s | AI Hub',
   },
   description:
-    'Plateforme de veille IA en temps réel. News, classements Arena, benchmarks, comparateur de modèles et signaux faibles.',
+    'Communauté IA francophone : feed social, hubs thématiques, votes Reddit-style, news Arena et comparateur de modèles.',
   keywords: [
     'IA',
     'intelligence artificielle',

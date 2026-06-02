@@ -2,10 +2,11 @@
 
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Zap, Flame, Trophy, Swords, Users, Search, Bell } from 'lucide-react'
+import { Zap, Flame, Trophy, Swords, Users, Search, Bell, Layers } from 'lucide-react'
 
 const NAV_ITEMS = [
   { href: '/', icon: Flame, label: 'Feed' },
+  { href: '/hubs', icon: Layers, label: 'Hubs' },
   { href: '/ranking', icon: Trophy, label: 'Classement' },
   { href: '/compare', icon: Swords, label: 'Comparer' },
   { href: '/community', icon: Users, label: 'Communauté' },
@@ -17,18 +18,18 @@ interface TopNavProps {
 
 export function TopNav({ active }: TopNavProps) {
   return (
-    <header className="sticky top-0 z-50 glass-header">
-      <div className="max-w-7xl mx-auto px-4 h-12 flex items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-2.5 shrink-0">
-          <div className="w-7 h-7 rounded-md bg-accent/10 border border-accent/20 flex items-center justify-center">
-            <Zap size={14} className="text-accent" />
+    <header className="sticky top-0 z-50 glass-header border-b border-border/80">
+      <div className="max-w-[1280px] mx-auto px-4 h-12 flex items-center justify-between gap-4">
+        <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent/25 to-accent-2/15 border border-accent/25 flex items-center justify-center group-hover:border-accent/50 transition-colors">
+            <Zap size={15} className="text-accent" />
           </div>
-          <div className="hidden sm:flex items-center gap-1.5">
-            <span className="font-display font-bold text-base tracking-tight text-foreground">
+          <div className="hidden sm:block">
+            <span className="font-display font-bold text-base tracking-tight text-foreground block leading-none">
               AI Hub
             </span>
-            <span className="text-[10px] font-medium text-muted-foreground border-l border-border pl-1.5 ml-0.5">
-              FR
+            <span className="text-[9px] text-muted-foreground tracking-wide">
+              communauté IA · FR
             </span>
           </div>
         </Link>
@@ -59,25 +60,25 @@ export function TopNav({ active }: TopNavProps) {
           <Button
             variant="ghost"
             size="icon"
+            className="text-muted-foreground h-8 w-8 hidden sm:flex"
+            aria-label="Rechercher"
+            title="Recherche — bientôt"
             disabled
-            className="text-muted-foreground h-8 w-8 opacity-50 cursor-not-allowed"
-            aria-label="Rechercher — bientôt disponible"
-            title="Recherche — bientôt disponible"
           >
             <Search size={15} />
           </Button>
           <Button
             variant="ghost"
             size="icon"
+            className="text-muted-foreground h-8 w-8"
+            aria-label="Notifications"
+            title="Notifications — bientôt"
             disabled
-            className="text-muted-foreground h-8 w-8 opacity-50 cursor-not-allowed"
-            aria-label="Notifications — bientôt disponible"
-            title="Notifications — bientôt disponible"
           >
             <Bell size={15} />
           </Button>
-          <Button size="sm" variant="outline" className="ml-1 h-7 text-xs px-3 rounded-md font-medium" asChild>
-            <Link href="/signup">Connexion</Link>
+          <Button size="sm" className="ml-1 h-7 text-xs px-3 rounded-full font-semibold" asChild>
+            <Link href="/signup">Rejoindre</Link>
           </Button>
         </div>
       </div>
