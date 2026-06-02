@@ -1,4 +1,5 @@
-data/community-votes.json
+# Runtime vote dumps (local dev) — bundled seeds are committed
+data/community-votes.local.json
 
 node_modules/
 .next/

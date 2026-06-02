@@ -101,7 +101,8 @@ export function CommunityVoteWidget({ category }: { category: string }) {
       })
       const json = await res.json()
       if (!res.ok || !json.ok) {
-        setError(json.error ?? 'Impossible d’enregistrer le vote')
+        const msg = json.error ?? 'Impossible d’enregistrer le vote'
+        setError(msg === 'Failed to save vote' ? 'Enregistrement impossible — réessayez dans un instant.' : msg)
         return
       }
       setVoted((prev) => ({ ...prev, [voteKey]: choice }))

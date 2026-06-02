@@ -29,5 +29,10 @@ export async function submitCommunityVote(input: SubmitVoteInput): Promise<Submi
       console.warn('[Votes] Postgres write failed, falling back to file:', err)
     }
   }
-  return submitVoteToFile(input)
+  try {
+    return await submitVoteToFile(input)
+  } catch (err) {
+    console.error('[Votes] all backends failed:', err)
+    throw err
+  }
 }

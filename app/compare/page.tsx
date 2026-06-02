@@ -6,6 +6,7 @@ import { TopNav } from '@/components/layout/top-nav'
 import { Footer } from '@/components/layout/footer'
 import { CommunityVoteWidget } from './community-vote'
 import { CommunityLeaderboard } from './leaderboard'
+import { RankingMetaBar } from './ranking-meta'
 import { getRanking } from '@/lib/data/pipeline'
 
 const CATEGORIES = [
@@ -72,6 +73,10 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
 
       <div className="max-w-7xl mx-auto px-4 py-4">
         <CategoryTabs active={activeCategory} />
+
+        <div className="mt-3">
+          <RankingMetaBar />
+        </div>
 
         <div className="mt-4 grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-4">
           <div className="space-y-4">
