@@ -18,7 +18,14 @@ function rowToPost(row: Record<string, unknown>): SocialPost {
     handle: row.handle,
     title: row.title,
     content: row.content,
-    tags: Array.isArray(row.tags) ? row.tags : JSON.parse(String(row.tags ?? '[]')),
+    tags: (() => {
+      if (Array.isArray(row.tags)) return row.tags as string[]
+      try {
+        return JSON.parse(String(row.tags ?? '[]')) as string[]
+      } catch {
+        return []
+      }
+    })(),
     upvotes: Number(row.upvotes),
     downvotes: Number(row.downvotes),
     score: Number(row.score),

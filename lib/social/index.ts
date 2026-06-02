@@ -40,26 +40,28 @@ async function listCommunity(): Promise<SocialPost[]> {
       console.warn('[Social] Postgres failed, file fallback:', err)
     }
   }
-  return listCommunityPostsFromFile()
+  try {
+    return await listCommunityPostsFromFile()
+  } catch (err) {
+    console.warn('[Social] file store failed:', err)
+    return []
+  }
 }
 
 async function enrichCurated(posts: SocialPost[]): Promise<SocialPost[]> {
-  if (hasDatabase()) {
-    try {
-      return Promise.all(
-        posts.map(async (p) => {
-          const v = await getCuratedVotesPg(p.id, p.upvotes, p.downvotes)
-          return { ...p, ...v }
-        })
-      )
-    } catch {
-      /* fall through */
-    }
-  }
   return Promise.all(
     posts.map(async (p) => {
-      const v = await getCuratedVoteDelta(p.id, p.upvotes, p.downvotes)
-      return { ...p, ...v }
+      try {
+        if (hasDatabase()) {
+          const v = await getCuratedVotesPg(p.id, p.upvotes, p.downvotes)
+          return { ...p, ...v }
+        }
+        const v = await getCuratedVoteDelta(p.id, p.upvotes, p.downvotes)
+        return { ...p, ...v }
+      } catch (err) {
+        console.warn('[Social] enrich vote skip', p.id, err)
+        return p
+      }
     })
   )
 }

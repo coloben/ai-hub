@@ -20,8 +20,22 @@ interface SocialFile {
   votes: PostVote[]
 }
 
-const DATA_DIR = path.join(process.cwd(), 'data')
-const SOCIAL_PATH = path.join(DATA_DIR, 'social.json')
+/** Vercel FS is read-only except /tmp — use /tmp when deployed serverless */
+function dataDir(): string {
+  if (process.env.VERCEL === '1' || process.env.VERCEL === 'true') {
+    return path.join('/tmp', 'ai-hub-data')
+  }
+  return path.join(process.cwd(), 'data')
+}
+
+function socialPath(): string {
+  return path.join(dataDir(), 'social.json')
+}
+
+/** Bundled seed path (read-only, always available on Vercel) */
+const BUNDLED_SOCIAL = path.join(process.cwd(), 'data', 'social.json')
+
+let memoryStore: SocialFile | null = null
 
 const SEED_POSTS: Omit<SocialPost, 'id' | 'createdAt'>[] = [
   {
@@ -68,34 +82,54 @@ const SEED_POSTS: Omit<SocialPost, 'id' | 'createdAt'>[] = [
   },
 ]
 
-async function ensureFile(): Promise<SocialFile> {
-  await fs.mkdir(DATA_DIR, { recursive: true })
-  try {
-    const raw = await fs.readFile(SOCIAL_PATH, 'utf-8')
-    const parsed = JSON.parse(raw) as SocialFile
-    return {
-      posts: Array.isArray(parsed.posts) ? parsed.posts : [],
-      comments: Array.isArray(parsed.comments) ? parsed.comments : [],
-      votes: Array.isArray(parsed.votes) ? parsed.votes : [],
-    }
-  } catch {
-    const now = new Date().toISOString()
-    const posts = SEED_POSTS.map((p, i) =>
-      SocialPostSchema.parse({
-        ...p,
-        id: `seed-${i + 1}`,
-        createdAt: new Date(Date.now() - (i + 1) * 3_600_000 * 4).toISOString(),
-      })
-    )
-    const data: SocialFile = { posts, comments: [], votes: [] }
-    await writeFile(data)
-    return data
+function buildSeedData(): SocialFile {
+  const posts = SEED_POSTS.map((p, i) =>
+    SocialPostSchema.parse({
+      ...p,
+      id: `seed-${i + 1}`,
+      createdAt: new Date(Date.now() - (i + 1) * 3_600_000 * 4).toISOString(),
+    })
+  )
+  return { posts, comments: [], votes: [] }
+}
+
+function parseFile(raw: string): SocialFile {
+  const parsed = JSON.parse(raw) as SocialFile
+  return {
+    posts: Array.isArray(parsed.posts) ? parsed.posts : [],
+    comments: Array.isArray(parsed.comments) ? parsed.comments : [],
+    votes: Array.isArray(parsed.votes) ? parsed.votes : [],
   }
 }
 
+async function ensureFile(): Promise<SocialFile> {
+  if (memoryStore) return memoryStore
+
+  const paths = [socialPath(), BUNDLED_SOCIAL]
+  for (const p of paths) {
+    try {
+      const raw = await fs.readFile(p, 'utf-8')
+      memoryStore = parseFile(raw)
+      return memoryStore
+    } catch {
+      /* try next */
+    }
+  }
+
+  memoryStore = buildSeedData()
+  try {
+    await writeFile(memoryStore)
+  } catch (err) {
+    console.warn('[Social] file write skipped (read-only FS):', err)
+  }
+  return memoryStore
+}
+
 async function writeFile(data: SocialFile): Promise<void> {
-  await fs.mkdir(DATA_DIR, { recursive: true })
-  await fs.writeFile(SOCIAL_PATH, JSON.stringify(data, null, 2), 'utf-8')
+  const dir = dataDir()
+  await fs.mkdir(dir, { recursive: true })
+  await fs.writeFile(socialPath(), JSON.stringify(data, null, 2), 'utf-8')
+  memoryStore = data
 }
 
 export async function listCommunityPostsFromFile(): Promise<SocialPost[]> {
