@@ -73,17 +73,22 @@ export async function getUnifiedFeed(options?: {
   const sort = options?.sort ?? 'hot'
   const hub = options?.hub ?? 'all'
 
-  const [feedData, community] = await Promise.all([getFeed(), listCommunity()])
-  const curated = await enrichCurated(feedData.posts.map(curatedToSocial))
-  let merged = [...community, ...curated]
+  try {
+    const [feedData, community] = await Promise.all([getFeed(), listCommunity()])
+    const curated = await enrichCurated(feedData.posts.map(curatedToSocial))
+    let merged = [...community, ...curated]
 
-  if (hub !== 'all') {
-    merged = merged.filter((p) => p.hub === hub)
-  }
+    if (hub !== 'all') {
+      merged = merged.filter((p) => p.hub === hub)
+    }
 
-  return {
-    posts: sortPosts(merged, sort),
-    updatedAt: feedData.updatedAt,
+    return {
+      posts: sortPosts(merged, sort),
+      updatedAt: feedData.updatedAt,
+    }
+  } catch (err) {
+    console.error('[Social] getUnifiedFeed failed:', err)
+    return { posts: [], updatedAt: new Date().toISOString() }
   }
 }
 

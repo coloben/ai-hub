@@ -4,6 +4,11 @@ import { getPairVoteStats, submitCommunityVote, SubmitVoteSchema } from '@/lib/v
 import { clientKey, rateLimit } from '@/lib/security/rate-limit'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204 })
+}
 
 const QuerySchema = z.object({
   category: z.string(),

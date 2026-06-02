@@ -1,0 +1,1 @@
+-- AI Hub — run community_votes.sql and social.sql in order (Supabase SQL editor).

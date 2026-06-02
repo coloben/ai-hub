@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto'
-import { ensureVoteSchema, getPool } from '@/lib/db'
+import { ensureVoteSchema, getPool, withDbRetry } from '@/lib/db'
 import type { SubmitVoteInput, SubmitVoteResult, PairVoteStats } from './schema'
 import { canonicalPair, winnerId } from './pair'
 
@@ -35,31 +35,33 @@ export async function getPairStatsFromPg(
   modelBId: string
 ): Promise<PairVoteStats> {
   await ensureVoteSchema()
-  return computeStats(category, modelAId, modelBId)
+  return withDbRetry(() => computeStats(category, modelAId, modelBId))
 }
 
 export async function submitVoteToPg(input: SubmitVoteInput): Promise<SubmitVoteResult> {
-  await ensureVoteSchema()
-  const [low, high] = canonicalPair(input.modelAId, input.modelBId)
-  const picked = winnerId(input.choice, input.modelAId, input.modelBId)
-  const pool = getPool()
+  return withDbRetry(async () => {
+    await ensureVoteSchema()
+    const [low, high] = canonicalPair(input.modelAId, input.modelBId)
+    const picked = winnerId(input.choice, input.modelAId, input.modelBId)
+    const pool = getPool()
 
-  let duplicate = false
-  try {
-    await pool.query(
-      `INSERT INTO community_votes (id, category, model_low, model_high, winner_id, voter_id)
-       VALUES ($1, $2, $3, $4, $5, $6)`,
-      [randomUUID(), input.category, low, high, picked, input.voterId]
-    )
-  } catch (err: unknown) {
-    const code = (err as { code?: string })?.code
-    if (code === '23505') {
-      duplicate = true
-    } else {
-      throw err
+    let duplicate = false
+    try {
+      await pool.query(
+        `INSERT INTO community_votes (id, category, model_low, model_high, winner_id, voter_id)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [randomUUID(), input.category, low, high, picked, input.voterId]
+      )
+    } catch (err: unknown) {
+      const code = (err as { code?: string })?.code
+      if (code === '23505') {
+        duplicate = true
+      } else {
+        throw err
+      }
     }
-  }
 
-  const stats = await computeStats(input.category, input.modelAId, input.modelBId)
-  return { ok: true, duplicate, stats }
+    const stats = await computeStats(input.category, input.modelAId, input.modelBId)
+    return { ok: true, duplicate, stats }
+  })
 }

@@ -6,6 +6,11 @@ import type { HubId } from '@/lib/social/hubs'
 import { HUB_IDS } from '@/lib/social/hubs'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204 })
+}
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl

@@ -1,5 +1,8 @@
+const path = require('path')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  outputFileTracingRoot: path.join(__dirname),
   allowedDevOrigins: ['127.0.0.1', 'localhost'],
   images: {
     formats: ['image/avif', 'image/webp'],
@@ -60,17 +63,35 @@ const nextConfig = {
         headers: securityHeaders,
       },
       {
-        source: '/api/:path*',
+        source: '/api/v1/posts',
+        headers: [
+          ...securityHeaders,
+          { key: 'Cache-Control', value: 'no-store' },
+        ],
+      },
+      {
+        source: '/api/v1/votes',
+        headers: [
+          ...securityHeaders,
+          { key: 'Cache-Control', value: 'no-store' },
+        ],
+      },
+      {
+        source: '/api/v1/:path*',
         headers: [
           ...securityHeaders,
           {
             key: 'Access-Control-Allow-Origin',
             value: process.env.NODE_ENV === 'production' ? origin : '*',
           },
-          { key: 'Access-Control-Allow-Methods', value: 'GET,POST,PATCH,OPTIONS' },
-          { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization' },
-          { key: 'Cache-Control', value: 'public, max-age=60, stale-while-revalidate=300' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET,POST,OPTIONS' },
+          { key: 'Access-Control-Allow-Headers', value: 'Content-Type' },
+          { key: 'Cache-Control', value: 'public, max-age=60, stale-while-revalidate=120' },
         ],
+      },
+      {
+        source: '/api/health',
+        headers: [{ key: 'Cache-Control', value: 'no-store' }],
       },
     ];
   },
