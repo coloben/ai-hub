@@ -1,3 +1,5 @@
+data/community-votes.json
+
 node_modules/
 .next/
 .env.local

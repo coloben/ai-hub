@@ -1,62 +1,84 @@
 ﻿import type { Config } from 'tailwindcss'
 
 const config: Config = {
-  content: ['./pages/**/*.{js,ts,jsx,tsx,mdx}','./components/**/*.{js,ts,jsx,tsx,mdx}','./app/**/*.{js,ts,jsx,tsx,mdx}','./lib/**/*.{js,ts,jsx,tsx,mdx}'],
+  content: ['./pages/**/*.{js,ts,jsx,tsx,mdx}','./components/**/*.{js,ts,jsx,tsx,mdx}','./app/**/*.{js,ts,jsx,tsx,mdx}','./app-v2/**/*.{js,ts,jsx,tsx,mdx}','./lib/**/*.{js,ts,jsx,tsx,mdx}'],
   theme: {
     extend: {
       colors: {
-        // ARENA v2 — Warm dark background, surface islands
-        arena: {
-          bg: '#0B0B0F',
-          surface: '#141418',
-          line: '#1E1E24',
-          hover: '#1A1A20',
-          active: '#222228',
-        },
-        // Borders — 2 levels only
-        edge: {
-          DEFAULT: 'rgba(255,255,255,0.06)',
-          hover: 'rgba(255,255,255,0.12)',
-          strong: 'rgba(255,255,255,0.20)',
-        },
-        // Text — 3 levels only
-        ink: {
-          primary: 'rgba(255,255,255,0.90)',
-          secondary: 'rgba(255,255,255,0.55)',
-          tertiary: 'rgba(255,255,255,0.30)',
-        },
-        // Root background alias — used as bg-bg in drawer/overlay components
+        // Base
         bg: '#0B0B0F',
-        // Data accent
+        // Surfaces
+        surface: {
+          DEFAULT: '#141418',
+          2: '#1A1A20',
+          3: '#222228',
+        },
+        // Borders
+        edge: {
+          DEFAULT: 'rgba(255,255,255,0.05)',
+          hover: 'rgba(255,255,255,0.10)',
+          strong: 'rgba(255,255,255,0.15)',
+        },
+        // Text — 4 levels for better hierarchy
+        ink: {
+          primary: 'rgba(255,255,255,0.92)',
+          secondary: 'rgba(255,255,255,0.60)',
+          tertiary: 'rgba(255,255,255,0.40)',
+          quaternary: 'rgba(255,255,255,0.20)',
+        },
+        // Data accent — teal
         data: '#00d4aa',
         'data-dim': 'rgba(0,212,170,0.10)',
         // States
         up: '#22c55e',
         down: '#ef4444',
         alert: '#ff6b00',
-
-        // ── Backward-compatible semantic aliases ──
-        // These ensure every existing component renders correctly
-        // without touching 50+ files manually.
-        text: {
-          DEFAULT: 'rgba(255,255,255,0.90)',
-          2: 'rgba(255,255,255,0.55)',
-          3: 'rgba(255,255,255,0.30)',
-        },
-        surface: {
-          DEFAULT: '#141418',
-          2: 'rgba(255,255,255,0.04)',
-          3: 'rgba(255,255,255,0.03)',
-        },
-        border: 'rgba(255,255,255,0.06)',
-        'border-hover': 'rgba(255,255,255,0.12)',
-        divider: 'rgba(255,255,255,0.06)',
+        // Semantic
         primary: '#00d4aa',
         success: '#22c55e',
         warn: '#f59e0b',
-        amber: '#f59e0b',
         error: '#ef4444',
         info: '#3b82f6',
+        // Backward compat
+        text: {
+          DEFAULT: 'rgba(255,255,255,0.92)',
+          2: 'rgba(255,255,255,0.60)',
+          3: 'rgba(255,255,255,0.40)',
+        },
+        border: 'rgba(255,255,255,0.05)',
+        'border-hover': 'rgba(255,255,255,0.10)',
+        divider: 'rgba(255,255,255,0.05)',
+        // ── V2 Design System — CSS Variables ──
+        background: 'var(--background)',
+        foreground: 'var(--foreground)',
+        accent: {
+          DEFAULT: 'var(--accent)',
+          dim: 'var(--accent-dim)',
+          glow: 'var(--accent-glow)',
+          foreground: 'var(--accent-foreground)',
+          2: 'var(--accent-2)',
+          '2-dim': 'var(--accent-2-dim)',
+          '2-glow': 'var(--accent-2-glow)',
+        },
+        muted: {
+          DEFAULT: 'var(--muted)',
+          foreground: 'var(--muted-foreground)',
+        },
+        card: {
+          DEFAULT: 'var(--card)',
+          foreground: 'var(--card-foreground)',
+          hover: 'var(--card-hover)',
+        },
+        popover: {
+          DEFAULT: 'var(--popover)',
+          foreground: 'var(--popover-foreground)',
+        },
+        destructive: {
+          DEFAULT: 'var(--destructive)',
+          dim: 'var(--destructive-dim)',
+        },
+        input: 'var(--input)',
+        ring: 'var(--ring)',
       },
       backgroundColor: {
         'primary-dim': 'rgba(0,212,170,0.10)',
@@ -95,6 +117,9 @@ const config: Config = {
         sm: '4px',
         md: '8px',
         lg: '12px',
+        xl: '16px',
+        '2xl': '20px',
+        radius: 'var(--radius)',
       },
       animation: {
         'fade-in': 'fadeIn 0.15s ease-out both',
