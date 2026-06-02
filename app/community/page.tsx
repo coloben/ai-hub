@@ -6,19 +6,27 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { HUBS } from '@/lib/social/hubs'
 import { getUnifiedFeed } from '@/lib/social'
-import { Trophy, MessageSquare, TrendingUp, Swords } from 'lucide-react'
+import { getCommunityStats } from '@/lib/votes/stats'
+import { getTrustStatus } from '@/lib/trust'
+import { DataTrustBanner } from '@/components/trust/data-trust-banner'
+import { MessageSquare, Swords, Vote } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Communauté IA',
-  description: 'Stats communauté, hubs actifs et contributeurs.',
+  description: 'Statistiques réelles de la communauté AI Hub : posts, duels, votes Arena.',
 }
 
 export default async function CommunityPage() {
-  const { posts } = await getUnifiedFeed({ sort: 'top' })
-  const communityPosts = posts.filter((p) => p.kind === 'community').slice(0, 5)
-  const topPost = posts[0]
+  const [{ posts }, community, trust] = await Promise.all([
+    getUnifiedFeed({ sort: 'top' }),
+    getCommunityStats(),
+    getTrustStatus(),
+  ])
+
+  const communityPosts = posts.filter((p) => p.kind === 'community')
+  const topPost = communityPosts[0] ?? posts.find((p) => p.kind === 'curated')
 
   return (
     <div className="min-h-screen bg-background pb-16 lg:pb-0">
@@ -28,34 +36,33 @@ export default async function CommunityPage() {
         <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight mb-2">
           Communauté <span className="text-accent">AI Hub</span>
         </h1>
-        <p className="text-muted-foreground text-sm mb-8 max-w-xl">
-          Votez, publiez, commentez. Karma et comptes persistants arrivent — la couche sociale est déjà live.
+        <p className="text-muted-foreground text-sm mb-6 max-w-xl">
+          Métriques mesurées — aucun membre ou karma fictif. Les duels et posts sont comptés
+          depuis la base ou le stockage actif.
         </p>
 
-        <div className="grid sm:grid-cols-3 gap-4 mb-10">
+        <DataTrustBanner status={trust} />
+
+        <div className="grid sm:grid-cols-3 gap-4 my-8">
           <Card>
             <CardContent className="pt-4">
-              <TrendingUp className="text-accent mb-2" size={20} />
-              <p className="text-2xl font-bold font-mono">{posts.length}</p>
-              <p className="text-[12px] text-muted-foreground">posts dans le feed</p>
+              <Vote className="text-accent mb-2" size={20} />
+              <p className="text-2xl font-bold font-mono">{community.totalDuelVotes}</p>
+              <p className="text-[12px] text-muted-foreground">duels AI Hub enregistrés</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-4">
               <MessageSquare className="text-accent-2 mb-2" size={20} />
-              <p className="text-2xl font-bold font-mono">
-                {posts.reduce((a, p) => a + p.commentCount, 0)}
-              </p>
-              <p className="text-[12px] text-muted-foreground">commentaires</p>
+              <p className="text-2xl font-bold font-mono">{communityPosts.length}</p>
+              <p className="text-[12px] text-muted-foreground">posts communauté publiés</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-4">
-              <Trophy className="text-warning mb-2" size={20} />
-              <p className="text-2xl font-bold font-mono truncate text-sm">
-                {topPost?.title.slice(0, 24)}…
-              </p>
-              <p className="text-[12px] text-muted-foreground">top post (score {topPost?.score})</p>
+              <Swords className="text-warning mb-2" size={20} />
+              <p className="text-2xl font-bold font-mono">{community.uniqueVoters}</p>
+              <p className="text-[12px] text-muted-foreground">votants uniques (duels)</p>
             </CardContent>
           </Card>
         </div>
@@ -67,9 +74,11 @@ export default async function CommunityPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               {communityPosts.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Aucun post — soyez le premier.</p>
+                <p className="text-sm text-muted-foreground">
+                  Aucun post pour l&apos;instant — le feed affiche les actualités Arena sourcées.
+                </p>
               ) : (
-                communityPosts.map((p) => (
+                communityPosts.slice(0, 5).map((p) => (
                   <Link
                     key={p.id}
                     href={`/post/${p.id}`}
@@ -90,7 +99,7 @@ export default async function CommunityPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm">Hubs populaires</CardTitle>
+              <CardTitle className="text-sm">Hubs</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               {HUBS.slice(0, 6).map((h) => (
@@ -100,7 +109,6 @@ export default async function CommunityPage() {
                   className="flex items-center justify-between py-1.5 text-sm hover:text-accent"
                 >
                   <span>h/{h.id}</span>
-                  <span className="text-[11px] text-muted-foreground">{h.memberCount}</span>
                 </Link>
               ))}
               <Button asChild size="sm" className="w-full mt-2">
@@ -110,22 +118,12 @@ export default async function CommunityPage() {
           </Card>
         </div>
 
-        <Card className="mt-8 border-accent/20 bg-accent-dim/20">
-          <CardContent className="py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div>
-              <h2 className="font-semibold flex items-center gap-2">
-                <Swords size={18} className="text-accent" />
-                Comparateur de modèles
-              </h2>
-              <p className="text-[13px] text-muted-foreground mt-1">
-                Duels A vs B — alimente le classement communautaire en parallèle du feed.
-              </p>
-            </div>
-            <Button asChild>
-              <Link href="/compare">Voter maintenant</Link>
-            </Button>
-          </CardContent>
-        </Card>
+        {topPost && (
+          <p className="text-[11px] text-muted-foreground text-center mt-6">
+            Top post affiché : {topPost.title.slice(0, 60)}
+            {topPost.title.length > 60 ? '…' : ''} ({topPost.kind === 'community' ? 'communauté' : 'actualité'})
+          </p>
+        )}
       </section>
 
       <Footer />

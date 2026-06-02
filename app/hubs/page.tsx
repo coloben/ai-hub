@@ -34,9 +34,6 @@ export default function HubsPage() {
                   <CardTitle className="text-base flex items-center gap-2">
                     <Icon size={18} className={hub.color} />
                     h/{hub.id}
-                    <span className="ml-auto text-[10px] font-normal text-muted-foreground">
-                      {hub.memberCount} membres
-                    </span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>

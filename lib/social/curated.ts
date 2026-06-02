@@ -46,9 +46,8 @@ function parseTimeToIso(time: string): string {
   return new Date(now - ms).toISOString()
 }
 
+/** Curated news: no fabricated community scores — Arena volume shown separately */
 export function curatedToSocial(post: FeedPost): SocialPost {
-  const up = Math.max(0, Math.floor(post.votes * 0.92))
-  const down = Math.max(0, post.votes - up)
   return {
     id: post.id,
     kind: 'curated',
@@ -59,11 +58,12 @@ export function curatedToSocial(post: FeedPost): SocialPost {
     title: post.title,
     content: post.content,
     tags: post.tags,
-    upvotes: up,
-    downvotes: down,
-    score: post.votes,
-    commentCount: post.comments,
+    upvotes: 0,
+    downvotes: 0,
+    score: 0,
+    commentCount: 0,
     createdAt: parseTimeToIso(post.time),
     sourceUrl: post.sourceUrl,
+    arenaVotes: post.votes > 0 ? post.votes : undefined,
   }
 }

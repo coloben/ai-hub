@@ -3,8 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import {
-  Flame, Trophy, Swords, Users, Bookmark, UserCircle, Settings,
-  Plus, TrendingUp,
+  Flame, Trophy, Swords, Users, Plus, TrendingUp, UserCircle,
 } from 'lucide-react'
 import { HUBS } from '@/lib/social/hubs'
 import { cn } from '@/lib/utils'
@@ -15,7 +14,6 @@ const MAIN_LINKS = [
   { href: '/ranking', icon: Trophy, label: 'Classement' },
   { href: '/compare', icon: Swords, label: 'Comparer' },
   { href: '/community', icon: TrendingUp, label: 'Communauté' },
-  { href: '/bookmarks', icon: Bookmark, label: 'Signets' },
 ]
 
 export function HubSidebar() {
@@ -68,7 +66,6 @@ export function HubSidebar() {
               >
                 <Icon size={15} className={hub.color} />
                 <span className="truncate">h/{hub.id}</span>
-                <span className="ml-auto text-[10px] opacity-50">{hub.memberCount}</span>
               </Link>
             )
           })}
@@ -83,22 +80,13 @@ export function HubSidebar() {
         Nouveau post
       </Link>
 
-      <div className="pt-2 border-t border-border space-y-0.5">
-        <Link
-          href="/signup"
-          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted"
-        >
-          <UserCircle size={18} />
-          Profil
-        </Link>
-        <Link
-          href="/settings"
-          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted"
-        >
-          <Settings size={18} />
-          Paramètres
-        </Link>
-      </div>
+      <Link
+        href="/signup"
+        className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted"
+      >
+        <UserCircle size={18} />
+        Profil local
+      </Link>
     </nav>
   )
 }

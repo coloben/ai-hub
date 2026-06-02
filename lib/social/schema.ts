@@ -32,6 +32,8 @@ export const SocialPostSchema = z.object({
   commentCount: z.number().int().min(0),
   createdAt: z.string().datetime(),
   sourceUrl: z.string().url().optional(),
+  /** Arena sample count — only on curated posts, not community upvotes */
+  arenaVotes: z.number().int().min(0).optional(),
 })
 
 export const CommentSchema = z.object({

@@ -1,6 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { BarChart3, Trophy, Database, Clock } from 'lucide-react'
 import { getRanking } from '@/lib/data/pipeline'
+import { classifyRankingSource } from '@/lib/trust'
 
 function fmt(n: number) {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
@@ -19,11 +20,16 @@ export async function HomeStatsBar() {
     minute: '2-digit',
   })
 
+  const tier = classifyRankingSource(ranking.source)
   const stats = [
     { label: 'Modèles', value: String(ranking.models.length), icon: BarChart3 },
     { label: 'Top ELO', value: top ? String(top.elo) : '—', icon: Trophy },
     { label: 'Votes Arena', value: fmt(arenaVotes), icon: Database },
-    { label: 'MAJ', value: updated, icon: Clock },
+    {
+      label: tier === 'fallback' ? 'Mode secours' : 'MAJ',
+      value: tier === 'fallback' ? 'Arena off' : updated,
+      icon: Clock,
+    },
   ]
 
   return (

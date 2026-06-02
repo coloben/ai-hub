@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getPairVoteStats, submitCommunityVote, SubmitVoteSchema } from '@/lib/votes'
+import { clientKey, rateLimit } from '@/lib/security/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -51,6 +52,14 @@ export async function POST(req: NextRequest) {
   const { modelAId, modelBId } = parsed.data
   if (modelAId === modelBId) {
     return NextResponse.json({ ok: false, error: 'Models must differ' }, { status: 400 })
+  }
+
+  const rl = rateLimit(clientKey(req, 'vote'), 30, 60_000)
+  if (!rl.ok) {
+    return NextResponse.json(
+      { ok: false, error: `Trop de votes — réessayez dans ${rl.retryAfterSec}s` },
+      { status: 429 }
+    )
   }
 
   try {

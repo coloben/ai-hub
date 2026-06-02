@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { CreatePostSchema, FeedSortSchema } from '@/lib/social/schema'
 import { createCommunityPost, getUnifiedFeed } from '@/lib/social'
+import { clientKey, rateLimit } from '@/lib/security/rate-limit'
 import type { HubId } from '@/lib/social/hubs'
 import { HUB_IDS } from '@/lib/social/hubs'
 
@@ -24,6 +25,13 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const rl = rateLimit(clientKey(req, 'post'), 10, 60_000)
+  if (!rl.ok) {
+    return NextResponse.json(
+      { ok: false, error: `Limite atteinte — ${rl.retryAfterSec}s` },
+      { status: 429 }
+    )
+  }
   try {
     const body = await req.json()
     const parsed = CreatePostSchema.safeParse(body)

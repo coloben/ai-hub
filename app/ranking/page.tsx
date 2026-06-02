@@ -8,6 +8,9 @@ import { TopNav } from '@/components/layout/top-nav'
 import { Footer } from '@/components/layout/footer'
 import { DataRankingWidget } from '@/app/components/data-ranking'
 import { getRanking } from '@/lib/data/pipeline'
+import { rankingFromData } from '@/lib/trust'
+import { DataTrustBanner } from '@/components/trust/data-trust-banner'
+import { CertifiedBadge } from '@/components/trust/certified-badge'
 
 export const metadata = {
   title: 'Classement IA — Leaderboard Arena AI & Benchmarks | AI Hub',
@@ -30,14 +33,14 @@ function HeroRanking() {
         <div className="flex items-center gap-2 mb-1">
           <Trophy size={14} className="text-accent" />
           <span className="text-[11px] font-medium text-accent tracking-wide">
-            Leaderboard temps réel
+            Classement Arena certifié
           </span>
         </div>
         <h1 className="text-lg md:text-2xl font-display font-bold tracking-tight text-foreground">
           Le classement des meilleurs modèles IA
         </h1>
         <p className="mt-1 text-[13px] text-muted-foreground max-w-xl leading-relaxed">
-          Basé sur Arena AI + votes communautaires. Données vérifiables, mises à jour quotidiennement.
+          ELO et volumes issus de Chatbot Arena (LMSYS). Cache 5 min · vérifiable sur lmarena.ai.
         </p>
       </div>
     </section>
@@ -74,6 +77,7 @@ export default async function RankingPage({ searchParams }: { searchParams: Prom
   const filter = params.filter ?? 'all'
 
   const ranking = await getRanking()
+  const trust = rankingFromData(ranking)
   const models = filter === 'all'
     ? ranking.models
     : ranking.models.filter(m => m.category === filter)
@@ -94,13 +98,18 @@ export default async function RankingPage({ searchParams }: { searchParams: Prom
       <div className="max-w-7xl mx-auto px-4 py-4">
         <FilterTabs active={filter} />
 
+        <div className="mt-3">
+          <DataTrustBanner status={trust} />
+        </div>
+
         <div className="mt-4 grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-4">
           {/* Main ranking table */}
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-[13px] flex items-center gap-1.5 font-semibold">
                 <Trophy size={13} className="text-accent" />
-                Classement ELO — {ranking.source}
+                Classement ELO
+                <CertifiedBadge variant="arena" className="ml-2" />
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-0 divide-y divide-border/40">
@@ -115,7 +124,9 @@ export default async function RankingPage({ searchParams }: { searchParams: Prom
                   </span>
                   <div className="flex-1 min-w-0">
                     <p className="text-[13px] font-medium text-foreground truncate">{m.name}</p>
-                    <p className="text-[10px] text-muted-foreground">{m.organization} · {m.samples?.toLocaleString() ?? '—'} votes</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {m.organization} · {(m.samples ?? 0).toLocaleString('fr-FR')} votes Arena
+                    </p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-bold data-num text-foreground">{m.elo}</p>

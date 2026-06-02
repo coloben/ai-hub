@@ -23,19 +23,18 @@ export interface HubMeta {
   description: string
   icon: LucideIcon
   color: string
-  memberCount: string
 }
 
 export const HUBS: HubMeta[] = [
-  { id: 'general', label: 'Général', description: 'Actualités IA, débats et annonces.', icon: Cpu, color: 'text-accent', memberCount: '12k' },
-  { id: 'llm', label: 'LLM', description: 'GPT, Claude, Gemini, open models.', icon: MessageSquare, color: 'text-accent-2', memberCount: '8.4k' },
-  { id: 'coding', label: 'Code', description: 'Dev, agents, SWE-bench.', icon: Code, color: 'text-accent', memberCount: '5.2k' },
-  { id: 'creativity', label: 'Créativité', description: 'Image, vidéo, écriture.', icon: Sparkles, color: 'text-accent-2', memberCount: '3.1k' },
-  { id: 'reasoning', label: 'Raisonnement', description: 'Math, logique, o1-style.', icon: MessageSquare, color: 'text-accent', memberCount: '2.8k' },
-  { id: 'french', label: 'Français', description: 'IA en langue française.', icon: Globe, color: 'text-accent-2', memberCount: '4.6k' },
-  { id: 'multimodal', label: 'Multimodal', description: 'Vision, audio, vidéo.', icon: Image, color: 'text-accent', memberCount: '2.2k' },
-  { id: 'open-source', label: 'Open Source', description: 'Llama, Qwen, weights libres.', icon: Users, color: 'text-accent-2', memberCount: '6.7k' },
-  { id: 'safety', label: 'AI Safety', description: 'Alignement, régulation, éthique.', icon: Shield, color: 'text-warning', memberCount: '1.9k' },
+  { id: 'general', label: 'Général', description: 'Actualités IA, débats et annonces.', icon: Cpu, color: 'text-accent' },
+  { id: 'llm', label: 'LLM', description: 'GPT, Claude, Gemini, open models.', icon: MessageSquare, color: 'text-accent-2' },
+  { id: 'coding', label: 'Code', description: 'Dev, agents, SWE-bench.', icon: Code, color: 'text-accent' },
+  { id: 'creativity', label: 'Créativité', description: 'Image, vidéo, écriture.', icon: Sparkles, color: 'text-accent-2' },
+  { id: 'reasoning', label: 'Raisonnement', description: 'Math, logique, o1-style.', icon: MessageSquare, color: 'text-accent' },
+  { id: 'french', label: 'Français', description: 'IA en langue française.', icon: Globe, color: 'text-accent-2' },
+  { id: 'multimodal', label: 'Multimodal', description: 'Vision, audio, vidéo.', icon: Image, color: 'text-accent' },
+  { id: 'open-source', label: 'Open Source', description: 'Llama, Qwen, weights libres.', icon: Users, color: 'text-accent-2' },
+  { id: 'safety', label: 'AI Safety', description: 'Alignement, régulation, éthique.', icon: Shield, color: 'text-warning' },
 ]
 
 export function getHub(id: string): HubMeta | undefined {

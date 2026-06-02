@@ -73,15 +73,20 @@ async function fetchArenaTextLeaderboard(): Promise<ArenaEntry[]> {
     candidates.push(d.toISOString().slice(0, 10))
   }
 
+  const fileNames = ['text.json', 'text-battle.json', 'leaderboard.json']
+
   for (const date of candidates) {
-    try {
-      const url = `${ARENA_GH_RAW}/data/${date}/text.json`
-      const data = await fetchJson(url, 5000)
-      if (data?.models?.length > 0) {
-        return data.models as ArenaEntry[]
+    for (const file of fileNames) {
+      try {
+        const url = `${ARENA_GH_RAW}/data/${date}/${file}`
+        const data = await fetchJson(url, 5000)
+        const models = data?.models ?? data?.leaderboard
+        if (Array.isArray(models) && models.length > 0) {
+          return models as ArenaEntry[]
+        }
+      } catch {
+        continue
       }
-    } catch {
-      continue
     }
   }
   throw new Error('No arena leaderboard data found for recent dates')
@@ -160,7 +165,7 @@ function normalizeHfPapers(raw: Record<string, unknown>[]): FeedPost[] {
         title,
         content: String(item.summary ?? item.abstract ?? '').slice(0, 500),
         tags: (item.tags as string[])?.slice(0, 5) ?? ['research', 'paper'],
-        votes: Number(item.upvotes ?? item.likes ?? 0),
+        votes: 0,
         comments: Number(item.comments ?? 0),
         shares: 0,
         badge: 'Research',

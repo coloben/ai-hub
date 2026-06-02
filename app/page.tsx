@@ -7,6 +7,8 @@ import { SocialFeed } from '@/components/social/social-feed'
 import { TrendingPanel } from '@/components/social/trending-panel'
 import { HomeStatsBar } from './components/home-stats-bar'
 import { getUnifiedFeed } from '@/lib/social'
+import { getTrustStatus } from '@/lib/trust'
+import { DataTrustBanner } from '@/components/trust/data-trust-banner'
 import { HUB_IDS } from '@/lib/social/hubs'
 import type { HubId } from '@/lib/social/hubs'
 import { Card } from '@/components/ui/card'
@@ -29,7 +31,10 @@ export default async function HomePage({ searchParams }: PageProps) {
   const hub: HubId | 'all' =
     hubParam && HUB_IDS.includes(hubParam as HubId) ? (hubParam as HubId) : 'all'
 
-  const { posts } = await getUnifiedFeed({ sort: 'hot', hub })
+  const [{ posts }, trust] = await Promise.all([
+    getUnifiedFeed({ sort: 'hot', hub }),
+    getTrustStatus(),
+  ])
 
   return (
     <div className="min-h-screen bg-background pb-16 lg:pb-0">
@@ -48,7 +53,7 @@ export default async function HomePage({ searchParams }: PageProps) {
               )}
             </h1>
             <p className="text-[12px] text-muted-foreground">
-              Actualités Arena + posts communauté · votes Reddit-style
+              Actualités sourcées · posts communauté avec votes réels uniquement
             </p>
           </div>
           <Suspense fallback={<Skeleton className="h-8 w-48" />}>
@@ -57,7 +62,11 @@ export default async function HomePage({ searchParams }: PageProps) {
         </div>
       </div>
 
-      <div className="max-w-[1280px] mx-auto px-4 grid grid-cols-1 lg:grid-cols-[240px_minmax(0,680px)_minmax(260px,1fr)] gap-5 py-5">
+      <div className="max-w-[1280px] mx-auto px-4 py-3">
+        <DataTrustBanner status={trust} />
+      </div>
+
+      <div className="max-w-[1280px] mx-auto px-4 grid grid-cols-1 lg:grid-cols-[240px_minmax(0,680px)_minmax(260px,1fr)] gap-5 py-3 pb-5">
         <Suspense fallback={<div className="hidden lg:block w-[240px]" />}>
           <HubSidebar />
         </Suspense>

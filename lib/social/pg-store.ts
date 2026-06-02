@@ -37,47 +37,6 @@ function rowToPost(row: Record<string, unknown>): SocialPost {
 
 export async function ensureSeedPostsPg(): Promise<void> {
   await ensureSocialSchema()
-  const pool = getPool()
-  const { rows } = await pool.query<{ n: string }>('SELECT COUNT(*)::text AS n FROM social_posts')
-  if (parseInt(rows[0]?.n ?? '0', 10) > 0) return
-
-  const seeds = [
-    {
-      hub: 'llm',
-      flair: 'Discussion',
-      author: 'Marie D.',
-      handle: 'marie_dev',
-      title: 'Claude vs Gemini pour du code production — votre retour ?',
-      content: 'Je teste les deux sur une codebase React + API Node. Claude semble plus prudent sur les refactors, Gemini plus rapide sur le boilerplate.',
-      tags: ['claude', 'gemini', 'coding'],
-    },
-    {
-      hub: 'open-source',
-      flair: 'Ask',
-      author: 'Lucas',
-      handle: 'lucas_ml',
-      title: 'Quel modèle open-weight pour un RAG local en français ?',
-      content: 'Budget GPU : 24 Go VRAM. Besoin de citations fiables et bon français.',
-      tags: ['rag', 'français'],
-    },
-  ]
-
-  for (const s of seeds) {
-    await pool.query(
-      `INSERT INTO social_posts (id, kind, hub, flair, author, handle, title, content, tags, upvotes, downvotes, score, comment_count)
-       VALUES ($1, 'community', $2, $3, $4, $5, $6, $7, $8::jsonb, 1, 0, 1, 0)`,
-      [
-        randomUUID(),
-        s.hub,
-        s.flair,
-        s.author,
-        s.handle,
-        s.title,
-        s.content,
-        JSON.stringify(s.tags),
-      ]
-    )
-  }
 }
 
 export async function listCommunityPostsFromPg(): Promise<SocialPost[]> {

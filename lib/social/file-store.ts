@@ -37,60 +37,8 @@ const BUNDLED_SOCIAL = path.join(process.cwd(), 'data', 'social.json')
 
 let memoryStore: SocialFile | null = null
 
-const SEED_POSTS: Omit<SocialPost, 'id' | 'createdAt'>[] = [
-  {
-    kind: 'community',
-    hub: 'llm',
-    flair: 'Discussion',
-    author: 'Marie D.',
-    handle: 'marie_dev',
-    title: 'Claude vs Gemini pour du code production — votre retour ?',
-    content: 'Je teste les deux sur une codebase React + API Node. Claude semble plus prudent sur les refactors, Gemini plus rapide sur le boilerplate. Vous tranchez comment ?',
-    tags: ['claude', 'gemini', 'coding'],
-    upvotes: 42,
-    downvotes: 3,
-    score: 39,
-    commentCount: 12,
-  },
-  {
-    kind: 'community',
-    hub: 'open-source',
-    flair: 'Ask',
-    author: 'Lucas',
-    handle: 'lucas_ml',
-    title: 'Quel modèle open-weight pour un RAG local en français ?',
-    content: 'Budget GPU : 24 Go VRAM. Besoin de citations fiables et bon français. Qwen vs Llama vs Mistral en 2026 ?',
-    tags: ['rag', 'français', 'open-source'],
-    upvotes: 28,
-    downvotes: 1,
-    score: 27,
-    commentCount: 8,
-  },
-  {
-    kind: 'community',
-    hub: 'safety',
-    flair: 'Opinion',
-    author: 'Amina K.',
-    handle: 'amina_policy',
-    title: 'Les benchmarks Arena ne mesurent pas l\'alignement',
-    content: 'Un modèle peut être #1 en ELO tout en étant dangereux sur des jailbreaks ciblés. Il faudrait un score "safety" public à côté de l\'ELO.',
-    tags: ['safety', 'arena', 'benchmark'],
-    upvotes: 67,
-    downvotes: 5,
-    score: 62,
-    commentCount: 24,
-  },
-]
-
-function buildSeedData(): SocialFile {
-  const posts = SEED_POSTS.map((p, i) =>
-    SocialPostSchema.parse({
-      ...p,
-      id: `seed-${i + 1}`,
-      createdAt: new Date(Date.now() - (i + 1) * 3_600_000 * 4).toISOString(),
-    })
-  )
-  return { posts, comments: [], votes: [] }
+function emptyStore(): SocialFile {
+  return { posts: [], comments: [], votes: [] }
 }
 
 function parseFile(raw: string): SocialFile {
@@ -116,7 +64,7 @@ async function ensureFile(): Promise<SocialFile> {
     }
   }
 
-  memoryStore = buildSeedData()
+  memoryStore = emptyStore()
   try {
     await writeFile(memoryStore)
   } catch (err) {

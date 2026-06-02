@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { MessageSquare, Share2, ExternalLink, Bookmark } from 'lucide-react'
+import { MessageSquare, Share2, ExternalLink } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { VoteColumn } from './vote-column'
 import { fmtScore, timeAgo } from '@/lib/social/client'
@@ -9,6 +9,7 @@ import { FLAIR_COLORS } from '@/lib/social/hubs'
 import type { SocialPost } from '@/lib/social/schema'
 import type { Flair } from '@/lib/social/hubs'
 import { getHub } from '@/lib/social/hubs'
+import { CertifiedBadge } from '@/components/trust/certified-badge'
 
 interface PostCardProps {
   post: SocialPost
@@ -17,10 +18,28 @@ interface PostCardProps {
 export function PostCard({ post }: PostCardProps) {
   const hub = getHub(post.hub)
   const flairClass = FLAIR_COLORS[post.flair as Flair] ?? FLAIR_COLORS.Discussion
+  const isCommunity = post.kind === 'community'
 
   return (
     <article className="group flex gap-2 px-3 py-3 hover:bg-card-hover/40 transition-colors border-b border-border/50 last:border-0">
-      <VoteColumn postId={post.id} kind={post.kind} score={post.score} />
+      {isCommunity ? (
+        <VoteColumn postId={post.id} kind={post.kind} score={post.score} />
+      ) : (
+        <div className="flex flex-col items-center min-w-[2.25rem] pt-1 shrink-0 text-center">
+          {post.arenaVotes != null && post.arenaVotes > 0 ? (
+            <>
+              <span className="text-[10px] font-mono font-bold text-accent-2 leading-none">
+                {fmtScore(post.arenaVotes)}
+              </span>
+              <span className="text-[8px] text-muted-foreground uppercase tracking-wide mt-0.5">
+                Arena
+              </span>
+            </>
+          ) : (
+            <span className="text-[9px] text-muted-foreground">—</span>
+          )}
+        </div>
+      )}
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 flex-wrap text-[11px] text-muted-foreground mb-0.5">
@@ -41,9 +60,7 @@ export function PostCard({ post }: PostCardProps) {
           <Badge className={`text-[9px] px-1.5 py-0 h-4 border-0 ${flairClass}`}>
             {post.flair}
           </Badge>
-          {post.kind === 'curated' && (
-            <span className="text-[9px] uppercase tracking-wide text-accent-2/80">Arena</span>
-          )}
+          <CertifiedBadge variant={isCommunity ? 'community' : 'editorial'} />
         </div>
 
         <Link href={`/post/${post.id}`} className="block">
@@ -70,13 +87,15 @@ export function PostCard({ post }: PostCardProps) {
         )}
 
         <div className="flex items-center gap-1 text-[12px] text-muted-foreground">
-          <Link
-            href={`/post/${post.id}`}
-            className="flex items-center gap-1.5 px-2 py-1 rounded-full hover:bg-muted hover:text-foreground transition-colors"
-          >
-            <MessageSquare size={14} />
-            <span className="font-mono">{fmtScore(post.commentCount)}</span>
-          </Link>
+          {isCommunity && (
+            <Link
+              href={`/post/${post.id}`}
+              className="flex items-center gap-1.5 px-2 py-1 rounded-full hover:bg-muted hover:text-foreground transition-colors"
+            >
+              <MessageSquare size={14} />
+              <span className="font-mono">{fmtScore(post.commentCount)}</span>
+            </Link>
+          )}
           <button
             type="button"
             className="flex items-center gap-1.5 px-2 py-1 rounded-full hover:bg-muted hover:text-foreground transition-colors"
@@ -101,14 +120,6 @@ export function PostCard({ post }: PostCardProps) {
               Source <ExternalLink size={12} />
             </a>
           )}
-          <button
-            type="button"
-            className="p-1.5 rounded-full hover:bg-muted opacity-0 group-hover:opacity-100 transition-opacity"
-            aria-label="Signet"
-            title="Signets — bientôt"
-          >
-            <Bookmark size={14} />
-          </button>
         </div>
       </div>
     </article>

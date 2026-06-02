@@ -51,7 +51,20 @@ export default async function PostPage({ params }: Props) {
 
         <Card className="overflow-hidden">
           <article className="flex gap-3 p-4">
-            <VoteColumn postId={post.id} kind={post.kind} score={post.score} />
+            {post.kind === 'community' ? (
+              <VoteColumn postId={post.id} kind={post.kind} score={post.score} />
+            ) : (
+              <div className="min-w-[2.25rem] pt-1 text-center shrink-0">
+                {post.arenaVotes != null && post.arenaVotes > 0 ? (
+                  <>
+                    <p className="text-xs font-mono font-bold text-accent-2">{post.arenaVotes.toLocaleString('fr-FR')}</p>
+                    <p className="text-[8px] text-muted-foreground">Arena</p>
+                  </>
+                ) : (
+                  <p className="text-[9px] text-muted-foreground">—</p>
+                )}
+              </div>
+            )}
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground mb-2">
                 {hub && <span className="font-semibold text-foreground">h/{post.hub}</span>}
@@ -89,7 +102,9 @@ export default async function PostPage({ params }: Props) {
             </div>
           </article>
 
-          <CommentThread postId={post.id} initialCount={post.commentCount} />
+          {post.kind === 'community' && (
+            <CommentThread postId={post.id} initialCount={post.commentCount} />
+          )}
         </Card>
       </div>
 

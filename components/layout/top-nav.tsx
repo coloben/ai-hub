@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Zap, Flame, Trophy, Swords, Users, Search, Bell, Layers } from 'lucide-react'
+import { Zap, Flame, Trophy, Swords, Users, Layers } from 'lucide-react'
 
 const NAV_ITEMS = [
   { href: '/', icon: Flame, label: 'Feed' },
@@ -29,7 +29,7 @@ export function TopNav({ active }: TopNavProps) {
               AI Hub
             </span>
             <span className="text-[9px] text-muted-foreground tracking-wide">
-              communauté IA · FR
+              données Arena certifiées
             </span>
           </div>
         </Link>
@@ -56,31 +56,9 @@ export function TopNav({ active }: TopNavProps) {
           })}
         </nav>
 
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-muted-foreground h-8 w-8 hidden sm:flex"
-            aria-label="Rechercher"
-            title="Recherche — bientôt"
-            disabled
-          >
-            <Search size={15} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-muted-foreground h-8 w-8"
-            aria-label="Notifications"
-            title="Notifications — bientôt"
-            disabled
-          >
-            <Bell size={15} />
-          </Button>
-          <Button size="sm" className="ml-1 h-7 text-xs px-3 rounded-full font-semibold" asChild>
-            <Link href="/signup">Rejoindre</Link>
-          </Button>
-        </div>
+        <Button size="sm" className="h-7 text-xs px-3 rounded-full font-semibold" asChild>
+          <Link href="/signup">Profil</Link>
+        </Button>
       </div>
     </header>
   )
