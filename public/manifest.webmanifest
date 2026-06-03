@@ -1,0 +1,20 @@
+{
+  "name": "AI Hub",
+  "short_name": "AI Hub",
+  "description": "Communauté IA francophone — classement Arena, feed et comparateur",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#06060a",
+  "lang": "fr",
+  "orientation": "portrait-primary",
+  "categories": ["news", "education", "productivity"],
+  "icons": [
+    {
+      "src": "/icon",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

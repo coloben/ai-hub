@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Zap } from 'lucide-react'
+import { DeployVersion } from './deploy-version'
 
 export function Footer() {
   return (
@@ -30,7 +31,9 @@ export function Footer() {
         </div>
         <div className="mt-4 pt-3 border-t border-border/50 text-center">
           <p className="text-[10px] text-muted-foreground/50">
-            Sources : LMSYS Arena · Hugging Face · arXiv · TechCrunch — Dernière MAJ : {new Date().toLocaleDateString('fr-FR')}
+            Sources : LMSYS Arena · Hugging Face · arXiv — Dernière MAJ :{' '}
+            {new Date().toLocaleDateString('fr-FR')}
+            <DeployVersion />
           </p>
         </div>
       </div>

@@ -21,6 +21,13 @@ export async function POST(
       return NextResponse.json({ error: 'Post introuvable' }, { status: 404 })
     }
 
+    if (existing.kind === 'curated') {
+      return NextResponse.json(
+        { ok: false, error: 'Les actualités importées (arXiv/HF) ne sont pas votables.' },
+        { status: 403 }
+      )
+    }
+
     const result = await voteOnPost(
       id,
       parsed.data.voterId,

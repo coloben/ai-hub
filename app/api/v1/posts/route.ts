@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { CreatePostSchema, FeedSortSchema } from '@/lib/social/schema'
 import { createCommunityPost, getUnifiedFeed } from '@/lib/social'
 import { clientKey, rateLimit } from '@/lib/security/rate-limit'
+import { sanitizeText } from '@/lib/security/sanitize'
 import type { HubId } from '@/lib/social/hubs'
 import { HUB_IDS } from '@/lib/social/hubs'
 
@@ -43,7 +44,12 @@ export async function POST(req: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
     }
-    const post = await createCommunityPost(parsed.data)
+    const post = await createCommunityPost({
+      ...parsed.data,
+      title: sanitizeText(parsed.data.title, 300),
+      content: sanitizeText(parsed.data.content, 4000),
+      author: sanitizeText(parsed.data.author, 64),
+    })
     return NextResponse.json({ post }, { status: 201 })
   } catch (e) {
     console.error('[API posts POST]', e)

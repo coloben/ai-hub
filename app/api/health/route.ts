@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { hasDatabase } from '@/lib/db'
-import { getRanking } from '@/lib/data/pipeline'
+import { getRanking, getFeed } from '@/lib/data/pipeline'
 import { getCommunityStats } from '@/lib/votes/stats'
 import { classifyRankingSource } from '@/lib/trust'
 
@@ -40,7 +40,20 @@ export async function GET() {
     detail: hasDatabase() ? 'DATABASE_URL set' : 'file/tmp fallback only',
   }
 
-  const allOk = checks.ranking?.ok !== false
+  try {
+    const t0 = Date.now()
+    const feed = await getFeed()
+    const live = feed.sources.some((s) => s === 'arxiv-cs-ai' || s === 'huggingface-papers')
+    checks.feed = {
+      ok: live,
+      ms: Date.now() - t0,
+      detail: `${feed.sources.join(', ')} · ${feed.posts.length} posts · tier ${feed.feedTier ?? 'live'}`,
+    }
+  } catch (e) {
+    checks.feed = { ok: false, detail: e instanceof Error ? e.message : 'failed' }
+  }
+
+  const allOk = checks.ranking?.ok !== false && checks.feed?.ok !== false
   return NextResponse.json(
     {
       status: allOk ? 'healthy' : 'degraded',

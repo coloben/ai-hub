@@ -1,10 +1,11 @@
 import {
-  Code, Sparkles, MessageSquare, Globe, Image, Users, Cpu, Shield,
+  Code, Sparkles, MessageSquare, Globe, Image, Users, Cpu, Shield, BookOpen,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 export const HUB_IDS = [
   'general',
+  'research',
   'llm',
   'coding',
   'creativity',
@@ -27,6 +28,7 @@ export interface HubMeta {
 
 export const HUBS: HubMeta[] = [
   { id: 'general', label: 'Général', description: 'Actualités IA, débats et annonces.', icon: Cpu, color: 'text-accent' },
+  { id: 'research', label: 'Papers', description: 'Preprints arXiv cs.AI et papers Hugging Face.', icon: BookOpen, color: 'text-accent-2' },
   { id: 'llm', label: 'LLM', description: 'GPT, Claude, Gemini, open models.', icon: MessageSquare, color: 'text-accent-2' },
   { id: 'coding', label: 'Code', description: 'Dev, agents, SWE-bench.', icon: Code, color: 'text-accent' },
   { id: 'creativity', label: 'Créativité', description: 'Image, vidéo, écriture.', icon: Sparkles, color: 'text-accent-2' },

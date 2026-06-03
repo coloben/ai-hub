@@ -31,11 +31,19 @@ const FAQS = [
     question: "D'où viennent les données ?",
     answer: "Trois sources principales : Arena AI (classement ELO crowdsourced), Hugging Face Papers (recherche en IA), et arXiv cs.AI (articles scientifiques). Toutes les sources sont vérifiables.",
   },
+  {
+    question: "Pourquoi vois-je @arxiv dans le feed ?",
+    answer: "Ce n'est pas un compte membre. Ce sont des preprints importés automatiquement depuis arXiv (cs.AI). Le badge « Actualité vérifiée » et le lien « Voir sur arXiv » permettent de vérifier chaque titre.",
+  },
+  {
+    question: "Les votes sur les papers arXiv sont-ils réels ?",
+    answer: "Non — les actualités importées ne sont pas votables sur AI Hub. Seuls les posts publiés via le formulaire « Publier sur AI Hub » acceptent votes et commentaires communauté.",
+  },
 ]
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-background grid-dots">
+    <div id="main" className="min-h-screen bg-background grid-dots">
       <OrganizationSchema />
       <BreadcrumbSchema
         items={[
@@ -94,6 +102,21 @@ export default function AboutPage() {
             </Card>
           ))}
         </div>
+      </div>
+
+      <div id="persistance" className="max-w-3xl mx-auto px-4 py-6 scroll-mt-20">
+        <Card className="border-warning/30">
+          <CardContent className="p-5">
+            <Shield size={18} className="text-warning mb-2" />
+            <h2 className="text-base font-display font-bold text-foreground mb-2">Persistance</h2>
+            <p className="text-[12px] text-muted-foreground leading-relaxed">
+              En production, configurez <code className="font-mono text-[10px]">DATABASE_URL</code>{' '}
+              (pooler Supabase, port 6543) pour que les duels A/B et les posts communauté survivent
+              aux redéploiements Vercel. Sans base, le site fonctionne mais les données peuvent être
+              effacées.
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Open Data */}

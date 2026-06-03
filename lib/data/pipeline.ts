@@ -1,6 +1,6 @@
 import { unstable_cache } from 'next/cache'
 import { fetchArenaRanking, fetchFeedPosts } from './sources'
-import { getFallbackRanking, getFallbackFeed } from './fallback'
+import { getFallbackRanking, getUnavailableFeed } from './fallback'
 import { RankingDataSchema, FeedDataSchema } from './schema'
 import type { RankingData, FeedData } from './schema'
 
@@ -35,8 +35,8 @@ export const getFeed = unstable_cache(
       }
       return FeedDataSchema.parse(data)
     } catch (err) {
-      console.warn('[Pipeline] Feed fetch failed, using fallback:', err)
-      return getFallbackFeed()
+      console.warn('[Pipeline] Feed fetch failed:', err)
+      return getUnavailableFeed()
     }
   },
   ['feed', 'aggregated'],

@@ -4,6 +4,7 @@ import {
   FeedPostSchema,
   type ArenaModel,
   type FeedPost,
+  type FeedData,
 } from './schema'
 
 /* ── Helpers ───────────────────────────────────────────────────────────── */
@@ -153,6 +154,15 @@ function normalizeHfPapers(raw: Record<string, unknown>[]): FeedPost[] {
       const title = String(item.title ?? '')
       if (!title) continue
 
+      const publishedRaw =
+        (item.publishedAt as string) ??
+        (item.published_at as string) ??
+        (item.createdAt as string) ??
+        (item.created_at as string) ??
+        ''
+      const publishedAt = publishedRaw ? new Date(publishedRaw).toISOString() : undefined
+      const timeLabel = publishedAt ? getTimeAgo(publishedAt) : '1 j'
+
       const post = FeedPostSchema.parse({
         id: `hf-${String(item.id ?? Math.random()).slice(0, 20)}`,
         author: String(
@@ -161,7 +171,7 @@ function normalizeHfPapers(raw: Record<string, unknown>[]): FeedPost[] {
             'Hugging Face'
         ),
         handle: 'huggingface',
-        time: '1 j',
+        time: timeLabel,
         title,
         content: String(item.summary ?? item.abstract ?? '').slice(0, 500),
         tags: (item.tags as string[])?.slice(0, 5) ?? ['research', 'paper'],
@@ -171,6 +181,7 @@ function normalizeHfPapers(raw: Record<string, unknown>[]): FeedPost[] {
         badge: 'Research',
         type: 'news' as const,
         sourceUrl: String(item.url ?? `https://huggingface.co/papers/${item.id ?? ''}`),
+        publishedAt,
       })
       posts.push(post)
     } catch {
@@ -225,6 +236,8 @@ function normalizeArxiv(raw: Record<string, unknown>[]): FeedPost[] {
       const published = String(item.published ?? '')
       const timeDiff = published ? getTimeAgo(published) : '1 j'
 
+      const publishedAt = published ? new Date(published).toISOString() : undefined
+
       const post = FeedPostSchema.parse({
         id: `arxiv-${arxivId.slice(0, 20)}`,
         author: String(item.author ?? 'arXiv'),
@@ -232,13 +245,14 @@ function normalizeArxiv(raw: Record<string, unknown>[]): FeedPost[] {
         time: timeDiff,
         title,
         content: String(item.summary ?? '').slice(0, 500),
-        tags: ['research', 'cs.AI'],
+        tags: ['research', 'cs.AI', 'paper'],
         votes: 0,
         comments: 0,
         shares: 0,
         badge: 'Paper',
         type: 'news' as const,
         sourceUrl: `https://arxiv.org/abs/${arxivId}`,
+        publishedAt,
       })
       posts.push(post)
     } catch {
@@ -264,11 +278,7 @@ function getTimeAgo(isoDate: string): string {
 
 /* ── Aggregated feed fetcher ─────────────────────────────────────────── */
 
-export async function fetchFeedPosts(): Promise<{
-  posts: FeedPost[]
-  updatedAt: string
-  sources: string[]
-}> {
+export async function fetchFeedPosts(): Promise<FeedData> {
   const posts: FeedPost[] = []
   const sources: string[] = []
 
@@ -300,5 +310,6 @@ export async function fetchFeedPosts(): Promise<{
     posts,
     updatedAt: new Date().toISOString(),
     sources,
+    feedTier: posts.length > 0 ? ('live' as const) : ('unavailable' as const),
   }
 }

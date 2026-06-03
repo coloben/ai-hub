@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { CreateCommentSchema } from '@/lib/social/schema'
-import { getComments, addComment } from '@/lib/social'
+import { getComments, addComment, getPostById } from '@/lib/social'
+import { sanitizeText } from '@/lib/security/sanitize'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,7 +25,22 @@ export async function POST(
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
     }
-    const comment = await addComment(id, parsed.data)
+    const post = await getPostById(id)
+    if (!post) {
+      return NextResponse.json({ error: 'Post introuvable' }, { status: 404 })
+    }
+    if (post.kind === 'curated') {
+      return NextResponse.json(
+        { error: 'Commentaires réservés aux posts communauté. Discutez sur la source officielle.' },
+        { status: 403 }
+      )
+    }
+
+    const comment = await addComment(id, {
+      ...parsed.data,
+      content: sanitizeText(parsed.data.content, 2000),
+      author: sanitizeText(parsed.data.author, 64),
+    })
     if (!comment) {
       return NextResponse.json({ error: 'Post introuvable' }, { status: 404 })
     }

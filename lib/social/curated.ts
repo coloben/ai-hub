@@ -1,8 +1,13 @@
 import type { FeedPost } from '@/lib/data/schema'
 import type { HubId, Flair } from './hubs'
 import type { SocialPost } from './schema'
+import { handleToImportSource } from './import-meta'
 
 const TAG_HUB: Record<string, HubId> = {
+  research: 'research',
+  paper: 'research',
+  'cs.ai': 'research',
+  arxiv: 'research',
   claude: 'llm',
   gpt: 'llm',
   openai: 'llm',
@@ -18,7 +23,8 @@ const TAG_HUB: Record<string, HubId> = {
   policy: 'safety',
 }
 
-function inferHub(tags: string[]): HubId {
+function inferHub(tags: string[], handle: string): HubId {
+  if (handle === 'arxiv' || handle === 'huggingface') return 'research'
   for (const tag of tags) {
     const hub = TAG_HUB[tag.toLowerCase()]
     if (hub) return hub
@@ -33,7 +39,14 @@ function inferFlair(post: FeedPost): Flair {
   return 'News'
 }
 
-function parseTimeToIso(time: string): string {
+function parseTimeToIso(time: string, publishedAt?: string): string {
+  if (publishedAt) {
+    try {
+      return new Date(publishedAt).toISOString()
+    } catch {
+      /* fall through */
+    }
+  }
   const now = Date.now()
   const m = time.match(/(\d+)\s*(h|min|j|d)/i)
   if (!m) return new Date(now).toISOString()
@@ -51,7 +64,7 @@ export function curatedToSocial(post: FeedPost): SocialPost {
   return {
     id: post.id,
     kind: 'curated',
-    hub: inferHub(post.tags),
+    hub: inferHub(post.tags, post.handle),
     flair: inferFlair(post),
     author: post.author,
     handle: post.handle,
@@ -62,8 +75,9 @@ export function curatedToSocial(post: FeedPost): SocialPost {
     downvotes: 0,
     score: 0,
     commentCount: 0,
-    createdAt: parseTimeToIso(post.time),
+    createdAt: parseTimeToIso(post.time, post.publishedAt),
     sourceUrl: post.sourceUrl,
+    importSource: handleToImportSource(post.handle),
     arenaVotes: post.votes > 0 ? post.votes : undefined,
   }
 }

@@ -6,26 +6,13 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Swords, Check } from 'lucide-react'
 import type { PairVoteStats } from '@/lib/votes/schema'
+import { getVoterId } from '@/lib/votes/voter-id'
 
 interface Model {
   id: string
   name: string
   organization: string
   elo: number
-}
-
-function getVoterId(): string {
-  const key = 'aihub-voter-id'
-  try {
-    let id = localStorage.getItem(key)
-    if (!id) {
-      id = crypto.randomUUID()
-      localStorage.setItem(key, id)
-    }
-    return id
-  } catch {
-    return 'anonymous-' + Math.random().toString(36).slice(2)
-  }
 }
 
 export function CommunityVoteWidget({ category }: { category: string }) {

@@ -26,6 +26,24 @@ const ENDPOINTS = [
   },
   {
     method: 'GET',
+    path: '/api/health',
+    desc: 'Sonde de santé : Arena, feed arXiv/HF, base de données.',
+    example: `curl https://ai-hub-cnb3.vercel.app/api/health`,
+  },
+  {
+    method: 'GET',
+    path: '/api/v1/stats',
+    desc: 'Stats communauté, confiance, feed et persistance.',
+    example: `curl https://ai-hub-cnb3.vercel.app/api/v1/stats`,
+  },
+  {
+    method: 'GET',
+    path: '/api/v1/openapi.json',
+    desc: 'Spécification OpenAPI 3.1 de l\'API publique.',
+    example: `curl https://ai-hub-cnb3.vercel.app/api/v1/openapi.json`,
+  },
+  {
+    method: 'GET',
     path: '/api/v1/papers',
     desc: 'Papers récents depuis Hugging Face et arXiv. Paramètre ?limit=10 pour paginer.',
     example: `curl https://ai-hub-cnb3.vercel.app/api/v1/papers?limit=5`,

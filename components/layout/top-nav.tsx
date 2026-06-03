@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Zap, Flame, Trophy, Swords, Users, Layers } from 'lucide-react'
+import { SiteSearch } from '@/components/layout/site-search'
 
 const NAV_ITEMS = [
   { href: '/', icon: Flame, label: 'Feed' },
@@ -20,8 +21,11 @@ export function TopNav({ active }: TopNavProps) {
   return (
     <header className="sticky top-0 z-50 glass-header border-b border-border/80">
       <div className="max-w-[1280px] mx-auto px-4 h-12 flex items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent/25 to-accent-2/15 border border-accent/25 flex items-center justify-center group-hover:border-accent/50 transition-colors">
+        <Link href="/" className="flex items-center gap-2.5 shrink-0 group" aria-label="AI Hub — accueil">
+          <div
+            className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent/25 to-accent-2/15 border border-accent/25 flex items-center justify-center group-hover:border-accent/50 transition-colors"
+            aria-hidden
+          >
             <Zap size={15} className="text-accent" />
           </div>
           <div className="hidden sm:block">
@@ -56,7 +60,9 @@ export function TopNav({ active }: TopNavProps) {
           })}
         </nav>
 
-        <Button size="sm" className="h-7 text-xs px-3 rounded-full font-semibold" asChild>
+        <SiteSearch />
+
+        <Button size="sm" className="h-7 text-xs px-3 rounded-full font-semibold min-h-[44px] sm:min-h-0" asChild>
           <Link href="/signup">Profil</Link>
         </Button>
       </div>

@@ -13,12 +13,33 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/ranking`, lastModified: now, changeFrequency: 'hourly' as const, priority: 0.9 },
     { url: `${BASE_URL}/compare`, lastModified: now, changeFrequency: 'hourly' as const, priority: 0.9 },
     { url: `${BASE_URL}/community`, lastModified: now, changeFrequency: 'daily' as const, priority: 0.8 },
+    { url: `${BASE_URL}/hubs`, lastModified: now, changeFrequency: 'daily' as const, priority: 0.8 },
+    { url: `${BASE_URL}/search`, lastModified: now, changeFrequency: 'daily' as const, priority: 0.7 },
     { url: `${BASE_URL}/about`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.6 },
     { url: `${BASE_URL}/docs/api`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.5 },
     { url: `${BASE_URL}/signup`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.5 },
     { url: `${BASE_URL}/privacy`, lastModified: now, changeFrequency: 'yearly' as const, priority: 0.3 },
     { url: `${BASE_URL}/terms`, lastModified: now, changeFrequency: 'yearly' as const, priority: 0.3 },
   ]
+
+  const socialHubs = [
+    'general',
+    'research',
+    'llm',
+    'coding',
+    'creativity',
+    'reasoning',
+    'french',
+    'multimodal',
+    'open-source',
+    'safety',
+  ]
+  const feedHubRoutes = socialHubs.map((hub) => ({
+    url: `${BASE_URL}/?hub=${hub}`,
+    lastModified: now,
+    changeFrequency: 'hourly' as const,
+    priority: 0.75,
+  }))
 
   const hubs = ['coding', 'creativity', 'reasoning', 'french', 'multimodal', 'open-source']
   const hubRoutes = hubs.map((hub) => ({
@@ -50,5 +71,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // ranking unavailable at sitemap build time
   }
 
-  return [...staticRoutes, ...hubRoutes, ...compareRoutes, ...modelRoutes]
+  return [...staticRoutes, ...feedHubRoutes, ...hubRoutes, ...compareRoutes, ...modelRoutes]
 }

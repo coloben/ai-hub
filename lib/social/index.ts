@@ -8,7 +8,6 @@ import {
   listCommunityPostsFromFile,
   createPostInFile,
   votePostInFile,
-  voteCuratedInFile,
   getCuratedVoteDelta,
   listCommentsFromFile,
   addCommentInFile,
@@ -131,21 +130,23 @@ export async function voteOnPost(
   voterId: string,
   direction: 'up' | 'down',
   kind: 'community' | 'curated'
-): Promise<{ ok: boolean; duplicate: boolean; post?: SocialPost }> {
+): Promise<{ ok: boolean; duplicate: boolean; post?: SocialPost; error?: string }> {
+  if (kind === 'curated') {
+    return {
+      ok: false,
+      duplicate: false,
+      error: 'Les actualités importées ne sont pas votables — utilisez les posts communauté.',
+    }
+  }
+
   if (hasDatabase()) {
     try {
-      const { duplicate } = await votePostInPg(postId, voterId, direction, kind === 'curated')
+      const { duplicate } = await votePostInPg(postId, voterId, direction, false)
       const post = await getPostById(postId)
       return { ok: true, duplicate, post: post ?? undefined }
     } catch (err) {
       console.warn('[Social] vote pg failed:', err)
     }
-  }
-
-  if (kind === 'curated') {
-    const { duplicate } = await voteCuratedInFile(postId, voterId, direction)
-    const post = await getPostById(postId)
-    return { ok: true, duplicate, post: post ?? undefined }
   }
 
   const { post, duplicate } = await votePostInFile(postId, voterId, direction)

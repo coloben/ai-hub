@@ -94,6 +94,7 @@ export const FeedPostSchema = z.object({
   badge: z.string().optional(),
   type: z.enum(['news', 'community', 'benchmark']),
   sourceUrl: z.string().url().optional(),
+  publishedAt: z.string().datetime().optional(),
 })
 
 /* ── Aggregated data schema ────────────────────────────────────────────── */
@@ -105,9 +106,10 @@ export const RankingDataSchema = z.object({
 })
 
 export const FeedDataSchema = z.object({
-  posts: z.array(FeedPostSchema).min(1),
+  posts: z.array(FeedPostSchema),
   updatedAt: z.string().datetime(),
   sources: z.array(z.string()),
+  feedTier: z.enum(['live', 'unavailable']).optional(),
 })
 
 /* ── Type exports ──────────────────────────────────────────────────────── */

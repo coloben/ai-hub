@@ -90,8 +90,9 @@ const config: Config = {
         'new-badge': '#00d4aa',
       },
       fontFamily: {
-        sans: ['Inter','-apple-system','BlinkMacSystemFont','Segoe UI','system-ui','sans-serif'],
-        mono: ['JetBrains Mono','ui-monospace','SFMono-Regular','Menlo','monospace'],
+        sans: ['var(--font-inter)', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-mono)', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+        display: ['var(--font-display)', 'var(--font-inter)', 'system-ui', 'sans-serif'],
       },
       fontSize: {
         '2xs': ['11px',{lineHeight:'14px',letterSpacing:'0.02em'}],

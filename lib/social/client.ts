@@ -1,6 +1,7 @@
 'use client'
 
-const VOTER_KEY = 'aihub_voter_id'
+import { getVoterId as getSharedVoterId } from '@/lib/votes/voter-id'
+
 const PROFILE_KEY = 'aihub_profile'
 
 export interface LocalProfile {
@@ -9,13 +10,7 @@ export interface LocalProfile {
 }
 
 export function getVoterId(): string {
-  if (typeof window === 'undefined') return 'ssr'
-  let id = localStorage.getItem(VOTER_KEY)
-  if (!id) {
-    id = `v_${crypto.randomUUID().replace(/-/g, '').slice(0, 24)}`
-    localStorage.setItem(VOTER_KEY, id)
-  }
-  return id
+  return getSharedVoterId()
 }
 
 export function getLocalProfile(): LocalProfile {

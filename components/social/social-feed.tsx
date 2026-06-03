@@ -1,6 +1,7 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { PostCard } from './post-card'
 import { PostComposer } from './post-composer'
 import { FeedTabs } from './feed-tabs'
@@ -15,9 +16,20 @@ interface SocialFeedProps {
 }
 
 export function SocialFeed({ initialPosts, initialSort = 'hot', hub = 'all' }: SocialFeedProps) {
-  const [sort, setSort] = useState<FeedSort>(initialSort)
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const sortParam = searchParams.get('sort')
+  const validSorts: FeedSort[] = ['hot', 'top', 'new', 'rising']
+  const sortFromUrl =
+    sortParam && validSorts.includes(sortParam as FeedSort) ? (sortParam as FeedSort) : initialSort
+
+  const [sort, setSort] = useState<FeedSort>(sortFromUrl)
   const [posts, setPosts] = useState(initialPosts)
   const [loading, setLoading] = useState(false)
+  const initialKey = useRef(`${hub}:${sortFromUrl}`)
+
+  const communityPosts = posts.filter((p) => p.kind === 'community')
+  const curatedPosts = posts.filter((p) => p.kind === 'curated')
 
   const refresh = useCallback(async () => {
     setLoading(true)
@@ -33,23 +45,73 @@ export function SocialFeed({ initialPosts, initialSort = 'hot', hub = 'all' }: S
   }, [sort, hub])
 
   useEffect(() => {
+    setSort(sortFromUrl)
+  }, [sortFromUrl])
+
+  useEffect(() => {
+    const key = `${hub}:${sort}`
+    if (key === initialKey.current) {
+      setPosts(initialPosts)
+      return
+    }
     void refresh()
-  }, [refresh])
+  }, [sort, hub, refresh, initialPosts])
+
+  function changeSort(next: FeedSort) {
+    setSort(next)
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('sort', next)
+    if (hub !== 'all') params.set('hub', hub)
+    else params.delete('hub')
+    router.replace(`/?${params.toString()}`, { scroll: false })
+  }
 
   return (
     <>
+      <div className="border-b border-border/60 bg-muted/20 px-3 py-2">
+        <p className="text-[11px] font-semibold text-foreground">Publier sur AI Hub</p>
+        <p className="text-[10px] text-muted-foreground">Posts communauté — votes et commentaires réels</p>
+      </div>
       <PostComposer defaultHub={hub === 'all' ? 'general' : hub} onPosted={() => void refresh()} />
-      <FeedTabs active={sort} onChange={setSort} />
+      <FeedTabs active={sort} onChange={changeSort} />
+
       {loading && posts.length === 0 ? (
         <FeedSkeleton />
       ) : (
         <div className={loading ? 'opacity-60 pointer-events-none' : ''}>
-          {posts.map((post) => (
-            <PostCard key={`${post.id}-${post.score}`} post={post} />
-          ))}
-          {posts.length === 0 && (
+          {communityPosts.length > 0 && (
+            <section aria-label="Posts communauté">
+              {communityPosts.map((post) => (
+                <PostCard key={`${post.id}-${post.score}`} post={post} />
+              ))}
+            </section>
+          )}
+
+          {curatedPosts.length > 0 && (
+            <section aria-label="Actualités importées">
+              <div className="px-3 py-2 border-b border-border/50 bg-card/40">
+                <p className="text-[11px] font-semibold text-foreground">Actualités importées</p>
+                <p className="text-[10px] text-muted-foreground">
+                  arXiv cs.AI & Hugging Face — pas publiées par des membres @arxiv
+                </p>
+              </div>
+              {curatedPosts.map((post) => (
+                <PostCard key={`${post.id}-curated`} post={post} />
+              ))}
+            </section>
+          )}
+
+          {communityPosts.length === 0 && curatedPosts.length === 0 && (
             <p className="py-12 text-center text-sm text-muted-foreground">
-              Aucun post dans ce hub. Soyez le premier à publier.
+              {hub === 'all'
+                ? 'Aucun contenu pour le moment.'
+                : `Aucun post dans h/${hub}. Les actualités arXiv sont dans h/research.`}
+            </p>
+          )}
+
+          {communityPosts.length === 0 && curatedPosts.length > 0 && hub !== 'all' && hub !== 'research' && (
+            <p className="py-6 text-center text-[12px] text-muted-foreground border-t border-border/40">
+              Aucun post communauté dans ce hub — seulement des imports ci-dessus ou dans h/research.
             </p>
           )}
         </div>

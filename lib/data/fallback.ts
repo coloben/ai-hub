@@ -3,8 +3,6 @@ import {
   FeedPostSchema,
   RankingDataSchema,
   FeedDataSchema,
-  type ArenaModel,
-  type FeedPost,
   type RankingData,
   type FeedData,
 } from './schema'
@@ -41,59 +39,29 @@ export function getFallbackRanking(): RankingData {
   })
 }
 
-/* ── Fallback Feed (actualités curées) ─────────────────────────────────── */
-
-const FALLBACK_POSTS_RAW = [
-  {
-    id: 'fb-1', author: 'Arena AI', handle: 'arena_ai', time: '2 h',
-    title: 'Claude Opus 4 prend la tête du Chatbot Arena avec 1502 ELO',
-    content: 'Anthropic domine le classement avec ses modèles thinking. Claude Opus 4.7 thinking suit de près à 1500 ELO. La famille Claude occupe les 4 premières places.',
-    tags: ['claude', 'elo', 'arena'], votes: 0, comments: 0, shares: 0,
-    badge: 'Benchmark', type: 'benchmark' as const,
-  },
-  {
-    id: 'fb-2', author: 'Google DeepMind', handle: 'deepmind', time: '5 h',
-    title: 'Gemini 3.1 Pro Preview : nouveau challenger sur l\'Arena',
-    content: 'Google présente Gemini 3.1 Pro Preview à 1487 ELO. Performances en hausse sur le raisonnement et le code. Disponible via API.',
-    tags: ['gemini', 'google', 'release'], votes: 0, comments: 0, shares: 0,
-    badge: 'Official', type: 'news' as const,
-  },
-  {
-    id: 'fb-3', author: 'OpenAI', handle: 'openai', time: '8 h',
-    title: 'GPT-5.5 High atteint 1482 ELO sur l\'Arena',
-    content: 'OpenAI lance GPT-5.5 High avec des capacités de raisonnement améliorées. Le modèle se positionne dans le top 10 du classement Arena.',
-    tags: ['openai', 'gpt', 'release'], votes: 0, comments: 0, shares: 0,
-    badge: 'Release', type: 'news' as const,
-  },
-  {
-    id: 'fb-4', author: 'Meta AI', handle: 'metaai', time: '12 h',
-    title: 'Muse Spark : le modèle open-weight de Meta à 1489 ELO',
-    content: 'Meta libère Muse Spark, un modèle open-weight qui se classe 5ème sur l\'Arena. Architecture MoE avec des performances impressionnantes pour un modèle ouvert.',
-    tags: ['meta', 'muse', 'open-source'], votes: 0, comments: 0, shares: 0,
-    badge: 'Release', type: 'news' as const,
-  },
-  {
-    id: 'fb-5', author: 'xAI', handle: 'xai', time: '6 h',
-    title: 'Grok 4.20 Beta1 entre dans le top 10 Arena',
-    content: 'Le dernier modèle de xAI atteint 1476 ELO. Améliorations notables en raisonnement et en code. Disponible sur X et via API.',
-    tags: ['grok', 'xai', 'benchmark'], votes: 0, comments: 0, shares: 0,
-    badge: 'Benchmark', type: 'benchmark' as const,
-  },
-  {
-    id: 'fb-6', author: 'DeepSeek', handle: 'deepseek', time: '3 h',
-    title: 'DeepSeek R2 : le modèle de raisonnement open-weight à 1470 ELO',
-    content: 'DeepSeek R2 propose des capacités de raisonnement avancées en open-weight. Le modèle rivalise avec les offres propriétaires sur plusieurs benchmarks.',
-    tags: ['deepseek', 'reasoning', 'open-weight'], votes: 0, comments: 0, shares: 0,
-    badge: 'Research', type: 'news' as const,
-  },
-]
-
-export function getFallbackFeed(): FeedData {
+/** Honest placeholder when arXiv/HF are down — no fake corporate posts */
+export function getUnavailableFeed(): FeedData {
   const now = new Date().toISOString()
-  const posts = FALLBACK_POSTS_RAW.map((p) => FeedPostSchema.parse({ ...p }))
+  const post = FeedPostSchema.parse({
+    id: 'feed-unavailable',
+    author: 'AI Hub',
+    handle: 'system',
+    time: '< 1 h',
+    title: 'Flux actualités temporairement indisponibles',
+    content:
+      'Les sources arXiv (cs.AI) et Hugging Face Papers ne répondent pas. Aucune fausse actualité n\'est affichée. Réessayez dans quelques minutes ou consultez le classement Arena.',
+    tags: ['system'],
+    votes: 0,
+    comments: 0,
+    shares: 0,
+    badge: 'Secours',
+    type: 'news' as const,
+    publishedAt: now,
+  })
   return FeedDataSchema.parse({
-    posts,
+    posts: [post],
     updatedAt: now,
-    sources: ['manual-curation'],
+    sources: ['feed-unavailable'],
+    feedTier: 'unavailable',
   })
 }

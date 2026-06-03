@@ -26,7 +26,7 @@ export function trustMessage(tier: DataTier): string {
     case 'cached':
       return 'Données en cache (rafraîchissement toutes les 5 minutes).'
     case 'fallback':
-      return 'Arena AI temporairement indisponible — classement de secours affiché. Les votes communautaires du site restent réels si enregistrés.'
+      return 'Arena AI temporairement indisponible — classement de secours (snapshot statique). Vérifiez la date de MAJ affichée. Les votes communautaires du site restent réels si DATABASE_URL est configuré.'
   }
 }
 

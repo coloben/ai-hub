@@ -9,6 +9,7 @@ import { getUnifiedFeed } from '@/lib/social'
 import { getCommunityStats } from '@/lib/votes/stats'
 import { getTrustStatus } from '@/lib/trust'
 import { DataTrustBanner } from '@/components/trust/data-trust-banner'
+import { PersistenceBanner } from '@/components/trust/persistence-banner'
 import { MessageSquare, Swords, Vote } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
@@ -41,7 +42,10 @@ export default async function CommunityPage() {
           depuis la base ou le stockage actif.
         </p>
 
-        <DataTrustBanner status={trust} />
+        <div className="space-y-2">
+          <DataTrustBanner status={trust} />
+          <PersistenceBanner persisted={community.persisted} />
+        </div>
 
         <div className="grid sm:grid-cols-3 gap-4 my-8">
           <Card>

@@ -12,6 +12,7 @@ import { getCommunityStats } from '@/lib/votes/stats'
 import { getRanking } from '@/lib/data/pipeline'
 import { getTrustStatus } from '@/lib/trust'
 import { DataTrustBanner } from '@/components/trust/data-trust-banner'
+import { PersistenceBanner } from '@/components/trust/persistence-banner'
 
 const CATEGORIES = [
   { key: 'global', label: 'Global', icon: Trophy },
@@ -61,7 +62,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
   const arenaVotesTotal = ranking.models.reduce((sum, m) => sum + (m.samples ?? 0), 0)
 
   return (
-    <div className="min-h-screen bg-background grid-dots">
+    <div id="main" className="min-h-screen bg-background grid-dots">
       <TopNav active="Comparer" />
 
       <section className="border-b border-border">
@@ -85,6 +86,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
 
         <div className="mt-3 space-y-3">
           <DataTrustBanner status={trust} compact />
+          <PersistenceBanner persisted={communityStats.persisted} compact />
           <RankingMetaBar />
         </div>
 

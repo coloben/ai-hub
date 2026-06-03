@@ -1,5 +1,3 @@
-'use client'
-
 interface JsonLdProps {
   data: Record<string, unknown> | Record<string, unknown>[]
 }
@@ -26,7 +24,7 @@ export function OrganizationSchema() {
         '@type': 'Organization',
         name: 'AI Hub',
         url: 'https://ai-hub-cnb3.vercel.app',
-        logo: 'https://ai-hub-cnb3.vercel.app/og.png',
+        logo: 'https://ai-hub-cnb3.vercel.app/opengraph-image',
         description: 'Plateforme communautaire de veille et de benchmark sur les modèles d\'intelligence artificielle.',
         sameAs: [
           'https://twitter.com/AIHubBenchmarks',
