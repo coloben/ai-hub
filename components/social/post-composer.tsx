@@ -56,7 +56,7 @@ export function PostComposer({ defaultHub = 'general', onPosted }: PostComposerP
   }
 
   return (
-    <div className="px-4 py-3 border-b border-border bg-card/50">
+    <div id="post-composer" className="px-4 py-3 border-b border-border bg-card/50 scroll-mt-20">
       <div className="flex gap-3">
         <div className="w-9 h-9 rounded-full bg-gradient-to-br from-accent/30 to-accent-2/20 border border-border flex items-center justify-center shrink-0">
           <UserCircle size={20} className="text-accent" />

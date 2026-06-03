@@ -39,7 +39,7 @@ export function MobileNav() {
           )
         })}
         <Link
-          href="/"
+          href="/#post-composer"
           className="flex flex-col items-center justify-center -mt-4"
           aria-label="Nouveau post"
         >

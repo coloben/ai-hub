@@ -78,7 +78,7 @@ export function SocialFeed({ initialPosts, initialSort = 'hot', hub = 'all' }: S
       {loading && posts.length === 0 ? (
         <FeedSkeleton />
       ) : (
-        <div className={loading ? 'opacity-60 pointer-events-none' : ''}>
+        <div className={loading ? 'opacity-70' : ''} aria-busy={loading}>
           {communityPosts.length > 0 && (
             <section aria-label="Posts communauté">
               {communityPosts.map((post) => (

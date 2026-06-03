@@ -138,14 +138,30 @@ export function CommunityVoteWidget({ category }: { category: string }) {
         )}
       </div>
 
+      {hasVoted && (
+        <p className="text-center text-[12px] text-muted-foreground bg-muted/30 rounded-md py-2 px-3">
+          Duel déjà voté sur cette paire — choisissez une autre comparaison ci-dessous.
+        </p>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card
+          role="button"
+          tabIndex={hasVoted || submitting ? -1 : 0}
+          aria-label={`Voter pour ${modelA.name}`}
+          aria-disabled={Boolean(hasVoted || submitting)}
           className={`relative overflow-hidden transition-all duration-200 card-lift ${
-            hasVoted
-              ? 'cursor-default'
+            hasVoted || submitting
+              ? 'cursor-default opacity-80'
               : 'cursor-pointer hover:border-accent/20'
           } ${hasVoted === 'A' ? 'border-accent/40' : 'border-border'}`}
-          onClick={() => !hasVoted && !submitting && handleVote('A')}
+          onClick={() => !hasVoted && !submitting && void handleVote('A')}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              void handleVote('A')
+            }
+          }}
         >
           <CardContent className="p-5 text-center">
             {hasVoted === 'A' && (
@@ -160,12 +176,22 @@ export function CommunityVoteWidget({ category }: { category: string }) {
         </Card>
 
         <Card
+          role="button"
+          tabIndex={hasVoted || submitting ? -1 : 0}
+          aria-label={`Voter pour ${modelB.name}`}
+          aria-disabled={Boolean(hasVoted || submitting)}
           className={`relative overflow-hidden transition-all duration-200 card-lift ${
-            hasVoted
-              ? 'cursor-default'
+            hasVoted || submitting
+              ? 'cursor-default opacity-80'
               : 'cursor-pointer hover:border-accent/20'
           } ${hasVoted === 'B' ? 'border-accent/40' : 'border-border'}`}
-          onClick={() => !hasVoted && !submitting && handleVote('B')}
+          onClick={() => !hasVoted && !submitting && void handleVote('B')}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              void handleVote('B')
+            }
+          }}
         >
           <CardContent className="p-5 text-center">
             {hasVoted === 'B' && (
@@ -197,21 +223,28 @@ export function CommunityVoteWidget({ category }: { category: string }) {
               ? 'Soyez le premier à voter pour cette paire.'
               : `${pctA} % préfèrent ${modelA.name} · ${totalVotes} vote${totalVotes > 1 ? 's' : ''}`}
           </p>
-          {hasVoted && pairs.length > 1 && (
-            <div className="flex justify-center pt-1">
-              <Button variant="outline" size="sm" className="h-7 px-3 text-xs rounded-md" onClick={nextPair}>
-                Comparaison suivante →
-              </Button>
-            </div>
-          )}
         </div>
       )}
 
       {error && <p className="text-[11px] text-destructive text-center">{error}</p>}
 
+      {pairs.length > 1 && (
+        <div className="flex justify-center pt-1">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-8 px-4 text-xs rounded-md"
+            onClick={nextPair}
+          >
+            Comparaison suivante →
+          </Button>
+        </div>
+      )}
+
       {!hasVoted && (
         <p className="text-[11px] text-muted-foreground text-center">
-          {submitting ? 'Enregistrement…' : 'Cliquez sur un modèle pour voter. Un vote par paire et par navigateur.'}
+          {submitting ? 'Enregistrement…' : 'Cliquez sur une carte pour voter (1 vote par paire).'}
         </p>
       )}
     </div>
