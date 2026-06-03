@@ -7,7 +7,8 @@ import { SocialFeed } from '@/components/social/social-feed'
 import { TrendingPanel } from '@/components/social/trending-panel'
 import { HomeStatsBar } from './components/home-stats-bar'
 import { getUnifiedFeed } from '@/lib/social'
-import { getTrustStatus } from '@/lib/trust'
+import { getRanking } from '@/lib/data/pipeline'
+import { rankingFromData } from '@/lib/trust'
 import { DataTrustBanner } from '@/components/trust/data-trust-banner'
 import { PersistenceBanner } from '@/components/trust/persistence-banner'
 import { getCommunityStats } from '@/lib/votes/stats'
@@ -41,11 +42,12 @@ export default async function HomePage({ searchParams }: PageProps) {
       ? (sortParam as FeedSort)
       : 'hot'
 
-  const [{ posts }, trust, community] = await Promise.all([
+  const [{ posts }, ranking, community] = await Promise.all([
     getUnifiedFeed({ sort, hub }),
-    getTrustStatus(),
+    getRanking(),
     getCommunityStats(),
   ])
+  const trust = rankingFromData(ranking)
 
   return (
     <div id="main" className="min-h-screen bg-background pb-16 lg:pb-0">
@@ -67,9 +69,7 @@ export default async function HomePage({ searchParams }: PageProps) {
               Actualités sourcées · posts communauté avec votes réels uniquement
             </p>
           </div>
-          <Suspense fallback={<Skeleton className="h-8 w-48" />}>
-            <HomeStatsBar />
-          </Suspense>
+          <HomeStatsBar ranking={ranking} />
         </div>
       </div>
 
@@ -85,22 +85,12 @@ export default async function HomePage({ searchParams }: PageProps) {
 
         <div className="min-w-0" role="region" aria-label="Fil principal">
           <Card className="overflow-hidden border-border/80 shadow-sm shadow-black/20">
-            <Suspense fallback={<Skeleton className="h-64 w-full" />}>
-              <SocialFeed initialPosts={posts} initialSort={sort} hub={hub} />
-            </Suspense>
+            <SocialFeed initialPosts={posts} initialSort={sort} hub={hub} />
           </Card>
         </div>
 
         <aside className="hidden lg:block space-y-4">
-          <Suspense
-            fallback={
-              <Card className="p-4">
-                <Skeleton className="h-24 w-full" />
-              </Card>
-            }
-          >
-            <TrendingPanel />
-          </Suspense>
+          <TrendingPanel ranking={ranking} />
         </aside>
       </div>
 

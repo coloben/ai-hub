@@ -1,11 +1,11 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { PostCard } from './post-card'
 import { PostComposer } from './post-composer'
 import { FeedTabs } from './feed-tabs'
 import { Skeleton } from '@/components/ui/skeleton'
+import { sortPosts } from '@/lib/social/scoring'
 import type { SocialPost, FeedSort } from '@/lib/social/schema'
 import type { HubId } from '@/lib/social/hubs'
 
@@ -16,17 +16,16 @@ interface SocialFeedProps {
 }
 
 export function SocialFeed({ initialPosts, initialSort = 'hot', hub = 'all' }: SocialFeedProps) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const sortParam = searchParams.get('sort')
-  const validSorts: FeedSort[] = ['hot', 'top', 'new', 'rising']
-  const sortFromUrl =
-    sortParam && validSorts.includes(sortParam as FeedSort) ? (sortParam as FeedSort) : initialSort
-
-  const [sort, setSort] = useState<FeedSort>(sortFromUrl)
-  const [posts, setPosts] = useState(initialPosts)
+  const [sort, setSort] = useState<FeedSort>(initialSort)
+  const [allPosts, setAllPosts] = useState(initialPosts)
   const [loading, setLoading] = useState(false)
-  const initialKey = useRef(`${hub}:${sortFromUrl}`)
+
+  useEffect(() => {
+    setAllPosts(initialPosts)
+    setSort(initialSort)
+  }, [initialPosts, initialSort])
+
+  const posts = useMemo(() => sortPosts(allPosts, sort), [allPosts, sort])
 
   const communityPosts = posts.filter((p) => p.kind === 'community')
   const curatedPosts = posts.filter((p) => p.kind === 'curated')
@@ -34,36 +33,25 @@ export function SocialFeed({ initialPosts, initialSort = 'hot', hub = 'all' }: S
   const refresh = useCallback(async () => {
     setLoading(true)
     try {
-      const q = new URLSearchParams({ sort })
+      const q = new URLSearchParams({ sort: 'new' })
       if (hub !== 'all') q.set('hub', hub)
-      const res = await fetch(`/api/v1/posts?${q}`)
+      const res = await fetch(`/api/v1/posts?${q}`, { cache: 'no-store' })
       const data = await res.json()
-      if (Array.isArray(data.posts)) setPosts(data.posts)
+      if (Array.isArray(data.posts)) setAllPosts(data.posts)
     } finally {
       setLoading(false)
     }
-  }, [sort, hub])
-
-  useEffect(() => {
-    setSort(sortFromUrl)
-  }, [sortFromUrl])
-
-  useEffect(() => {
-    const key = `${hub}:${sort}`
-    if (key === initialKey.current) {
-      setPosts(initialPosts)
-      return
-    }
-    void refresh()
-  }, [sort, hub, refresh, initialPosts])
+  }, [hub])
 
   function changeSort(next: FeedSort) {
     setSort(next)
-    const params = new URLSearchParams(searchParams.toString())
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
     params.set('sort', next)
     if (hub !== 'all') params.set('hub', hub)
     else params.delete('hub')
-    router.replace(`/?${params.toString()}`, { scroll: false })
+    const qs = params.toString()
+    window.history.replaceState(null, '', qs ? `/?${qs}` : '/')
   }
 
   return (
@@ -75,10 +63,13 @@ export function SocialFeed({ initialPosts, initialSort = 'hot', hub = 'all' }: S
       <PostComposer defaultHub={hub === 'all' ? 'general' : hub} onPosted={() => void refresh()} />
       <FeedTabs active={sort} onChange={changeSort} />
 
-      {loading && posts.length === 0 ? (
+      {loading && allPosts.length === 0 ? (
         <FeedSkeleton />
       ) : (
-        <div className={loading ? 'opacity-70' : ''} aria-busy={loading}>
+        <div aria-busy={loading}>
+          {loading && (
+            <p className="text-center text-[10px] text-muted-foreground py-1">Actualisation…</p>
+          )}
           {communityPosts.length > 0 && (
             <section aria-label="Posts communauté">
               {communityPosts.map((post) => (

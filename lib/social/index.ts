@@ -8,7 +8,6 @@ import {
   listCommunityPostsFromFile,
   createPostInFile,
   votePostInFile,
-  getCuratedVoteDelta,
   listCommentsFromFile,
   addCommentInFile,
   getPostFromFile,
@@ -17,7 +16,6 @@ import {
   listCommunityPostsFromPg,
   createPostInPg,
   votePostInPg,
-  getCuratedVotesPg,
   listCommentsFromPg,
   addCommentInPg,
   getCommunityPostPg,
@@ -47,24 +45,6 @@ async function listCommunity(): Promise<SocialPost[]> {
   }
 }
 
-async function enrichCurated(posts: SocialPost[]): Promise<SocialPost[]> {
-  return Promise.all(
-    posts.map(async (p) => {
-      try {
-        if (hasDatabase()) {
-          const v = await getCuratedVotesPg(p.id, p.upvotes, p.downvotes)
-          return { ...p, ...v }
-        }
-        const v = await getCuratedVoteDelta(p.id, p.upvotes, p.downvotes)
-        return { ...p, ...v }
-      } catch (err) {
-        console.warn('[Social] enrich vote skip', p.id, err)
-        return p
-      }
-    })
-  )
-}
-
 export async function getUnifiedFeed(options?: {
   sort?: FeedSort
   hub?: HubId | 'all'
@@ -74,7 +54,8 @@ export async function getUnifiedFeed(options?: {
 
   try {
     const [feedData, community] = await Promise.all([getFeed(), listCommunity()])
-    const curated = await enrichCurated(feedData.posts.map(curatedToSocial))
+    // Curated posts are not votable — skip per-post DB enrichment (was causing 15+ queries / request)
+    const curated = feedData.posts.map(curatedToSocial)
     let merged = [...community, ...curated]
 
     if (hub !== 'all') {
@@ -101,17 +82,7 @@ export async function getPostById(id: string): Promise<SocialPost | null> {
   const feed = await getFeed()
   const raw = feed.posts.find((p) => p.id === id)
   if (!raw) return null
-  const post = curatedToSocial(raw)
-  if (hasDatabase()) {
-    try {
-      const v = await getCuratedVotesPg(id, post.upvotes, post.downvotes)
-      return { ...post, ...v }
-    } catch {
-      /* noop */
-    }
-  }
-  const v = await getCuratedVoteDelta(id, post.upvotes, post.downvotes)
-  return { ...post, ...v }
+  return curatedToSocial(raw)
 }
 
 export async function createCommunityPost(input: CreatePostInput): Promise<SocialPost> {

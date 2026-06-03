@@ -41,7 +41,6 @@ export async function ensureSeedPostsPg(): Promise<void> {
 
 export async function listCommunityPostsFromPg(): Promise<SocialPost[]> {
   await ensureSocialSchema()
-  await ensureSeedPostsPg()
   const pool = getPool()
   const { rows } = await pool.query(
     `SELECT * FROM social_posts WHERE kind = 'community' ORDER BY created_at DESC LIMIT 200`

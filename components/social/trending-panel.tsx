@@ -1,11 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Hash, Swords, Trophy } from 'lucide-react'
 import Link from 'next/link'
-import { getRanking } from '@/lib/data/pipeline'
+import type { RankingData } from '@/lib/data/schema'
 import { CertifiedBadge } from '@/components/trust/certified-badge'
 
-export async function TrendingPanel() {
-  const ranking = await getRanking()
+export function TrendingPanel({ ranking }: { ranking: RankingData }) {
   const top5 = ranking.models.slice(0, 5)
   const tags = top5
     .flatMap((m) => m.name.toLowerCase().split(/[\s-]+/))

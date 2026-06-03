@@ -15,9 +15,21 @@ interface Model {
   elo: number
 }
 
+const VOTED_STORAGE_KEY = 'aihub_duel_votes'
+
+function loadVoted(): Record<string, 'A' | 'B'> {
+  if (typeof window === 'undefined') return {}
+  try {
+    const raw = sessionStorage.getItem(VOTED_STORAGE_KEY)
+    return raw ? (JSON.parse(raw) as Record<string, 'A' | 'B'>) : {}
+  } catch {
+    return {}
+  }
+}
+
 export function CommunityVoteWidget({ category }: { category: string }) {
   const [models, setModels] = useState<Model[]>([])
-  const [voted, setVoted] = useState<Record<string, 'A' | 'B'>>({})
+  const [voted, setVoted] = useState<Record<string, 'A' | 'B'>>(loadVoted)
   const [statsByPair, setStatsByPair] = useState<Record<string, PairVoteStats>>({})
   const [currentIndex, setCurrentIndex] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -92,7 +104,15 @@ export function CommunityVoteWidget({ category }: { category: string }) {
         setError(msg === 'Failed to save vote' ? 'Enregistrement impossible — réessayez dans un instant.' : msg)
         return
       }
-      setVoted((prev) => ({ ...prev, [voteKey]: choice }))
+      setVoted((prev) => {
+        const next = { ...prev, [voteKey]: choice }
+        try {
+          sessionStorage.setItem(VOTED_STORAGE_KEY, JSON.stringify(next))
+        } catch {
+          /* ignore */
+        }
+        return next
+      })
       if (json.stats) {
         setStatsByPair((prev) => ({ ...prev, [voteKey]: json.stats as PairVoteStats }))
       }

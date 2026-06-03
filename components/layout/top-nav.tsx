@@ -1,9 +1,14 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Zap, Flame, Trophy, Swords, Users, Layers } from 'lucide-react'
-import { SiteSearch } from '@/components/layout/site-search'
+
+const SiteSearch = dynamic(
+  () => import('@/components/layout/site-search').then((m) => m.SiteSearch),
+  { ssr: false, loading: () => null }
+)
 
 const NAV_ITEMS = [
   { href: '/', icon: Flame, label: 'Feed' },

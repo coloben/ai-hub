@@ -1,6 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { BarChart3, Trophy, Database, Clock } from 'lucide-react'
-import { getRanking } from '@/lib/data/pipeline'
+import type { RankingData } from '@/lib/data/schema'
 import { classifyRankingSource } from '@/lib/trust'
 
 function fmt(n: number) {
@@ -9,8 +9,7 @@ function fmt(n: number) {
   return `${n}`
 }
 
-export async function HomeStatsBar() {
-  const ranking = await getRanking()
+export function HomeStatsBar({ ranking }: { ranking: RankingData }) {
   const top = ranking.models[0]
   const arenaVotes = ranking.models.reduce((sum, m) => sum + (m.samples ?? 0), 0)
   const updated = new Date(ranking.updatedAt).toLocaleString('fr-FR', {
