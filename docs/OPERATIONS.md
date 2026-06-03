@@ -40,10 +40,11 @@ Verify after deploy:
 
 ## Database migrations
 
-Tables auto-create on first API call. For manual setup, run:
+**Recommandé :** nouveau projet Supabase — voir `docs/SUPABASE-FRESH-SETUP.md`.
 
-- `sql/community_votes.sql`
-- `sql/social.sql`
+Tables auto-create on first API call. For manual setup, run once in SQL Editor:
+
+- `sql/00_full_schema.sql` (ou `community_votes.sql` + `social.sql`)
 
 ## Incident playbook
 
