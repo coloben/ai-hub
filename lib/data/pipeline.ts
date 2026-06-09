@@ -1,8 +1,9 @@
 import { unstable_cache } from 'next/cache'
-import { fetchArenaRanking, fetchFeedPosts } from './sources'
+import { fetchArenaRanking, fetchArenaBoards, fetchArenaBoard } from './sources'
+import { fetchFeedPosts } from './sources'
 import { getFallbackRanking, getUnavailableFeed } from './fallback'
-import { RankingDataSchema, FeedDataSchema } from './schema'
-import type { RankingData, FeedData } from './schema'
+import { RankingDataSchema, FeedDataSchema, ArenaBoardsDataSchema } from './schema'
+import type { RankingData, FeedData, ArenaBoardsData } from './schema'
 
 /* ── Cache config ──────────────────────────────────────────────────────── */
 
@@ -23,6 +24,39 @@ export const getRanking = unstable_cache(
   ['ranking', 'arena-ai'],
   { revalidate: CACHE_TTL_SECONDS, tags: ['ranking'] }
 )
+
+export const getArenaBoards = unstable_cache(
+  async (): Promise<ArenaBoardsData> => {
+    try {
+      const data = await fetchArenaBoards()
+      return ArenaBoardsDataSchema.parse(data)
+    } catch (err) {
+      console.warn('[Pipeline] Arena boards fetch failed:', err)
+      const fallback = getFallbackRanking()
+      return ArenaBoardsDataSchema.parse({
+        boards: [
+          { id: 'text', label: 'Text', scoreKind: 'elo' as const },
+        ],
+        rankings: { text: fallback },
+        defaultBoard: 'text',
+        snapshotDate: fallback.updatedAt.slice(0, 10),
+        updatedAt: fallback.updatedAt,
+        source: fallback.source,
+      })
+    }
+  },
+  ['ranking', 'arena-boards'],
+  { revalidate: CACHE_TTL_SECONDS, tags: ['ranking'] }
+)
+
+export async function getArenaBoard(boardId: string): Promise<RankingData> {
+  try {
+    const data = await fetchArenaBoard(boardId)
+    return RankingDataSchema.parse(data)
+  } catch {
+    return getRanking()
+  }
+}
 
 /* ── Feed pipeline ─────────────────────────────────────────────────────── */
 

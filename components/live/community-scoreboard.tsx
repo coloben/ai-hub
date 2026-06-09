@@ -4,13 +4,7 @@ import Link from 'next/link'
 import { useLiveStats } from '@/hooks/use-live-stats'
 import { Trophy, Users } from 'lucide-react'
 import { CertifiedBadge } from '@/components/trust/certified-badge'
-
-function modelLabel(id: string) {
-  return id
-    .split('-')
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ')
-}
+import { formatArenaModelName } from '@/lib/data/model-names'
 
 interface CommunityScoreboardProps {
   category?: string
@@ -66,7 +60,7 @@ export function CommunityScoreboard({
               </span>
               <div className="flex-1 min-w-0">
                 <p className={`truncate font-medium ${compact ? 'text-[12px]' : 'text-[13px]'}`}>
-                  {modelLabel(row.modelId)}
+                  {formatArenaModelName(row.modelId)}
                 </p>
                 <p className="text-[10px] text-muted-foreground">
                   {row.wins}V · {row.losses}D · {row.duels} duels

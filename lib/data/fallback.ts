@@ -10,13 +10,13 @@ import {
 /* ── Fallback Ranking (Arena AI data, May 2026) ──────────────────────── */
 
 const FALLBACK_MODELS_RAW = [
-  { id: 'claude-opus-4-6-thinking', name: 'Claude Opus 4 (thinking)', organization: 'Anthropic', elo: 1502, eloDelta: 0, samples: 34186, category: 'proprietary' as const },
-  { id: 'claude-opus-4-7-thinking', name: 'Claude Opus 4.7 (thinking)', organization: 'Anthropic', elo: 1500, eloDelta: 0, samples: 19973, category: 'proprietary' as const },
-  { id: 'claude-opus-4-6', name: 'Claude Opus 4', organization: 'Anthropic', elo: 1498, eloDelta: 0, samples: 36512, category: 'proprietary' as const },
-  { id: 'claude-opus-4-7', name: 'Claude Opus 4.7', organization: 'Anthropic', elo: 1494, eloDelta: 0, samples: 20724, category: 'proprietary' as const },
-  { id: 'muse-spark', name: 'Muse Spark', organization: 'Meta', elo: 1489, eloDelta: 0, samples: 12228, category: 'open-weight' as const },
-  { id: 'gemini-3-1-pro-preview', name: 'Gemini 3.1 Pro Preview', organization: 'Google', elo: 1487, eloDelta: 0, samples: 43742, category: 'proprietary' as const },
-  { id: 'gemini-3-pro', name: 'Gemini 3 Pro', organization: 'Google', elo: 1486, eloDelta: 0, samples: 41332, category: 'proprietary' as const },
+  { id: 'claude-opus-4-6-thinking', name: 'Claude Opus 4.6 (Thinking)', organization: 'Anthropic', elo: 1502, eloDelta: 1, confidenceInterval: 4, scoreKind: 'elo' as const, rank: 1, samples: 34186, category: 'proprietary' as const },
+  { id: 'claude-opus-4-7-thinking', name: 'Claude Opus 4.7 (Thinking)', organization: 'Anthropic', elo: 1500, eloDelta: 0, confidenceInterval: 5, scoreKind: 'elo' as const, rank: 2, samples: 19973, category: 'proprietary' as const },
+  { id: 'claude-opus-4-6', name: 'Claude Opus 4.6', organization: 'Anthropic', elo: 1498, eloDelta: 0, confidenceInterval: 4, scoreKind: 'elo' as const, rank: 3, samples: 36512, category: 'proprietary' as const },
+  { id: 'claude-opus-4-7', name: 'Claude Opus 4.7', organization: 'Anthropic', elo: 1494, eloDelta: -1, confidenceInterval: 4, scoreKind: 'elo' as const, rank: 4, samples: 20724, category: 'proprietary' as const },
+  { id: 'muse-spark', name: 'Muse Spark', organization: 'Meta', elo: 1489, eloDelta: 0, confidenceInterval: 5, scoreKind: 'elo' as const, rank: 5, samples: 12228, category: 'open-weight' as const },
+  { id: 'gemini-3-1-pro-preview', name: 'Gemini 3.1 Pro Preview', organization: 'Google', elo: 1487, eloDelta: 0, confidenceInterval: 4, scoreKind: 'elo' as const, rank: 6, samples: 43742, category: 'proprietary' as const },
+  { id: 'gemini-3-pro', name: 'Gemini 3 Pro', organization: 'Google', elo: 1486, eloDelta: 0, confidenceInterval: 4, scoreKind: 'elo' as const, rank: 7, samples: 41332, category: 'proprietary' as const },
   { id: 'gpt-5-5-high', name: 'GPT-5.5 High', organization: 'OpenAI', elo: 1482, eloDelta: 0, samples: 16573, category: 'proprietary' as const },
   { id: 'gpt-5-4-high', name: 'GPT-5.4 High', organization: 'OpenAI', elo: 1480, eloDelta: 0, samples: 28246, category: 'proprietary' as const },
   { id: 'gemini-3-5-flash', name: 'Gemini 3.5 Flash', organization: 'Google', elo: 1479, eloDelta: 0, samples: 9045, category: 'proprietary' as const },

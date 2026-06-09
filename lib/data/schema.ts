@@ -2,15 +2,29 @@ import { z } from 'zod'
 
 /* ── Base schemas ──────────────────────────────────────────────────────── */
 
+export const ArenaScoreKindSchema = z.enum(['elo', 'relative'])
+
 export const ArenaModelSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
   organization: z.string().min(1),
-  elo: z.number().int().min(0).max(2000),
+  elo: z.number().int(),
   eloDelta: z.number().int(),
+  confidenceInterval: z.number().int().min(0).optional(),
+  scoreKind: ArenaScoreKindSchema.default('elo'),
+  arenaBoard: z.string().optional(),
+  rank: z.number().int().min(1).optional(),
   samples: z.number().int().optional(),
   category: z.enum(['proprietary', 'open-weight', 'open-source']).optional(),
   updatedAt: z.string().datetime().optional(),
+})
+
+export const ArenaBoardSchema = z.object({
+  id: z.string().min(1),
+  label: z.string().min(1),
+  description: z.string().optional(),
+  scoreKind: ArenaScoreKindSchema,
+  sourceUrl: z.string().url().optional(),
 })
 
 export const NewsItemSchema = z.object({
@@ -112,9 +126,21 @@ export const FeedDataSchema = z.object({
   feedTier: z.enum(['live', 'unavailable']).optional(),
 })
 
+export const ArenaBoardsDataSchema = z.object({
+  boards: z.array(ArenaBoardSchema),
+  rankings: z.record(z.string(), RankingDataSchema),
+  defaultBoard: z.string(),
+  snapshotDate: z.string(),
+  updatedAt: z.string().datetime(),
+  source: z.string().min(1),
+})
+
 /* ── Type exports ──────────────────────────────────────────────────────── */
 
 export type ArenaModel = z.infer<typeof ArenaModelSchema>
+export type ArenaScoreKind = z.infer<typeof ArenaScoreKindSchema>
+export type ArenaBoard = z.infer<typeof ArenaBoardSchema>
+export type ArenaBoardsData = z.infer<typeof ArenaBoardsDataSchema>
 export type NewsItem = z.infer<typeof NewsItemSchema>
 export type Benchmark = z.infer<typeof BenchmarkSchema>
 export type Comparison = z.infer<typeof ComparisonSchema>
