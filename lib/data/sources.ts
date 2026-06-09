@@ -64,48 +64,74 @@ interface ArenaEntry {
   votes: number
 }
 
-async function fetchArenaTextLeaderboard(): Promise<ArenaEntry[]> {
-  // Try today first, then yesterday, then day before
+const ARENA_FILE_NAMES = ['text.json', 'text-battle.json', 'leaderboard.json']
+
+function recentArenaDates(count = 7): string[] {
   const today = new Date()
   const candidates: string[] = []
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < count; i++) {
     const d = new Date(today)
     d.setDate(d.getDate() - i)
     candidates.push(d.toISOString().slice(0, 10))
   }
+  return candidates
+}
 
-  const fileNames = ['text.json', 'text-battle.json', 'leaderboard.json']
-
-  for (const date of candidates) {
-    for (const file of fileNames) {
-      try {
-        const url = `${ARENA_GH_RAW}/data/${date}/${file}`
-        const data = await fetchJson(url, 5000)
-        const models = data?.models ?? data?.leaderboard
-        if (Array.isArray(models) && models.length > 0) {
-          return models as ArenaEntry[]
-        }
-      } catch {
-        continue
+async function fetchArenaSnapshotForDate(date: string): Promise<ArenaEntry[] | null> {
+  for (const file of ARENA_FILE_NAMES) {
+    try {
+      const url = `${ARENA_GH_RAW}/data/${date}/${file}`
+      const data = await fetchJson(url, 5000)
+      const models = data?.models ?? data?.leaderboard
+      if (Array.isArray(models) && models.length > 0) {
+        return models as ArenaEntry[]
       }
+    } catch {
+      continue
+    }
+  }
+  return null
+}
+
+async function fetchArenaTextLeaderboard(): Promise<{ entries: ArenaEntry[]; snapshotDate: string }> {
+  for (const date of recentArenaDates()) {
+    const entries = await fetchArenaSnapshotForDate(date)
+    if (entries && entries.length > 0) {
+      return { entries, snapshotDate: date }
     }
   }
   throw new Error('No arena leaderboard data found for recent dates')
 }
 
-function normalizeArenaEntry(entries: ArenaEntry[]): ArenaModel[] {
+function prevSnapshotDate(date: string): string {
+  const d = new Date(`${date}T12:00:00.000Z`)
+  d.setUTCDate(d.getUTCDate() - 1)
+  return d.toISOString().slice(0, 10)
+}
+
+function normalizeArenaEntry(
+  entries: ArenaEntry[],
+  prevScores?: Map<string, number>,
+  snapshotDate?: string
+): ArenaModel[] {
   const models: ArenaModel[] = []
+  const updatedAt = snapshotDate ? `${snapshotDate}T12:00:00.000Z` : new Date().toISOString()
+
   for (const entry of entries.slice(0, 25)) {
     try {
+      const elo = Math.round(entry.score)
+      const prev = prevScores?.get(entry.model)
+      const eloDelta = prev != null ? elo - prev : 0
+
       const model = ArenaModelSchema.parse({
         id: entry.model.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
         name: entry.model,
         organization: entry.vendor,
-        elo: Math.round(entry.score),
-        eloDelta: 0, // daily snapshots don't include delta
+        elo,
+        eloDelta,
         samples: entry.votes,
         category: (entry.license === 'proprietary' ? 'proprietary' : 'open-weight') as ArenaModel['category'],
-        updatedAt: new Date().toISOString(),
+        updatedAt,
       })
       models.push(model)
     } catch {
@@ -120,8 +146,18 @@ export async function fetchArenaRanking(): Promise<{
   updatedAt: string
   source: 'arena-ai'
 }> {
-  const entries = await fetchArenaTextLeaderboard()
-  const models = normalizeArenaEntry(entries)
+  const { entries, snapshotDate } = await fetchArenaTextLeaderboard()
+
+  const prevDate = prevSnapshotDate(snapshotDate)
+  const prevEntries = await fetchArenaSnapshotForDate(prevDate)
+  const prevScores = new Map<string, number>()
+  if (prevEntries) {
+    for (const e of prevEntries) {
+      prevScores.set(e.model, Math.round(e.score))
+    }
+  }
+
+  const models = normalizeArenaEntry(entries, prevScores, snapshotDate)
 
   if (models.length === 0) {
     throw new Error('Arena fetch returned no valid models')
@@ -129,7 +165,7 @@ export async function fetchArenaRanking(): Promise<{
 
   return {
     models,
-    updatedAt: new Date().toISOString(),
+    updatedAt: `${snapshotDate}T12:00:00.000Z`,
     source: 'arena-ai',
   }
 }

@@ -7,10 +7,11 @@ import { Button } from '@/components/ui/button'
 import { HUBS } from '@/lib/social/hubs'
 import { getUnifiedFeed } from '@/lib/social'
 import { getCommunityStats } from '@/lib/votes/stats'
+import { LiveCommunityMetrics } from '@/components/live/live-community-metrics'
+import { CommunityScoreboard } from '@/components/live/community-scoreboard'
 import { getTrustStatus } from '@/lib/trust'
 import { DataTrustBanner } from '@/components/trust/data-trust-banner'
 import { PersistenceBanner } from '@/components/trust/persistence-banner'
-import { MessageSquare, Swords, Vote } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -47,29 +48,16 @@ export default async function CommunityPage() {
           <PersistenceBanner persisted={community.persisted} />
         </div>
 
-        <div className="grid sm:grid-cols-3 gap-4 my-8">
-          <Card>
-            <CardContent className="pt-4">
-              <Vote className="text-accent mb-2" size={20} />
-              <p className="text-2xl font-bold font-mono">{community.totalDuelVotes}</p>
-              <p className="text-[12px] text-muted-foreground">duels AI Hub enregistrés</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <MessageSquare className="text-accent-2 mb-2" size={20} />
-              <p className="text-2xl font-bold font-mono">{communityPosts.length}</p>
-              <p className="text-[12px] text-muted-foreground">posts communauté publiés</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <Swords className="text-warning mb-2" size={20} />
-              <p className="text-2xl font-bold font-mono">{community.uniqueVoters}</p>
-              <p className="text-[12px] text-muted-foreground">votants uniques (duels)</p>
-            </CardContent>
-          </Card>
-        </div>
+        <LiveCommunityMetrics />
+
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="text-sm">Classement communauté (duels A vs B)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CommunityScoreboard category="global" limit={12} />
+          </CardContent>
+        </Card>
 
         <div className="grid md:grid-cols-2 gap-6">
           <Card>

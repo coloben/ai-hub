@@ -6,6 +6,7 @@ import { HubSidebar } from '@/components/social/hub-sidebar'
 import { SocialFeed } from '@/components/social/social-feed'
 import { TrendingPanel } from '@/components/social/trending-panel'
 import { HomeStatsBar } from './components/home-stats-bar'
+import { LiveHomeCommunityPill } from '@/components/live/live-home-community-pill'
 import { getUnifiedFeed } from '@/lib/social'
 import { getRanking } from '@/lib/data/pipeline'
 import { rankingFromData } from '@/lib/trust'
@@ -68,6 +69,9 @@ export default async function HomePage({ searchParams }: PageProps) {
             <p className="text-[12px] text-muted-foreground">
               Actualités sourcées · posts communauté avec votes réels uniquement
             </p>
+            <div className="mt-2">
+              <LiveHomeCommunityPill />
+            </div>
           </div>
           <HomeStatsBar ranking={ranking} />
         </div>

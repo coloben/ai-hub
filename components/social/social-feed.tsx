@@ -6,6 +6,7 @@ import { PostComposer } from './post-composer'
 import { FeedTabs } from './feed-tabs'
 import { Skeleton } from '@/components/ui/skeleton'
 import { sortPosts } from '@/lib/social/scoring'
+import { bumpLiveStats } from '@/lib/live/events'
 import type { SocialPost, FeedSort } from '@/lib/social/schema'
 import type { HubId } from '@/lib/social/hubs'
 
@@ -25,11 +26,6 @@ export function SocialFeed({ initialPosts, initialSort = 'hot', hub = 'all' }: S
     setSort(initialSort)
   }, [initialPosts, initialSort])
 
-  const posts = useMemo(() => sortPosts(allPosts, sort), [allPosts, sort])
-
-  const communityPosts = posts.filter((p) => p.kind === 'community')
-  const curatedPosts = posts.filter((p) => p.kind === 'curated')
-
   const refresh = useCallback(async () => {
     setLoading(true)
     try {
@@ -42,6 +38,18 @@ export function SocialFeed({ initialPosts, initialSort = 'hot', hub = 'all' }: S
       setLoading(false)
     }
   }, [hub])
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (document.visibilityState === 'visible') void refresh()
+    }, 45_000)
+    return () => clearInterval(timer)
+  }, [refresh])
+
+  const posts = useMemo(() => sortPosts(allPosts, sort), [allPosts, sort])
+
+  const communityPosts = posts.filter((p) => p.kind === 'community')
+  const curatedPosts = posts.filter((p) => p.kind === 'curated')
 
   function changeSort(next: FeedSort) {
     setSort(next)
@@ -60,7 +68,13 @@ export function SocialFeed({ initialPosts, initialSort = 'hot', hub = 'all' }: S
         <p className="text-[11px] font-semibold text-foreground">Publier sur AI Hub</p>
         <p className="text-[10px] text-muted-foreground">Posts communauté — votes et commentaires réels</p>
       </div>
-      <PostComposer defaultHub={hub === 'all' ? 'general' : hub} onPosted={() => void refresh()} />
+      <PostComposer
+        defaultHub={hub === 'all' ? 'general' : hub}
+        onPosted={() => {
+          bumpLiveStats()
+          void refresh()
+        }}
+      />
       <FeedTabs active={sort} onChange={changeSort} />
 
       {loading && allPosts.length === 0 ? (

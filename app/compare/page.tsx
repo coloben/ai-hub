@@ -6,10 +6,11 @@ import { TopNav } from '@/components/layout/top-nav'
 import { Footer } from '@/components/layout/footer'
 import { CommunityVoteWidget } from './community-vote'
 import { ArenaLeaderboard } from './arena-leaderboard'
-import { DuelStatsPanel } from './duel-stats'
+import { LiveDuelStats } from '@/components/live/live-duel-stats'
+import { LiveCompareSidebar } from '@/components/live/live-compare-sidebar'
+import { CommunityScoreboard } from '@/components/live/community-scoreboard'
 import { RankingMetaBar } from './ranking-meta'
 import { getCommunityStats } from '@/lib/votes/stats'
-import { getRanking } from '@/lib/data/pipeline'
 import { getTrustStatus } from '@/lib/trust'
 import { DataTrustBanner } from '@/components/trust/data-trust-banner'
 import { PersistenceBanner } from '@/components/trust/persistence-banner'
@@ -52,14 +53,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
   const params = await searchParams
   const activeCategory = params.cat ?? 'global'
 
-  const [ranking, communityStats, trust] = await Promise.all([
-    getRanking(),
-    getCommunityStats(),
-    getTrustStatus(),
-  ])
-
-  const modelCount = ranking.models.length
-  const arenaVotesTotal = ranking.models.reduce((sum, m) => sum + (m.samples ?? 0), 0)
+  const [communityStats, trust] = await Promise.all([getCommunityStats(), getTrustStatus()])
 
   return (
     <div id="main" className="min-h-screen bg-background grid-dots">
@@ -105,9 +99,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
           </div>
 
           <div className="space-y-3">
-            <Suspense fallback={<div className="h-24 bg-muted animate-pulse rounded-lg" />}>
-              <DuelStatsPanel category={activeCategory} />
-            </Suspense>
+            <LiveDuelStats category={activeCategory} />
 
             <Card>
               <CardHeader className="pb-2">
@@ -133,22 +125,16 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
 
             <Card className="bg-accent/[0.03] border-accent/10">
               <CardContent className="p-3">
-                <div className="grid grid-cols-3 gap-3 text-center">
-                  <div>
-                    <p className="text-sm font-bold data-num text-accent-2">
-                      {(arenaVotesTotal / 1000).toFixed(1)}k
-                    </p>
-                    <p className="text-[9px] text-muted-foreground">Votes Arena</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold data-num text-accent">{communityStats.totalDuelVotes}</p>
-                    <p className="text-[9px] text-muted-foreground">Duels AI Hub</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold data-num text-foreground">{modelCount}</p>
-                    <p className="text-[9px] text-muted-foreground">Modèles</p>
-                  </div>
-                </div>
+                <LiveCompareSidebar category={activeCategory} />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-[13px] font-semibold">Classement duels</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CommunityScoreboard category={activeCategory} limit={8} compact />
               </CardContent>
             </Card>
           </div>

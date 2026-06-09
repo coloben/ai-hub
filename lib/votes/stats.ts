@@ -45,20 +45,24 @@ async function countFromFile(): Promise<CommunityStats> {
 async function countFromPg(): Promise<CommunityStats> {
   await ensureVoteSchema()
   const pool = getPool()
-  const total = await pool.query<{ n: string }>('SELECT COUNT(*)::text AS n FROM community_votes')
-  const voters = await pool.query<{ n: string }>(
-    'SELECT COUNT(DISTINCT voter_id)::text AS n FROM community_votes'
-  )
-  const byCatRows = await pool.query<{ category: string; n: string }>(
-    'SELECT category, COUNT(*)::text AS n FROM community_votes GROUP BY category'
-  )
+  const [agg, byCatRows] = await Promise.all([
+    pool.query<{ total: string; voters: string }>(`
+      SELECT
+        COUNT(*)::text AS total,
+        COUNT(DISTINCT voter_id)::text AS voters
+      FROM community_votes
+    `),
+    pool.query<{ category: string; n: string }>(
+      'SELECT category, COUNT(*)::text AS n FROM community_votes GROUP BY category'
+    ),
+  ])
   const votesByCategory: Record<string, number> = {}
   for (const row of byCatRows.rows) {
     votesByCategory[row.category] = parseInt(row.n, 10)
   }
   return {
-    totalDuelVotes: parseInt(total.rows[0]?.n ?? '0', 10),
-    uniqueVoters: parseInt(voters.rows[0]?.n ?? '0', 10),
+    totalDuelVotes: parseInt(agg.rows[0]?.total ?? '0', 10),
+    uniqueVoters: parseInt(agg.rows[0]?.voters ?? '0', 10),
     votesByCategory,
     persisted: true,
   }

@@ -1,46 +1,49 @@
-import { NextResponse } from 'next/server'
-import { getCommunityStats } from '@/lib/votes/stats'
+import { NextRequest, NextResponse } from 'next/server'
+import { getLivePlatformSnapshot } from '@/lib/live/platform-stats'
 import { getTrustStatus } from '@/lib/trust'
-import { getRanking, getFeed } from '@/lib/data/pipeline'
+import { getFeed } from '@/lib/data/pipeline'
 import { hasDatabase } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
-export async function GET() {
-  const [community, trust, ranking, feed] = await Promise.all([
-    getCommunityStats(),
+export async function GET(req: NextRequest) {
+  const category = req.nextUrl.searchParams.get('category') ?? 'global'
+
+  const [snapshot, trust, feed] = await Promise.all([
+    getLivePlatformSnapshot(category),
     getTrustStatus(),
-    getRanking(),
     getFeed(),
   ])
-
-  const arenaVotesTotal = ranking.models.reduce((s, m) => s + (m.samples ?? 0), 0)
 
   const feedLive = feed.sources.some(
     (s) => s === 'arxiv-cs-ai' || s === 'huggingface-papers'
   )
 
-  return NextResponse.json({
-    ok: true,
-    community,
-    trust,
-    persistence: {
-      databaseConfigured: hasDatabase(),
-      communityPersisted: community.persisted,
+  return NextResponse.json(
+    {
+      ok: true,
+      generatedAt: snapshot.generatedAt,
+      community: snapshot.community,
+      social: snapshot.social,
+      leaderboard: snapshot.leaderboard,
+      arena: snapshot.arena,
+      trust,
+      persistence: {
+        databaseConfigured: hasDatabase(),
+        communityPersisted: snapshot.community.persisted,
+      },
+      feed: {
+        sources: feed.sources,
+        postCount: feed.posts.length,
+        updatedAt: feed.updatedAt,
+        tier: feed.feedTier ?? (feedLive ? 'live' : 'unavailable'),
+      },
     },
-    feed: {
-      sources: feed.sources,
-      postCount: feed.posts.length,
-      updatedAt: feed.updatedAt,
-      tier: feed.feedTier ?? (feedLive ? 'live' : 'unavailable'),
-    },
-    arena: {
-      modelCount: ranking.models.length,
-      votesTotal: arenaVotesTotal,
-      source: ranking.source,
-      updatedAt: ranking.updatedAt,
-      topModel: ranking.models[0]?.name ?? null,
-      topElo: ranking.models[0]?.elo ?? null,
-    },
-  })
+    {
+      headers: {
+        'Cache-Control': 'public, s-maxage=10, stale-while-revalidate=30',
+      },
+    }
+  )
 }

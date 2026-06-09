@@ -6,7 +6,7 @@ import { OrganizationSchema, BreadcrumbSchema } from '@/app/components/json-ld'
 import { Suspense } from 'react'
 import { TopNav } from '@/components/layout/top-nav'
 import { Footer } from '@/components/layout/footer'
-import { DataRankingWidget } from '@/app/components/data-ranking'
+import { CommunityScoreboard } from '@/components/live/community-scoreboard'
 import { getRanking } from '@/lib/data/pipeline'
 import { rankingFromData } from '@/lib/trust'
 import { DataTrustBanner } from '@/components/trust/data-trust-banner'
@@ -158,6 +158,20 @@ export default async function RankingPage({ searchParams }: { searchParams: Prom
                     </div>
                   </div>
                 ))}
+                {ranking.models.filter(m => m.eloDelta !== 0).length === 0 && (
+                  <p className="text-[11px] text-muted-foreground py-2">
+                    Variations jour/jour indisponibles pour ce snapshot Arena.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-[13px] font-semibold">Votes communauté</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CommunityScoreboard category="global" limit={8} compact />
               </CardContent>
             </Card>
 

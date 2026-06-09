@@ -1,9 +1,34 @@
 'use client'
 
 import { ChevronUp, ChevronDown } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { getVoterId, fmtScore } from '@/lib/social/client'
+import { bumpLiveStats } from '@/lib/live/events'
 import { cn } from '@/lib/utils'
+
+const POST_VOTES_KEY = 'aihub_post_votes'
+
+function loadPostVote(postId: string): 'up' | 'down' | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const raw = localStorage.getItem(POST_VOTES_KEY)
+    const map = raw ? (JSON.parse(raw) as Record<string, 'up' | 'down'>) : {}
+    return map[postId] ?? null
+  } catch {
+    return null
+  }
+}
+
+function savePostVote(postId: string, direction: 'up' | 'down') {
+  try {
+    const raw = localStorage.getItem(POST_VOTES_KEY)
+    const map = raw ? (JSON.parse(raw) as Record<string, 'up' | 'down'>) : {}
+    map[postId] = direction
+    localStorage.setItem(POST_VOTES_KEY, JSON.stringify(map))
+  } catch {
+    /* ignore */
+  }
+}
 
 interface VoteColumnProps {
   postId: string
@@ -17,8 +42,16 @@ export function VoteColumn({ postId, kind, score: initialScore, compact }: VoteC
   const [voted, setVoted] = useState<'up' | 'down' | null>(null)
   const [busy, setBusy] = useState(false)
 
+  useEffect(() => {
+    setScore(initialScore)
+  }, [initialScore])
+
+  useEffect(() => {
+    setVoted(loadPostVote(postId))
+  }, [postId])
+
   async function vote(direction: 'up' | 'down') {
-    if (busy || voted) return
+    if (busy || voted || kind !== 'community') return
     setBusy(true)
     try {
       const res = await fetch(`/api/v1/posts/${postId}/vote`, {
@@ -27,9 +60,16 @@ export function VoteColumn({ postId, kind, score: initialScore, compact }: VoteC
         body: JSON.stringify({ direction, voterId: getVoterId() }),
       })
       const data = await res.json()
-      if (data.post?.score != null) setScore(data.post.score)
-      else setScore((s) => s + (direction === 'up' ? 1 : -1))
-      if (!data.duplicate) setVoted(direction)
+      if (data.post?.score != null) {
+        setScore(data.post.score)
+      } else if (!data.duplicate) {
+        setScore((s) => s + (direction === 'up' ? 1 : -1))
+      }
+      if (!data.duplicate) {
+        setVoted(direction)
+        savePostVote(postId, direction)
+        bumpLiveStats()
+      }
     } finally {
       setBusy(false)
     }

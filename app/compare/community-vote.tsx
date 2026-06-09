@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Swords, Check } from 'lucide-react'
 import type { PairVoteStats } from '@/lib/votes/schema'
 import { getVoterId } from '@/lib/votes/voter-id'
+import { bumpLiveStats } from '@/lib/live/events'
 
 interface Model {
   id: string
@@ -20,7 +21,7 @@ const VOTED_STORAGE_KEY = 'aihub_duel_votes'
 function loadVoted(): Record<string, 'A' | 'B'> {
   if (typeof window === 'undefined') return {}
   try {
-    const raw = sessionStorage.getItem(VOTED_STORAGE_KEY)
+    const raw = localStorage.getItem(VOTED_STORAGE_KEY)
     return raw ? (JSON.parse(raw) as Record<string, 'A' | 'B'>) : {}
   } catch {
     return {}
@@ -107,7 +108,7 @@ export function CommunityVoteWidget({ category }: { category: string }) {
       setVoted((prev) => {
         const next = { ...prev, [voteKey]: choice }
         try {
-          sessionStorage.setItem(VOTED_STORAGE_KEY, JSON.stringify(next))
+          localStorage.setItem(VOTED_STORAGE_KEY, JSON.stringify(next))
         } catch {
           /* ignore */
         }
@@ -118,6 +119,8 @@ export function CommunityVoteWidget({ category }: { category: string }) {
       }
       if (json.duplicate) {
         setError('Vous avez déjà voté pour cette paire.')
+      } else {
+        bumpLiveStats()
       }
     } catch {
       setError('Erreur réseau — réessayez.')
